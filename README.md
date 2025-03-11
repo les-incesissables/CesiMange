@@ -1,5 +1,5 @@
 # WebAvance
 
-[Templates de Smart Commits](doc/WorkFlow/Git/Commit_Template.md)
+[Templates de Smart Commits](docs/WorkFlow/Git/Commit_Template.md)
 
-[Normes de codage](doc/WorkFlow/Normes_de_Codage.md)
+[Normes de codage](docs/WorkFlow/Normes_de_Codage.md)
