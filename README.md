@@ -5,3 +5,7 @@
 [Normes de codage](docs/workflow/Normes_de_Codage.md)
 
 [Git Flow](docs/workflow/Git/WorkFlow.md)
+
+
+npm install -g plop
+npm install --save-dev plop
