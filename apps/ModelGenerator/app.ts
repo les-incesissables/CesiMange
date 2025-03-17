@@ -32,7 +32,7 @@ const config = {
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
-    mongoUri: 'mongodb://localhost:27017/local', // URL de connexion MongoDB
+    mongoUri: 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
     sampleSize: 10,                  // Nombre de documents à analyser par collection
     cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
 };
@@ -54,43 +54,6 @@ function cleanDirectory(directory: string): void
         fs.rmSync(directory, { recursive: true, force: true });
     }
     ensureDirectoryExists(directory);
-}
-
-// Convertir un type Mongoose en type TypeScript
-function mongooseTypeToTypeScript(field: SchemaField): string
-{
-    const typeMap: Record<SchemaType, string> = {
-        'String': 'string',
-        'Number': 'number',
-        'Boolean': 'boolean',
-        'Date': 'Date',
-        'ObjectId': 'string',
-        'Array': 'any[]', // Sera remplacé si arrayType est défini
-        'Mixed': 'any',
-        'Map': 'Record<string, any>',
-        'Buffer': 'Buffer',
-    };
-
-    if (field.isArray)
-    {
-        if (field.arrayRef)
-        {
-            return `${field.arrayRef}DTO[]`;
-        } else if (field.arrayType)
-        {
-            return `${typeMap[field.arrayType]}[]`;
-        } else
-        {
-            return 'any[]';
-        }
-    }
-
-    if (field.ref)
-    {
-        return `${field.ref}DTO`;
-    }
-
-    return typeMap[field.type] || 'any';
 }
 
 // Inférer le type d'une valeur
@@ -288,7 +251,7 @@ function generateDTOContent(entityName: string, structure: PropertyDefinition, k
 /**
  * DTO pour l'entité ${entityName}
  */
-export interface ${entityName}DTO extends BaseDTO {
+export class ${entityName}DTO extends BaseDTO {
 ${properties}}
 `;
 }
@@ -345,7 +308,7 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
 /**
  * Critères de recherche pour l'entité ${entityName}
  */
-export interface ${entityName}CritereDTO extends BaseCritereDTO {
+export abstract class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
 }
@@ -396,33 +359,10 @@ async function generateDTOs(): Promise<void>
 
         // Générer les DTOs de base
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseDTO.ts'),
-            `/**
- * DTO de base dont héritent tous les DTOs
- */
-export interface BaseDTO {
-  id?: string;
-}
-`
-        );
+            path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),
-            `/**
- * Critères de base dont héritent tous les CritereDTOs
- */
-export interface BaseCritereDTO {
-  id?: string;
-  ids?: string[];
-  search?: string;
-  page?: number;
-  pageSize?: number;
-  sort?: string;
-  sortDirection?: 'asc' | 'desc';
-  includeDeleted?: boolean;
-}
-`
-        );
+            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
 
         // Connexion à MongoDB
         client = new MongoClient(config.mongoUri);

@@ -1,6 +1,6 @@
 /**
  * DTO de base dont h�ritent tous les DTOs
  */ 
-export interface BaseDTO {
+export abstract class BaseDTO {
   id?: string;
 }

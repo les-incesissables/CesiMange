@@ -2,21 +2,23 @@ import { IBaseRepository } from "./IBaseRepository";
 import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
 import { IRepositoryConfig } from "./IRepositoryConfig";
+import { Collection, Db, ObjectId } from "mongodb";
 
 /**
- * Contrôleur de base générique simplifié
+ * Contrôleur de base générique pour MongoDB
  * @template DTO - Type de données retourné/manipulé qui étend BaseDTO
  * @template CritereDTO - Type des critères de recherche qui étend BaseCritereDTO
- * @author Mahmoud Charif - CESIMANGE-118 - 12/03/2025 - Creation
+ * @author Mahmoud Charif - CESIMANGE-118 - 17/03/2025 - Adaptation pour MongoDB
  */
 export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> implements IBaseRepository<DTO, CritereDTO>
 {
-    protected Config: IRepositoryConfig;
-    protected Db: any; // Référence à la base de données
+    protected _config: IRepositoryConfig;
+    protected _db: Db;
+    protected _collection: Collection;
 
     constructor (pConfig: IRepositoryConfig)
     {
-        this.Config = pConfig;
+        this._config = pConfig;
     }
 
     /**
@@ -25,34 +27,22 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     abstract initialize(): Promise<void>;
 
     /**
-     * Exécute une requête (à implémenter dans les sous-classes concrètes)
+     * Construit le filtre MongoDB à partir des critères
      */
-    protected abstract executeQuery(pQuery: string, pParams?: any[]): Promise<any>;
-
-    /**
-     * Construit la condition WHERE d'une requête SQL à partir des critères
-     */
-    protected buildWhereClause(pCritereDTO: CritereDTO): { whereClause: string, params: any[] }
+    protected buildFilter(pCritereDTO: CritereDTO): any
     {
-        const conditions: string[] = [];
-        const params: any[] = [];
+        const lFilter: any = {};
 
         if (pCritereDTO.id)
         {
-            conditions.push("id = ?");
-            params.push(pCritereDTO.id);
+            lFilter._id = new ObjectId(pCritereDTO.id);
         }
 
         // Implémentation d'autres conditions spécifiques au modèle
-        const additionalConditions = this.getAdditionalConditions(pCritereDTO);
-        if (additionalConditions.conditions.length > 0)
-        {
-            conditions.push(...additionalConditions.conditions);
-            params.push(...additionalConditions.params);
-        }
+        const lAdditionalConditions = this.getAdditionalConditions(pCritereDTO);
+        Object.assign(lFilter, lAdditionalConditions);
 
-        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-        return { whereClause, params };
+        return lFilter;
     }
 
     /**
@@ -63,10 +53,13 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            const { whereClause, params } = this.buildWhereClause(pCritereDTO);
-            const query = `SELECT * FROM ${this.Config.table} ${whereClause}`;
-            const result = await this.executeQuery(query, params);
-            return this.formatResults(result);
+            const lFilter = this.buildFilter(pCritereDTO);
+            const lOptions = this.buildOptions(pCritereDTO);
+
+            const lCursor = this._collection.find(lFilter, lOptions);
+            const lResults = await lCursor.toArray();
+
+            return this.formatResults(lResults);
         } catch (error)
         {
             console.error("Erreur lors de la récupération des items:", error);
@@ -75,12 +68,44 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
 
     /**
+     * Construit les options de requête MongoDB (tri, pagination, etc.)
+     */
+    protected buildOptions(pCritereDTO: CritereDTO): any
+    {
+        const lOptions: any = {};
+
+        // Pagination
+        if (pCritereDTO.limit)
+        {
+            lOptions.limit = pCritereDTO.limit;
+        }
+
+        if (pCritereDTO.skip)
+        {
+            lOptions.skip = pCritereDTO.skip;
+        }
+
+        // Tri
+        if (pCritereDTO.sort)
+        {
+            lOptions.sort = pCritereDTO.sort;
+        }
+
+        return lOptions;
+    }
+
+    /**
      * Formate les résultats de la base de données en DTOs
      */
-    protected formatResults(results: any[]): DTO[]
+    protected formatResults(pResults: any[]): DTO[]
     {
-        // Implémentation par défaut - peut être surchargée
-        return results as DTO[];
+        return pResults.map(lDoc =>
+        {
+            // Convertir _id en id pour respecter le format DTO
+            const lFormatted: any = { ...lDoc, id: lDoc._id.toString() };
+            delete lFormatted._id;
+            return lFormatted as DTO;
+        });
     }
 
     /**
@@ -91,22 +116,21 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            const { whereClause, params } = this.buildWhereClause(pCritereDTO); 
+            const lFilter = this.buildFilter(pCritereDTO);
 
-            if (!whereClause)
+            if (Object.keys(lFilter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour obtenir un élément");
             }
 
-            const query = `SELECT * FROM ${this.Config.table} ${whereClause} LIMIT 1`;
-            const lResults = await this.executeQuery(query, params);
+            const lResult = await this._collection.findOne(lFilter);
 
-            if (lResults.length === 0)
+            if (!lResult)
             {
                 throw new Error("Élément non trouvé");
             }
 
-            return this.formatResults(lResults)[0];
+            return this.formatResults([lResult])[0];
         } catch (error)
         {
             console.error("Erreur lors de la récupération de l'item:", error);
@@ -122,29 +146,23 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            // Enlever l'id s'il est défini (généralement auto-incrémenté par la BD)
-            const item = { ...pDTO } as any;
-            delete item.id;
+            // Préparer le document
+            const lDoc = { ...pDTO } as any;
+            delete lDoc.id; // MongoDB gère automatiquement _id
 
             // Ajouter les timestamps
-            item.createdAt = new Date();
-            item.updatedAt = new Date();
+            lDoc.createdAt = new Date();
+            lDoc.updatedAt = new Date();
 
-            // Récupérer les colonnes et valeurs
-            const columns = Object.keys(item);
-            const placeholders = columns.map(() => '?').join(', ');
-            const values = columns.map(col => item[col]);
+            const lResult = await this._collection.insertOne(lDoc);
 
-            const query = `
-                INSERT INTO ${this.Config.table} (${columns.join(', ')})
-                VALUES (${placeholders})
-            `;
-
-            const result = await this.executeQuery(query, values);
+            if (!lResult.acknowledged)
+            {
+                throw new Error("Échec de l'insertion du document");
+            }
 
             // Récupérer l'élément inséré
-            const insertedId = result.insertId || result.lastID;
-            return this.getItem({ id: insertedId } as CritereDTO);
+            return this.getItem({ id: lResult.insertedId.toString() } as CritereDTO);
         } catch (error)
         {
             console.error("Erreur lors de la création de l'item:", error);
@@ -161,43 +179,30 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            // Vérifier si l'élément existe
-            const exists = await this.itemExists(pCritereDTO);
-            if (!exists)
-            {
-                throw new Error("L'élément à mettre à jour n'existe pas");
-            }
+            const lFilter = this.buildFilter(pCritereDTO);
 
-            const { whereClause, params: whereParams } = this.buildWhereClause(pCritereDTO);
-
-            if (!whereClause)
+            if (Object.keys(lFilter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour la mise à jour");
             }
 
             // Préparer les données à mettre à jour
-            const updateData = { ...pDTO } as any;
-            delete updateData.id; // Ne pas mettre à jour l'ID
-            updateData.updatedAt = new Date();
+            const lUpdateData = { ...pDTO } as any;
+            delete lUpdateData.id; // Ne pas inclure l'id dans les champs à mettre à jour
+            lUpdateData.updatedAt = new Date();
 
-            // Construire la requête SET
-            const columns = Object.keys(updateData);
-            const setClauses = columns.map(col => `${col} = ?`);
-            const values = columns.map(col => updateData[col]);
+            const lResult = await this._collection.findOneAndUpdate(
+                lFilter,
+                { $set: lUpdateData },
+                { returnDocument: 'after' }
+            );
 
-            const query = `
-                UPDATE ${this.Config.table}
-                SET ${setClauses.join(', ')}
-                ${whereClause}
-            `;
+            if (!lResult.value)
+            {
+                throw new Error("L'élément à mettre à jour n'existe pas");
+            }
 
-            // Combiner les paramètres SET et WHERE
-            const allParams = [...values, ...whereParams];
-
-            await this.executeQuery(query, allParams);
-
-            // Retourner l'élément mis à jour
-            return this.getItem(pCritereDTO);
+            return this.formatResults([lResult.value])[0];
         } catch (error)
         {
             console.error("Erreur lors de la mise à jour de l'item:", error);
@@ -213,18 +218,16 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            const { whereClause, params } = this.buildWhereClause(pCritereDTO);
+            const lFilter = this.buildFilter(pCritereDTO);
 
-            if (!whereClause)
+            if (Object.keys(lFilter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour la suppression");
             }
 
-            const query = `DELETE FROM ${this.Config.table} ${whereClause}`;
-            const result = await this.executeQuery(query, params);
+            const lResult = await this._collection.deleteOne(lFilter);
 
-            // Vérifier si des lignes ont été affectées
-            return result.affectedRows > 0 || result.changes > 0;
+            return lResult.deletedCount > 0;
         } catch (error)
         {
             console.error("Erreur lors de la suppression de l'item:", error);
@@ -240,17 +243,16 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         try
         {
-            const { whereClause, params } = this.buildWhereClause(pCritereDTO);
+            const lFilter = this.buildFilter(pCritereDTO);
 
-            if (!whereClause)
+            if (Object.keys(lFilter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour vérifier l'existence");
             }
 
-            const query = `SELECT EXISTS(SELECT 1 FROM ${this.Config.table} ${whereClause}) as existe`;
-            const result = await this.executeQuery(query, params);
+            const lCount = await this._collection.countDocuments(lFilter, { limit: 1 });
 
-            return result[0].existe === 1 || result[0].existe === true;
+            return lCount > 0;
         } catch (error)
         {
             console.error("Erreur lors de la vérification de l'existence:", error);
@@ -261,9 +263,8 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     /**
      * À surcharger dans les classes dérivées pour ajouter des conditions spécifiques
      */
-    protected getAdditionalConditions(pCritereDTO: CritereDTO): { conditions: string[], params: any[] }
+    protected getAdditionalConditions(pCritereDTO: CritereDTO): any
     {
-        return { conditions: [], params: [] };
+        return {};
     }
-
 }

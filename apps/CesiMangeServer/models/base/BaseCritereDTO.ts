@@ -1,7 +1,7 @@
 /**
  * Crit�res de base dont h�ritent tous les CritereDTOs
  */
-export interface BaseCritereDTO {
+export abstract class BaseCritereDTO {
   id?: string;
   ids?: string[];
   search?: string;
