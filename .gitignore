@@ -114,8 +114,6 @@ ipch/
 *.VC.db
 *.VC.VC.opendb
 
-# Visual Studio profiler
-*.psess
 *.vsp
 *.vspx
 *.sap
@@ -164,9 +162,6 @@ AutoTest.Net/
 
 # Web workbench (sass)
 .sass-cache/
-
-# Installshield output folder
-[Ee]xpress/
 
 # DocProject is a documentation generator add-in
 DocProject/buildhelp/

@@ -31,7 +31,7 @@ interface KnownTypes
 // Configuration
 const config = {
     modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../CesiMangeServer/models/',         // Répertoire où seront générés les DTOs
+    outputDir: '../Express/models/',         // Répertoire où seront générés les DTOs
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
@@ -330,7 +330,7 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
 /**
  * Critères de recherche pour l'entité ${entityName}
  */
-export abstract class ${entityName}CritereDTO extends BaseCritereDTO {
+export class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
 }
