@@ -10,34 +10,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseRepository = void 0;
+const mongodb_1 = require("mongodb");
 /**
- * Contr�leur de base g�n�rique simplifi�
+ * Contr�leur de base g�n�rique pour MongoDB
  * @template DTO - Type de donn�es retourn�/manipul� qui �tend BaseDTO
  * @template CritereDTO - Type des crit�res de recherche qui �tend BaseCritereDTO
- * @author Mahmoud Charif - CESIMANGE-118 - 12/03/2025 - Creation
+ * @author Mahmoud Charif - CESIMANGE-118 - 17/03/2025 - Adaptation pour MongoDB
  */
 class BaseRepository {
+    //#endregion
+    //#region CTOR
     constructor(pConfig) {
-        this.Config = pConfig;
+        this._config = pConfig;
     }
     /**
-     * Construit la condition WHERE d'une requ�te SQL � partir des crit�res
+     * Construit le filtre MongoDB � partir des crit�res
      */
-    buildWhereClause(pCritereDTO) {
-        const conditions = [];
-        const params = [];
-        if (pCritereDTO.id) {
-            conditions.push("id = ?");
-            params.push(pCritereDTO.id);
+    buildFilter(pCritereDTO) {
+        const lFilter = {};
+        if (pCritereDTO.Id) {
+            lFilter._id = new mongodb_1.ObjectId(pCritereDTO.Id);
         }
         // Impl�mentation d'autres conditions sp�cifiques au mod�le
-        const additionalConditions = this.getAdditionalConditions(pCritereDTO);
-        if (additionalConditions.conditions.length > 0) {
-            conditions.push(...additionalConditions.conditions);
-            params.push(...additionalConditions.params);
-        }
-        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-        return { whereClause, params };
+        const lAdditionalConditions = this.getAdditionalConditions(pCritereDTO);
+        Object.assign(lFilter, lAdditionalConditions);
+        return lFilter;
     }
     /**
      * Obtenir tous les �l�ments selon des crit�res
@@ -46,10 +43,11 @@ class BaseRepository {
     getItems(pCritereDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { whereClause, params } = this.buildWhereClause(pCritereDTO);
-                const query = `SELECT * FROM ${this.Config.table} ${whereClause}`;
-                const result = yield this.executeQuery(query, params);
-                return this.formatResults(result);
+                const lFilter = this.buildFilter(pCritereDTO);
+                const lOptions = this.buildOptions(pCritereDTO);
+                const lCursor = this._collection.find(lFilter, lOptions);
+                const lResults = yield lCursor.toArray();
+                return this.formatResults(lResults);
             }
             catch (error) {
                 console.error("Erreur lors de la r�cup�ration des items:", error);
@@ -58,11 +56,33 @@ class BaseRepository {
         });
     }
     /**
+     * Construit les options de requ�te MongoDB (tri, pagination, etc.)
+     */
+    buildOptions(pCritereDTO) {
+        const lOptions = {};
+        // Pagination
+        if (pCritereDTO.Limit) {
+            lOptions.limit = pCritereDTO.Limit;
+        }
+        if (pCritereDTO.Skip) {
+            lOptions.skip = pCritereDTO.Skip;
+        }
+        // Tri
+        if (pCritereDTO.Sort) {
+            lOptions.sort = pCritereDTO.Sort;
+        }
+        return lOptions;
+    }
+    /**
      * Formate les r�sultats de la base de donn�es en DTOs
      */
-    formatResults(results) {
-        // Impl�mentation par d�faut - peut �tre surcharg�e
-        return results;
+    formatResults(pResults) {
+        return pResults.map(lDoc => {
+            // Convertir _id en id pour respecter le format DTO
+            const lFormatted = Object.assign(Object.assign({}, lDoc), { id: lDoc._id.toString() });
+            delete lFormatted._id;
+            return lFormatted;
+        });
     }
     /**
      * Obtenir un �l�ment par crit�res
@@ -71,16 +91,15 @@ class BaseRepository {
     getItem(pCritereDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { whereClause, params } = this.buildWhereClause(pCritereDTO);
-                if (!whereClause) {
+                const lFilter = this.buildFilter(pCritereDTO);
+                if (Object.keys(lFilter).length === 0) {
                     throw new Error("Au moins un crit�re est requis pour obtenir un �l�ment");
                 }
-                const query = `SELECT * FROM ${this.Config.table} ${whereClause} LIMIT 1`;
-                const lResults = yield this.executeQuery(query, params);
-                if (lResults.length === 0) {
+                const lResult = yield this._collection.findOne(lFilter);
+                if (!lResult) {
                     throw new Error("�l�ment non trouv�");
                 }
-                return this.formatResults(lResults)[0];
+                return this.formatResults([lResult])[0];
             }
             catch (error) {
                 console.error("Erreur lors de la r�cup�ration de l'item:", error);
@@ -95,24 +114,19 @@ class BaseRepository {
     createItem(pDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Enlever l'id s'il est d�fini (g�n�ralement auto-incr�ment� par la BD)
-                const item = Object.assign({}, pDTO);
-                delete item.id;
+                // Pr�parer le document
+                const lDoc = Object.assign({}, pDTO);
+                delete lDoc.id; // MongoDB g�re automatiquement _id
                 // Ajouter les timestamps
-                item.createdAt = new Date();
-                item.updatedAt = new Date();
-                // R�cup�rer les colonnes et valeurs
-                const columns = Object.keys(item);
-                const placeholders = columns.map(() => '?').join(', ');
-                const values = columns.map(col => item[col]);
-                const query = `
-                INSERT INTO ${this.Config.table} (${columns.join(', ')})
-                VALUES (${placeholders})
-            `;
-                const result = yield this.executeQuery(query, values);
-                // R�cup�rer l'�l�ment ins�r�
-                const insertedId = result.insertId || result.lastID;
-                return this.getItem({ id: insertedId });
+                lDoc.createdAt = new Date();
+                lDoc.updatedAt = new Date();
+                const lResult = yield this._collection.insertOne(lDoc);
+                if (!lResult.acknowledged) {
+                    throw new Error("�chec de l'insertion du document");
+                }
+                let CritereDTO;
+                CritereDTO.Id = pDTO.id;
+                return yield this.getItem(CritereDTO);
             }
             catch (error) {
                 console.error("Erreur lors de la cr�ation de l'item:", error);
@@ -128,33 +142,19 @@ class BaseRepository {
     updateItem(pDTO, pCritereDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // V�rifier si l'�l�ment existe
-                const exists = yield this.itemExists(pCritereDTO);
-                if (!exists) {
-                    throw new Error("L'�l�ment � mettre � jour n'existe pas");
-                }
-                const { whereClause, params: whereParams } = this.buildWhereClause(pCritereDTO);
-                if (!whereClause) {
+                const lFilter = this.buildFilter(pCritereDTO);
+                if (Object.keys(lFilter).length === 0) {
                     throw new Error("Au moins un crit�re est requis pour la mise � jour");
                 }
                 // Pr�parer les donn�es � mettre � jour
-                const updateData = Object.assign({}, pDTO);
-                delete updateData.id; // Ne pas mettre � jour l'ID
-                updateData.updatedAt = new Date();
-                // Construire la requ�te SET
-                const columns = Object.keys(updateData);
-                const setClauses = columns.map(col => `${col} = ?`);
-                const values = columns.map(col => updateData[col]);
-                const query = `
-                UPDATE ${this.Config.table}
-                SET ${setClauses.join(', ')}
-                ${whereClause}
-            `;
-                // Combiner les param�tres SET et WHERE
-                const allParams = [...values, ...whereParams];
-                yield this.executeQuery(query, allParams);
-                // Retourner l'�l�ment mis � jour
-                return this.getItem(pCritereDTO);
+                const lUpdateData = Object.assign({}, pDTO);
+                delete lUpdateData.id; // Ne pas inclure l'id dans les champs � mettre � jour
+                lUpdateData.updatedAt = new Date();
+                const lResult = yield this._collection.findOneAndUpdate(lFilter, { $set: lUpdateData }, { returnDocument: 'after' });
+                if (!lResult.value) {
+                    throw new Error("L'�l�ment � mettre � jour n'existe pas");
+                }
+                return this.formatResults([lResult.value])[0];
             }
             catch (error) {
                 console.error("Erreur lors de la mise � jour de l'item:", error);
@@ -169,14 +169,12 @@ class BaseRepository {
     deleteItem(pCritereDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { whereClause, params } = this.buildWhereClause(pCritereDTO);
-                if (!whereClause) {
+                const lFilter = this.buildFilter(pCritereDTO);
+                if (Object.keys(lFilter).length === 0) {
                     throw new Error("Au moins un crit�re est requis pour la suppression");
                 }
-                const query = `DELETE FROM ${this.Config.table} ${whereClause}`;
-                const result = yield this.executeQuery(query, params);
-                // V�rifier si des lignes ont �t� affect�es
-                return result.affectedRows > 0 || result.changes > 0;
+                const lResult = yield this._collection.deleteOne(lFilter);
+                return lResult.deletedCount > 0;
             }
             catch (error) {
                 console.error("Erreur lors de la suppression de l'item:", error);
@@ -191,13 +189,12 @@ class BaseRepository {
     itemExists(pCritereDTO) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { whereClause, params } = this.buildWhereClause(pCritereDTO);
-                if (!whereClause) {
+                const lFilter = this.buildFilter(pCritereDTO);
+                if (Object.keys(lFilter).length === 0) {
                     throw new Error("Au moins un crit�re est requis pour v�rifier l'existence");
                 }
-                const query = `SELECT EXISTS(SELECT 1 FROM ${this.Config.table} ${whereClause}) as existe`;
-                const result = yield this.executeQuery(query, params);
-                return result[0].existe === 1 || result[0].existe === true;
+                const lCount = yield this._collection.countDocuments(lFilter, { limit: 1 });
+                return lCount > 0;
             }
             catch (error) {
                 console.error("Erreur lors de la v�rification de l'existence:", error);
@@ -209,7 +206,7 @@ class BaseRepository {
      * � surcharger dans les classes d�riv�es pour ajouter des conditions sp�cifiques
      */
     getAdditionalConditions(pCritereDTO) {
-        return { conditions: [], params: [] };
+        return {};
     }
 }
 exports.BaseRepository = BaseRepository;

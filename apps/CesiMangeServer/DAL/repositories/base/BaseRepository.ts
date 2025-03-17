@@ -12,18 +12,25 @@ import { Collection, Db, ObjectId } from "mongodb";
  */
 export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> implements IBaseRepository<DTO, CritereDTO>
 {
+    //#region Attributes
     protected _config: IRepositoryConfig;
     protected _db: Db;
-    protected _collection: Collection;
+    protected _collection: Collection; 
+    //#endregion
+
+    //#region CTOR
 
     constructor (pConfig: IRepositoryConfig)
     {
         this._config = pConfig;
     }
 
+    //#endregion
+
+    //#region Methods
     /**
-     * Méthode d'initialisation à implémenter dans les sous-classes
-     */
+* Méthode d'initialisation à implémenter dans les sous-classes
+*/
     abstract initialize(): Promise<void>;
 
     /**
@@ -33,9 +40,9 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         const lFilter: any = {};
 
-        if (pCritereDTO.id)
+        if (pCritereDTO.Id)
         {
-            lFilter._id = new ObjectId(pCritereDTO.id);
+            lFilter._id = new ObjectId(pCritereDTO.Id);
         }
 
         // Implémentation d'autres conditions spécifiques au modèle
@@ -75,20 +82,20 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         const lOptions: any = {};
 
         // Pagination
-        if (pCritereDTO.limit)
+        if (pCritereDTO.Limit)
         {
-            lOptions.limit = pCritereDTO.limit;
+            lOptions.limit = pCritereDTO.Limit;
         }
 
-        if (pCritereDTO.skip)
+        if (pCritereDTO.Skip)
         {
-            lOptions.skip = pCritereDTO.skip;
+            lOptions.skip = pCritereDTO.Skip;
         }
 
         // Tri
-        if (pCritereDTO.sort)
+        if (pCritereDTO.Sort)
         {
-            lOptions.sort = pCritereDTO.sort;
+            lOptions.sort = pCritereDTO.Sort;
         }
 
         return lOptions;
@@ -160,9 +167,10 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             {
                 throw new Error("Échec de l'insertion du document");
             }
+            let CritereDTO: CritereDTO;
+            CritereDTO.Id = pDTO.id;
+            return await this.getItem(CritereDTO);
 
-            // Récupérer l'élément inséré
-            return this.getItem({ id: lResult.insertedId.toString() } as CritereDTO);
         } catch (error)
         {
             console.error("Erreur lors de la création de l'item:", error);
@@ -266,5 +274,6 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     protected getAdditionalConditions(pCritereDTO: CritereDTO): any
     {
         return {};
-    }
+    } 
+    //#endregion
 }

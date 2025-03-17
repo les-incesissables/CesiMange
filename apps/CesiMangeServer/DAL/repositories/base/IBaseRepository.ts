@@ -1,9 +1,12 @@
+import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
+import { BaseDTO } from "../../../models/base/BaseDTO";
+
 /**
  * Contrôleur de base générique
  * @template DTO - Type de données retourné/manipulé
  * @template CritereDTO - Type des critères de recherche
  */
-export interface IBaseRepository<DTO, CritereDTO>
+export interface IBaseRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO>
 {
     /**
      * Obtenir tous les éléments selon des critères
