@@ -1,4 +1,5 @@
 "use strict";
+// generateDTOs.ts
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -42,14 +43,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// generateDTOs.ts
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const mongodb_1 = require("mongodb");
+//#endregion
 // Configuration
 const config = {
     modelsDir: './src/models', // R�pertoire des mod�les
-    outputDir: '../CesiMangeServer/models', // R�pertoire o� seront g�n�r�s les DTOs
+    outputDir: '../CesiMangeServer/models/', // R�pertoire o� seront g�n�r�s les DTOs
     baseImportPath: '../base', // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs � exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'], // Dossiers � ne pas cr�er/traiter
@@ -57,6 +58,7 @@ const config = {
     sampleSize: 10, // Nombre de documents � analyser par collection
     cleanOutputDir: true, // Nettoyer le r�pertoire de sortie avant de g�n�rer les nouveaux fichiers
 };
+//#region Methods
 // Fonction pour cr�er le dossier de sortie s'il n'existe pas
 function ensureDirectoryExists(directory) {
     if (!fs.existsSync(directory)) {
@@ -91,7 +93,6 @@ function inferType(value) {
     return typeof value;
 }
 // Analyser un document MongoDB et d�duire sa structure
-// Dans la fonction analyzeDocument
 function analyzeDocument(document, knownTypes = {}) {
     const structure = {};
     Object.entries(document).forEach(([key, value]) => {
@@ -169,13 +170,25 @@ function transformToCriteriaStructure(structure, knownTypes) {
     });
     return criteriaStructure;
 }
-// Calculer le chemin d'importation relatif
-function calculateRelativeImportPath(fromDir, toDir, toFile) {
-    const relativePath = path.relative(fromDir, toDir);
-    return relativePath ? `${relativePath}/${toFile}` : `./${toFile}`;
+// Fonction utilitaire pour v�rifier si un type est primitif
+function isPrimitiveType(type) {
+    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object'];
+    return primitiveTypes.some(pt => type === pt);
 }
-// Fonction pour g�n�rer le contenu du fichier DTO avec imports g�n�riques
-// Fonction pour g�n�rer le contenu du fichier DTO avec imports coh�rents
+// Convertir un nom de collection en nom d'entit�
+function collectionToEntityName(collectionName) {
+    return collectionName
+        .replace(/^[_]/, '')
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join('')
+        .replace(/s$/, ''); // Enlever le 's' final si pr�sent
+}
+// Fonction pour d�terminer si une collection doit �tre exclue
+function shouldExcludeCollection(collectionName) {
+    return config.excludedDirectories.includes(collectionName.toLowerCase());
+}
+//#region Generate
 // Fonction pour g�n�rer le contenu du fichier DTO
 function generateDTOContent(entityName, structure, knownTypes, entityDir) {
     const imports = new Set();
@@ -266,24 +279,6 @@ export abstract class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
 }
-// Fonction utilitaire pour v�rifier si un type est primitif
-function isPrimitiveType(type) {
-    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object'];
-    return primitiveTypes.some(pt => type === pt);
-}
-// Convertir un nom de collection en nom d'entit�
-function collectionToEntityName(collectionName) {
-    return collectionName
-        .replace(/^[_]/, '')
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join('')
-        .replace(/s$/, ''); // Enlever le 's' final si pr�sent
-}
-// Fonction pour d�terminer si une collection doit �tre exclue
-function shouldExcludeCollection(collectionName) {
-    return config.excludedDirectories.includes(collectionName.toLowerCase());
-}
 // Fonction principale pour g�n�rer les DTOs
 function generateDTOs() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -299,6 +294,7 @@ function generateDTOs() {
                 ensureDirectoryExists(config.outputDir);
             }
             ensureDirectoryExists(path.join(config.outputDir, 'base'));
+            fs.writeFileSync(path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
             // G�n�rer les DTOs de base
             fs.writeFileSync(path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
             fs.writeFileSync(path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
@@ -310,51 +306,7 @@ function generateDTOs() {
             const db = client.db(dbName);
             // Cr�er manuellement des exemples si aucune collection n'est trouv�e
             const collections = yield db.listCollections().toArray();
-            if (collections.length === 0) {
-                console.log('Aucune collection trouv�e. Cr�ation d\'exemples de DTOs...');
-                // Cr�er des DTOs d'exemple
-                const exampleEntities = [
-                    {
-                        name: 'User',
-                        structure: {
-                            id: 'string',
-                            username: 'string',
-                            email: 'string',
-                            isActive: 'boolean',
-                            createdAt: 'Date',
-                            roles: 'string[]'
-                        }
-                    },
-                    {
-                        name: 'Product',
-                        structure: {
-                            id: 'string',
-                            name: 'string',
-                            description: 'string',
-                            price: 'number',
-                            inStock: 'boolean',
-                            categories: 'string[]'
-                        }
-                    }
-                ];
-                const knownTypes = {};
-                for (const entity of exampleEntities) {
-                    console.log(`G�n�ration des fichiers pour ${entity.name}...`);
-                    // Cr�er le dossier pour l'entit�
-                    const entityDir = path.join(config.outputDir, entity.name.toLowerCase());
-                    ensureDirectoryExists(entityDir);
-                    // G�n�rer la structure des crit�res
-                    const criteriaStructure = transformToCriteriaStructure(entity.structure, knownTypes);
-                    // G�n�rer et �crire le DTO
-                    const dtoContent = generateDTOContent(entity.name, entity.structure, knownTypes, entityDir);
-                    fs.writeFileSync(path.join(entityDir, `${entity.name}DTO.ts`), dtoContent);
-                    // G�n�rer et �crire le CritereDTO
-                    const critereDTOContent = generateCritereDTOContent(entity.name, criteriaStructure, entityDir);
-                    fs.writeFileSync(path.join(entityDir, `${entity.name}CritereDTO.ts`), critereDTOContent);
-                    console.log(`  Fichiers g�n�r�s pour ${entity.name}`);
-                }
-            }
-            else {
+            if (collections.length > 0) {
                 // Analyser les collections existantes
                 console.log(`${collections.length} collections trouv�es.`);
                 const knownTypes = {};
@@ -442,6 +394,8 @@ function generateDTOs() {
         }
     });
 }
+//#endregion
+//#endregion
 // Ex�cuter la g�n�ration
 generateDTOs();
 //# sourceMappingURL=app.js.map

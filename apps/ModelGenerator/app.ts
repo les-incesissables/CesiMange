@@ -1,4 +1,5 @@
 // generateDTOs.ts
+
 import * as fs from 'fs';
 import * as path from 'path';
 import { MongoClient } from 'mongodb';
@@ -6,6 +7,7 @@ import { MongoClient } from 'mongodb';
 // Types pour le générateur
 type SchemaType = 'String' | 'Number' | 'Boolean' | 'Date' | 'ObjectId' | 'Array' | 'Mixed' | 'Map' | 'Buffer';
 
+//#region Interfaces
 interface SchemaField
 {
     type: SchemaType;
@@ -23,12 +25,13 @@ interface PropertyDefinition
 interface KnownTypes
 {
     [typeName: string]: PropertyDefinition;
-}
+} 
+//#endregion
 
 // Configuration
 const config = {
     modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../CesiMangeServer/models',         // Répertoire où seront générés les DTOs
+    outputDir: '../CesiMangeServer/models/',         // Répertoire où seront générés les DTOs
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
@@ -37,6 +40,7 @@ const config = {
     cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
 };
 
+//#region Methods
 // Fonction pour créer le dossier de sortie s'il n'existe pas
 function ensureDirectoryExists(directory: string): void
 {
@@ -84,7 +88,6 @@ function inferType(value: any): string
 }
 
 // Analyser un document MongoDB et déduire sa structure
-// Dans la fonction analyzeDocument
 function analyzeDocument(document: any, knownTypes: KnownTypes = {}): PropertyDefinition
 {
     const structure: PropertyDefinition = {};
@@ -190,15 +193,34 @@ function transformToCriteriaStructure(structure: PropertyDefinition, knownTypes:
     return criteriaStructure;
 }
 
-// Calculer le chemin d'importation relatif
-function calculateRelativeImportPath(fromDir: string, toDir: string, toFile: string): string
+
+
+// Fonction utilitaire pour vérifier si un type est primitif
+function isPrimitiveType(type: string): boolean
 {
-    const relativePath = path.relative(fromDir, toDir);
-    return relativePath ? `${relativePath}/${toFile}` : `./${toFile}`;
+    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object'];
+    return primitiveTypes.some(pt => type === pt);
 }
 
-// Fonction pour générer le contenu du fichier DTO avec imports génériques
-// Fonction pour générer le contenu du fichier DTO avec imports cohérents
+// Convertir un nom de collection en nom d'entité
+function collectionToEntityName(collectionName: string): string
+{
+    return collectionName
+        .replace(/^[_]/, '')
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join('')
+        .replace(/s$/, ''); // Enlever le 's' final si présent
+}
+
+// Fonction pour déterminer si une collection doit être exclue
+function shouldExcludeCollection(collectionName: string): boolean
+{
+    return config.excludedDirectories.includes(collectionName.toLowerCase());
+}
+
+//#region Generate
+
 // Fonction pour générer le contenu du fichier DTO
 function generateDTOContent(entityName: string, structure: PropertyDefinition, knownTypes: KnownTypes, entityDir: string): string
 {
@@ -313,30 +335,6 @@ ${properties}}
 `;
 }
 
-// Fonction utilitaire pour vérifier si un type est primitif
-function isPrimitiveType(type: string): boolean
-{
-    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object'];
-    return primitiveTypes.some(pt => type === pt);
-}
-
-// Convertir un nom de collection en nom d'entité
-function collectionToEntityName(collectionName: string): string
-{
-    return collectionName
-        .replace(/^[_]/, '')
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join('')
-        .replace(/s$/, ''); // Enlever le 's' final si présent
-}
-
-// Fonction pour déterminer si une collection doit être exclue
-function shouldExcludeCollection(collectionName: string): boolean
-{
-    return config.excludedDirectories.includes(collectionName.toLowerCase());
-}
-
 // Fonction principale pour générer les DTOs
 async function generateDTOs(): Promise<void>
 {
@@ -357,12 +355,17 @@ async function generateDTOs(): Promise<void>
 
         ensureDirectoryExists(path.join(config.outputDir, 'base'));
 
+        fs.writeFileSync(
+            path.join(config.outputDir.replace('models',''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
+
         // Générer les DTOs de base
         fs.writeFileSync(
             path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+
+
 
         // Connexion à MongoDB
         client = new MongoClient(config.mongoUri);
@@ -375,60 +378,7 @@ async function generateDTOs(): Promise<void>
         // Créer manuellement des exemples si aucune collection n'est trouvée
         const collections = await db.listCollections().toArray();
 
-        if (collections.length === 0)
-        {
-            console.log('Aucune collection trouvée. Création d\'exemples de DTOs...');
-
-            // Créer des DTOs d'exemple
-            const exampleEntities = [
-                {
-                    name: 'User',
-                    structure: {
-                        id: 'string',
-                        username: 'string',
-                        email: 'string',
-                        isActive: 'boolean',
-                        createdAt: 'Date',
-                        roles: 'string[]'
-                    }
-                },
-                {
-                    name: 'Product',
-                    structure: {
-                        id: 'string',
-                        name: 'string',
-                        description: 'string',
-                        price: 'number',
-                        inStock: 'boolean',
-                        categories: 'string[]'
-                    }
-                }
-            ];
-
-            const knownTypes: KnownTypes = {};
-
-            for (const entity of exampleEntities)
-            {
-                console.log(`Génération des fichiers pour ${entity.name}...`);
-
-                // Créer le dossier pour l'entité
-                const entityDir = path.join(config.outputDir, entity.name.toLowerCase());
-                ensureDirectoryExists(entityDir);
-
-                // Générer la structure des critères
-                const criteriaStructure = transformToCriteriaStructure(entity.structure, knownTypes);
-
-                // Générer et écrire le DTO
-                const dtoContent = generateDTOContent(entity.name, entity.structure, knownTypes, entityDir);
-                fs.writeFileSync(path.join(entityDir, `${entity.name}DTO.ts`), dtoContent);
-
-                // Générer et écrire le CritereDTO
-                const critereDTOContent = generateCritereDTOContent(entity.name, criteriaStructure, entityDir);
-                fs.writeFileSync(path.join(entityDir, `${entity.name}CritereDTO.ts`), critereDTOContent);
-
-                console.log(`  Fichiers générés pour ${entity.name}`);
-            }
-        } else
+        if (collections.length > 0)
         {
             // Analyser les collections existantes
             console.log(`${collections.length} collections trouvées.`);
@@ -547,7 +497,11 @@ async function generateDTOs(): Promise<void>
             console.log('Déconnecté de MongoDB');
         }
     }
-}
+}  
+
+//#endregion
+
+//#endregion
 
 // Exécuter la génération
 generateDTOs();
