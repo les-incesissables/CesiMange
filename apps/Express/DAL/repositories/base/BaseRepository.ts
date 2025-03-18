@@ -3,7 +3,6 @@ import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
 import { IRepositoryConfig } from "./IRepositoryConfig";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
-import escapeStringRegexp from 'escape-string-regexp';
 
 /**
  * Repository de base générique pour MongoDB
@@ -28,9 +27,10 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     //#endregion
 
     //#region Methods
+
     /**
-    * Méthode d'initialisation de la connexion MongoDB
-    */
+     * Méthode d'initialisation de la connexion MongoDB
+     */  
     async initialize(): Promise<void>
     {
         try
@@ -55,123 +55,11 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         }
     }
 
-    /**
-     * S'assure que la connexion est établie avant d'exécuter une opération
-     */
-    protected async ensureConnection(): Promise<void>
-    {
-        if (!this._collection)
-        {
-            await this.initialize();
-        }
-    }
-
-    protected buildFilter(pCritereDTO: CritereDTO): any {
-        const lFilter: any = {};
-
-        const processFilter = (key: string, value: any, filter: any) =>
-        {
-            if (value !== undefined && value !== null && value !== '')
-            {
-                // Gestion spéciale pour l'ID MongoDB
-                if (key === 'id' || key === '_id')
-                {
-                    try
-                    {
-                        filter._id = new ObjectId(value as string);
-                    } catch (error)
-                    {
-                        console.warn("ID non valide pour MongoDB:", value);
-                    }
-                }
-                // Gestion des champs "Like"
-                else if (key.endsWith('Like') && typeof value === 'string')
-                {
-                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
-                    const escapedValue = this.escapeRegex(value);
-                    filter[fieldName] = { $regex: escapedValue, $options: 'i' };
-                }
-                // Gestion des objets imbriqués (ex: menuLike)
-                else if (typeof value === 'object' && !Array.isArray(value))
-                {
-                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
-                    filter[fieldName] = { "$elemMatch": this.buildFilter(value) }; // Recherche sur les sous-objets
-                }
-                // Gestion des tableaux (ex: recherche avec $in)
-                else if (Array.isArray(value))
-                {
-                    filter[key] = { $in: value };
-                }
-                // Gestion des autres types (boolean, number, objets)
-                else
-                {
-                    filter[key] = value;
-                }
-            }
-        };
-
-        // Parcourir toutes les propriétés de CritereDTO
-        for (const [key, value] of Object.entries(pCritereDTO))
-        {
-            processFilter(key, value, lFilter);
-        }
-
-        return Object.keys(lFilter).length > 0 ? lFilter : {};
-    }
-
-    // Fonction d'échappement des caractères spéciaux pour les regex
-    private escapeRegex(value: string): string {
-        return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    }
-
-
-    /**
- * Construit les options de requête MongoDB (tri, pagination, etc.)
- */
-    protected buildOptions(pCritereDTO: CritereDTO): any
-    {
-        const lOptions: any = {};
-
-        // Pagination
-        if (pCritereDTO.Limit)
-        {
-            lOptions.limit = pCritereDTO.Limit;
-        }
-
-        if (pCritereDTO.Skip)
-        {
-            lOptions.skip = pCritereDTO.Skip;
-        }
-
-        // Tri
-        if (pCritereDTO.Sort)
-        {
-            const sortDirection = pCritereDTO.SortDirection || 1;
-            lOptions.sort = { [pCritereDTO.Sort]: sortDirection };
-        }
-
-        return lOptions;
-    }
-
-    /**
-     * Formate les résultats de la base de données en DTOs
-     */
-    protected formatResults(pResults: any[]): DTO[]
-    {
-        return pResults.map(lDoc =>
-        {
-            // Convertir _id en id pour respecter le format DTO
-            const lFormatted: any = { ...lDoc, id: lDoc._id.toString() };
-            delete lFormatted._id;
-            return lFormatted as DTO;
-        });
-    }
-
     //#region CRUD
     /**
-* Obtenir tous les éléments selon des critères
-* @param pCritereDTO - Critères de recherche
-*/
+    * Obtenir tous les éléments selon des critères
+    * @param pCritereDTO - Critères de recherche
+    */
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
         try
@@ -369,6 +257,139 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             throw error;
         }
     }
+    //#endregion
+
+    /**
+     * S'assure que la connexion est établie avant d'exécuter une opération
+     */
+    protected async ensureConnection(): Promise<void>
+    {
+        if (!this._collection)
+        {
+            await this.initialize();
+        }
+    }
+
+    //#region Build
+    /**
+* Construit les options de requête MongoDB (tri, pagination, etc.)
+*/
+    protected buildOptions(pCritereDTO: CritereDTO): any
+    {
+        const lOptions: any = {};
+
+        // Pagination
+        if (pCritereDTO.Limit)
+        {
+            lOptions.limit = pCritereDTO.Limit;
+        }
+
+        if (pCritereDTO.Skip)
+        {
+            lOptions.skip = pCritereDTO.Skip;
+        }
+
+        // Tri
+        if (pCritereDTO.Sort)
+        {
+            const sortDirection = pCritereDTO.SortDirection || 1;
+            lOptions.sort = { [pCritereDTO.Sort]: sortDirection };
+        }
+
+        return lOptions;
+    }
+
+
+    protected buildFilter(pCritereDTO: CritereDTO): any
+    {
+        const lFilter: any = {};
+
+        const processFilter = (key: string, value: any, filter: any) =>
+        {
+            if (value !== undefined && value !== null && value !== '')
+            {
+                // Gestion spéciale pour l'ID MongoDB
+                if (key === 'id' || key === '_id')
+                {
+                    try
+                    {
+                        filter._id = new ObjectId(value as string);
+                    } catch (error)
+                    {
+                        console.warn("ID non valide pour MongoDB:", value);
+                    }
+                }
+                // Gestion des champs "Like"
+                else if (key.endsWith('Like') && typeof value === 'string')
+                {
+                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
+                    const escapedValue = this.escapeRegex(value);
+                    filter[fieldName] = { $regex: escapedValue, $options: 'i' };
+                }
+                // Gestion des objets imbriqués (ex: menuLike)
+                else if (typeof value === 'object' && !Array.isArray(value))
+                {
+                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
+                    filter[fieldName] = { "$elemMatch": this.buildFilter(value) }; // Recherche sur les sous-objets
+                }
+                // Gestion des tableaux (ex: recherche avec $in)
+                else if (Array.isArray(value))
+                {
+                    filter[key] = { $in: value };
+                }
+                // Gestion des tableaux (ex: recherche avec $in)
+                else if (Array.isArray(value))
+                {
+                    filter[key] = { $in: value };
+                }
+                // Gestion des dates (recherche par plage de dates)
+                else if (this.isDate(value))
+                {
+                    filter[key] = { $gte: value };
+
+                }
+                // Gestion des autres types (boolean, number, objets)
+                else
+                {
+                    filter[key] = value;
+                }
+            }
+        };
+
+        // Parcourir toutes les propriétés de CritereDTO
+        for (const [key, value] of Object.entries(pCritereDTO))
+        {
+            processFilter(key, value, lFilter);
+        }
+
+        return Object.keys(lFilter).length > 0 ? lFilter : {};
+    } 
+    //#endregion
+
+    //#region Private
+    private isDate(dateStr: string)
+    {
+        return !isNaN(new Date(dateStr).getDate());
+    }
+    // Fonction d'échappement des caractères spéciaux pour les regex
+    private escapeRegex(value: string): string
+    {
+        return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    /**
+     * Formate les résultats de la base de données en DTOs
+     */
+    private formatResults(pResults: any[]): DTO[]
+    {
+        return pResults.map(lDoc =>
+        {
+            // Convertir _id en id pour respecter le format DTO
+            const lFormatted: any = { ...lDoc, id: lDoc._id.toString() };
+            delete lFormatted._id;
+            return lFormatted as DTO;
+        });
+    } 
     //#endregion
 
     /**

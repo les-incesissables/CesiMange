@@ -1,7 +1,11 @@
 import { IBaseRepository } from "../../DAL/repositories/base/IBaseRepository";
+import { IRepositoryConfig } from "../../DAL/repositories/base/IRepositoryConfig";
+import { Repository } from "../../DAL/repositories/base/Repository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../models/base/BaseDTO";
 import { IBaseMetier } from "./IBaseMetier";
+
+
 
 
 /**
@@ -13,9 +17,16 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
 {
     protected repository: IBaseRepository<DTO, CritereDTO>;
 
-    constructor (repository: IBaseRepository<DTO, CritereDTO>)
+    constructor (pCollectionName : string)
     {
-        this.repository = repository;
+        const config: IRepositoryConfig = {
+            collectionName: pCollectionName, // Collection MongoDB
+            connectionString: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet',
+            dbName: 'CesiMange'
+        };
+
+        const lRepo = new Repository<DTO, CritereDTO>(config);
+        this.repository = lRepo;
     }
 
     /**

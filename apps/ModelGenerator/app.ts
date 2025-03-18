@@ -263,14 +263,7 @@ ${repoConfigImport}
  */
 export class ${entityName}Metier extends BaseMetier<${entityName}DTO, ${entityName}CritereDTO> {
     constructor() {
-        const config: IRepositoryConfig = {
-            collectionName: '${entityName.toLowerCase()}', // Collection MongoDB
-            connectionString: 'mongodb://localhost:27017/projet',
-            dbName: 'projet'
-        };
-
-        const repo = new Repository<${entityName}DTO, ${entityName}CritereDTO>(config);
-        super(repo);
+        super('${entityName.toLowerCase()}');
     }
 }`;
 }
@@ -446,14 +439,9 @@ async function generateDTOs(): Promise<void>
     {
         console.log('Démarrage de la génération des DTOs...');
 
-        // Nettoyer et créer les répertoires nécessaires
-        if (config.cleanOutputDir)
-        {
-            cleanDirectory(config.outputDir);
-        } else
-        {
-            ensureDirectoryExists(config.outputDir);
-        }
+
+        ensureDirectoryExists(config.outputDir);
+        
 
         ensureDirectoryExists(path.join(config.outputDir, 'base'));
 

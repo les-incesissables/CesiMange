@@ -1,7 +1,7 @@
 // We import the fs module so that we can have access to the file system.
-const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
+require('dotenv').config();
 
 import * as path from 'path';
 
