@@ -7,9 +7,12 @@ import * as path from 'path';
 
 import routes from './routes/index';
 import users from './routes/user';
-import { UserController } from './controllers/UserController';
-import { UserMetier } from './metier/base/UserMetier';
-import { RestaurantMetier } from './metier/base/RestaurantMetier';
+import { OrderController } from './controllers/order/OrderController';
+import { RestaurantController } from './controllers/restaurant/RestaurantController';
+import { UserController } from './controllers/user/UserController';
+import { RestaurantMetier } from './metier/restaurant/RestaurantMetier';
+import { UserMetier } from './metier/user/UserMetier';
+import { OrderMetier } from './metier/order/OrderMetier';
 
 // Création de l'application Express
 const app = express();
@@ -27,12 +30,15 @@ app.use('/', routes);
 app.use('/users', users);
 
 const userController = new UserController(new UserMetier());
-const restaurantController = new UserController(new RestaurantMetier());
+const restaurantController = new RestaurantController(new RestaurantMetier());
+const orderMetier = new OrderController(new OrderMetier());
+
 
 
 // Ajout des routes du UserController
 app.use('/api/users', userController.getRouter()); // Utilisez un préfixe comme '/api/users' pour éviter les conflits
 app.use('/api/resto', restaurantController.getRouter()); // Utilisez un préfixe comme '/api/users' pour éviter les conflits
+app.use('/api/order', orderMetier.getRouter()); // Utilisez un préfixe comme '/api/users' pour éviter les conflits
 
 
 // We assign the port number 8080.

@@ -4,6 +4,7 @@ import { MenuCritereDTO } from "../menu/MenuCritereDTO";
 
 /**
  * Crit�res de recherche pour l'entit� Restaurant
+ * @Author ModelGenerator - 2025-03-18T11:10:29.391Z - Cr�ation
  */
 export class RestaurantCritereDTO extends BaseCritereDTO {
   name?: string;
@@ -11,7 +12,7 @@ export class RestaurantCritereDTO extends BaseCritereDTO {
   description?: string;
   descriptionLike?: string;
   menu?: MenuDTO[];
-  menuLike?: MenuCritereDTO;    
+  menuLike?: MenuCritereDTO;
   address?: string;
   addressLike?: string;
   phone?: string;

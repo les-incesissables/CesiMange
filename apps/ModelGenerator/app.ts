@@ -25,7 +25,7 @@ interface PropertyDefinition
 interface KnownTypes
 {
     [typeName: string]: PropertyDefinition;
-} 
+}
 //#endregion
 
 // Configuration
@@ -222,6 +222,62 @@ function shouldExcludeCollection(collectionName: string): boolean
 //#region Generate
 
 // Fonction pour générer le contenu du fichier DTO
+function generateController(entityName: string): string
+{
+    const dtoImport = `import { ${entityName}DTO } from "../../models/${entityName.toLowerCase()}/${entityName}DTO";`;
+    const critereImport = `import { ${entityName}CritereDTO } from "../../models/${entityName.toLowerCase()}/${entityName}CritereDTO";`;
+    const baseControllerImport = `import { BaseController } from "../BaseController";`;
+    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
+
+    return `${dtoImport}
+${critereImport}
+${baseControllerImport}
+
+/**
+ * Contrôleur pour l'entité ${entityName}
+ * @Author ModelGenerator - ${lGenerationDate} - Création
+ */
+export class ${entityName}Controller extends BaseController<${entityName}DTO, ${entityName}CritereDTO> {
+}`;
+}
+
+function generateMetier(entityName: string): string
+{
+    const dtoImport = `import { ${entityName}DTO } from "../../models/${entityName.toLowerCase()}/${entityName}DTO";`;
+    const critereImport = `import { ${entityName}CritereDTO } from "../../models/${entityName.toLowerCase()}/${entityName}CritereDTO";`;
+    const baseMetierImport = `import { BaseMetier } from "../base/BaseMetier";`;
+    const repositoryImport = `import { Repository } from "../../DAL/repositories/base/Repository";`;
+    const repoConfigImport = `import { IRepositoryConfig } from "../../DAL/repositories/base/IRepositoryConfig";`;
+
+    const generationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
+
+    return `${dtoImport}
+${critereImport}
+${baseMetierImport}
+${repositoryImport}
+${repoConfigImport}
+
+/**
+ * Métier pour l'entité ${entityName}
+ * @Author ModelGenerator - ${generationDate} - Création
+ */
+export class ${entityName}Metier extends BaseMetier<${entityName}DTO, ${entityName}CritereDTO> {
+    constructor() {
+        const config: IRepositoryConfig = {
+            collectionName: '${entityName.toLowerCase()}', // Collection MongoDB
+            connectionString: 'mongodb://localhost:27017/projet',
+            dbName: 'projet'
+        };
+
+        const repo = new Repository<${entityName}DTO, ${entityName}CritereDTO>(config);
+        super(repo);
+    }
+}`;
+}
+
+
+
+// Fonction pour générer le contenu du fichier DTO
 function generateDTOContent(entityName: string, structure: PropertyDefinition, knownTypes: KnownTypes, entityDir: string): string
 {
     const imports = new Set<string>();
@@ -265,6 +321,7 @@ function generateDTOContent(entityName: string, structure: PropertyDefinition, k
             properties += `  ${key}?: ${type};\n`;
         }
     });
+    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
 
     // Construire le contenu du fichier
     const importStatements = Array.from(imports).join('\n');
@@ -272,6 +329,7 @@ function generateDTOContent(entityName: string, structure: PropertyDefinition, k
 
 /**
  * DTO pour l'entité ${entityName}
+ * @Author ModelGenerator - ${lGenerationDate} - Création
  */
 export class ${entityName}DTO extends BaseDTO {
 ${properties}}
@@ -330,6 +388,7 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
         }
 
     });
+    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
 
     // Construire le contenu du fichier
     const importStatements = Array.from(imports).join('\n');
@@ -337,10 +396,45 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
 
 /**
  * Critères de recherche pour l'entité ${entityName}
+ * @Author ModelGenerator - ${lGenerationDate} - Création
  */
 export class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
+}
+
+function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure : PropertyDefinition, pKnownTypes : KnownTypes): void
+{
+    // Créer le dossier pour l'entité
+    const lEntityDir = path.join(config.outputDir, pEntityName.toLowerCase());
+    ensureDirectoryExists(lEntityDir);
+
+    // Générer et écrire le DTO
+    const lDtoContent = generateDTOContent(pEntityName, pStructure, pKnownTypes, lEntityDir);
+    fs.writeFileSync(path.join(lEntityDir, `${pEntityName}DTO.ts`), lDtoContent);
+
+    // Générer et écrire le CritereDTO
+    const lCritereDTOContent = generateCritereDTOContent(pEntityName, pCriteriaStructure, lEntityDir);
+    fs.writeFileSync(path.join(lEntityDir, `${pEntityName}CritereDTO.ts`), lCritereDTOContent);
+
+    // Créer le dossier pour l'entité
+    const lControllerDir = path.join(config.outputDir.replace('models', 'controllers'), pEntityName.toLowerCase());
+    ensureDirectoryExists(lControllerDir);
+
+    // Générer et écrire le CritereDTO
+    const lController = generateController(pEntityName);
+    fs.writeFileSync(path.join(lControllerDir, `${pEntityName}Controller.ts`), lController);
+
+    // Créer le dossier pour l'entité
+    const lMetierDir = path.join(config.outputDir.replace('models', 'metier'), pEntityName.toLowerCase());
+    ensureDirectoryExists(lMetierDir);
+
+    // Générer et écrire le CritereDTO
+    const lMetier = generateMetier(pEntityName);
+    fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
+
+    console.log(`  Fichiers générés pour ${pEntityName}`);
+    return;
 }
 
 // Fonction principale pour générer les DTOs
@@ -364,7 +458,7 @@ async function generateDTOs(): Promise<void>
         ensureDirectoryExists(path.join(config.outputDir, 'base'));
 
         fs.writeFileSync(
-            path.join(config.outputDir.replace('models',''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
+            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
 
         // Générer les DTOs de base
         fs.writeFileSync(
@@ -372,8 +466,6 @@ async function generateDTOs(): Promise<void>
 
         fs.writeFileSync(
             path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
-
-
 
         // Connexion à MongoDB
         client = new MongoClient(config.mongoUri);
@@ -445,19 +537,7 @@ async function generateDTOs(): Promise<void>
                 // Transformer la structure en critères
                 const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
 
-                // Créer le dossier pour l'entité
-                const entityDir = path.join(config.outputDir, entityName.toLowerCase());
-                ensureDirectoryExists(entityDir);
-
-                // Générer et écrire le DTO
-                const dtoContent = generateDTOContent(entityName, structure, knownTypes, entityDir);
-                fs.writeFileSync(path.join(entityDir, `${entityName}DTO.ts`), dtoContent);
-
-                // Générer et écrire le CritereDTO
-                const critereDTOContent = generateCritereDTOContent(entityName, criteriaStructure, entityDir);
-                fs.writeFileSync(path.join(entityDir, `${entityName}CritereDTO.ts`), critereDTOContent);
-
-                console.log(`  Fichiers générés pour ${entityName}`);
+                generateFiles(entityName, criteriaStructure, structure, knownTypes);
             }
 
             // Troisième passe : générer les DTOs et CritereDTOs pour les types complexes découverts
@@ -476,19 +556,8 @@ async function generateDTOs(): Promise<void>
                 // Transformer la structure en critères
                 const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
 
-                // Créer le dossier pour le type
-                const typeDir = path.join(config.outputDir, typeName.toLowerCase());
-                ensureDirectoryExists(typeDir);
+                generateFiles(typeName, criteriaStructure, structure, knownTypes);
 
-                // Générer et écrire le DTO
-                const dtoContent = generateDTOContent(typeName, structure, knownTypes, typeDir);
-                fs.writeFileSync(path.join(typeDir, `${typeName}DTO.ts`), dtoContent);
-
-                // Générer et écrire le CritereDTO
-                const critereDTOContent = generateCritereDTOContent(typeName, criteriaStructure, typeDir);
-                fs.writeFileSync(path.join(typeDir, `${typeName}CritereDTO.ts`), critereDTOContent);
-
-                console.log(`  Fichiers générés pour le type complexe ${typeName}`);
             }
         }
 
@@ -505,7 +574,7 @@ async function generateDTOs(): Promise<void>
             console.log('Déconnecté de MongoDB');
         }
     }
-}  
+}
 
 //#endregion
 
