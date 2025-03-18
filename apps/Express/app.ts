@@ -9,6 +9,7 @@ import routes from './routes/index';
 import users from './routes/user';
 import { UserController } from './controllers/UserController';
 import { UserMetier } from './metier/base/UserMetier';
+import { RestaurantMetier } from './metier/base/RestaurantMetier';
 
 // Création de l'application Express
 const app = express();
@@ -26,9 +27,13 @@ app.use('/', routes);
 app.use('/users', users);
 
 const userController = new UserController(new UserMetier());
+const restaurantController = new UserController(new RestaurantMetier());
+
 
 // Ajout des routes du UserController
 app.use('/api/users', userController.getRouter()); // Utilisez un préfixe comme '/api/users' pour éviter les conflits
+app.use('/api/resto', restaurantController.getRouter()); // Utilisez un préfixe comme '/api/users' pour éviter les conflits
+
 
 // We assign the port number 8080.
 const port = 8080;

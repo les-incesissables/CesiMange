@@ -33,6 +33,11 @@ export class BaseController<DTO extends BaseDTO, CritereDTO extends BaseCritereD
         this.router.delete('/:id', this.deleteItem);
     }
 
+    /**
+     * 
+     * @param req
+     * @param res
+     */
     protected getAllItems = async (req: Request, res: Response): Promise<void> =>
     {
         try

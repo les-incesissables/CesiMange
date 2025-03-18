@@ -66,12 +66,10 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         }
     }
 
-    protected buildFilter(pCritereDTO: CritereDTO): any
-    {
+    protected buildFilter(pCritereDTO: CritereDTO): any {
         const lFilter: any = {};
 
-        // Parcourir toutes les propriétés de CritereDTO
-        for (const [key, value] of Object.entries(pCritereDTO))
+        const processFilter = (key: string, value: any, filter: any) =>
         {
             if (value !== undefined && value !== null && value !== '')
             {
@@ -80,73 +78,56 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
                 {
                     try
                     {
-                        lFilter._id = new ObjectId(value as string);
+                        filter._id = new ObjectId(value as string);
                     } catch (error)
                     {
                         console.warn("ID non valide pour MongoDB:", value);
                     }
                 }
-                // Gestion des champs de recherche "Like"
+                // Gestion des champs "Like"
                 else if (key.endsWith('Like') && typeof value === 'string')
                 {
-                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like' du nom de champ
+                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
                     const escapedValue = this.escapeRegex(value);
-                    lFilter[fieldName] = { $regex: escapedValue, $options: 'i' }; // Insensible à la casse
+                    filter[fieldName] = { $regex: escapedValue, $options: 'i' };
                 }
-                // Recherche partielle pour les champs de type chaîne
-                else if (typeof value === 'string')
+                // Gestion des objets imbriqués (ex: menuLike)
+                else if (typeof value === 'object' && !Array.isArray(value))
                 {
-                    lFilter[key] = value.trim(); // Évite les espaces inutiles
+                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
+                    filter[fieldName] = { "$elemMatch": this.buildFilter(value) }; // Recherche sur les sous-objets
                 }
                 // Gestion des tableaux (ex: recherche avec $in)
                 else if (Array.isArray(value))
                 {
-                    lFilter[key] = { $in: value };
+                    filter[key] = { $in: value };
                 }
                 // Gestion des autres types (boolean, number, objets)
                 else
                 {
-                    lFilter[key] = value;
+                    filter[key] = value;
                 }
             }
+        };
+
+        // Parcourir toutes les propriétés de CritereDTO
+        for (const [key, value] of Object.entries(pCritereDTO))
+        {
+            processFilter(key, value, lFilter);
         }
 
         return Object.keys(lFilter).length > 0 ? lFilter : {};
     }
 
     // Fonction d'échappement des caractères spéciaux pour les regex
-    private escapeRegex(value: string): string
-    {
+    private escapeRegex(value: string): string {
         return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    /**
-     * Obtenir tous les éléments selon des critères
-     * @param pCritereDTO - Critères de recherche
-     */
-    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
-    {
-        try
-        {
-            await this.ensureConnection();
-
-            const lFilter = this.buildFilter(pCritereDTO);
-            const lOptions = this.buildOptions(pCritereDTO);
-
-            const lCursor = this._collection!.find(lFilter, lOptions);
-            const lResults = await lCursor.toArray();
-
-            return this.formatResults(lResults);
-        } catch (error)
-        {
-            console.error("Erreur lors de la récupération des items:", error);
-            throw error;
-        }
-    }
 
     /**
-     * Construit les options de requête MongoDB (tri, pagination, etc.)
-     */
+ * Construit les options de requête MongoDB (tri, pagination, etc.)
+ */
     protected buildOptions(pCritereDTO: CritereDTO): any
     {
         const lOptions: any = {};
@@ -186,10 +167,35 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         });
     }
 
+    //#region CRUD
     /**
-     * Obtenir un élément par critères
-     * @param pCritereDTO - Critères identifiant l'élément
-     */
+* Obtenir tous les éléments selon des critères
+* @param pCritereDTO - Critères de recherche
+*/
+    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
+    {
+        try
+        {
+            await this.ensureConnection();
+
+            const lFilter = this.buildFilter(pCritereDTO);
+            const lOptions = this.buildOptions(pCritereDTO);
+
+            const lCursor = this._collection!.find(lFilter, lOptions);
+            const lResults = await lCursor.toArray();
+
+            return this.formatResults(lResults);
+        } catch (error)
+        {
+            console.error("Erreur lors de la récupération des items:", error);
+            throw error;
+        }
+    }
+
+    /**
+    * Obtenir un élément par critères
+    * @param pCritereDTO - Critères identifiant l'élément
+    */
     async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
         try
@@ -363,6 +369,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             throw error;
         }
     }
+    //#endregion
 
     /**
      * Ferme la connexion à la base de données
