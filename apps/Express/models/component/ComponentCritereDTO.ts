@@ -5,7 +5,11 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
  */
 export class ComponentCritereDTO extends BaseCritereDTO {
   name?: string;
+  nameLike?: string;
   description?: string;
+  descriptionLike?: string;
   version?: string;
+  versionLike?: string;
   tags?: string[];
+  tagsLike?: string[];
 }

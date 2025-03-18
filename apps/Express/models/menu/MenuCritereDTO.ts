@@ -5,5 +5,7 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
  */
 export class MenuCritereDTO extends BaseCritereDTO {
   name?: string;
+  nameLike?: string;
   price?: number;
+  priceLike?: number;
 }

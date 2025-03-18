@@ -65,13 +65,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             await this.initialize();
         }
     }
-    private escapeRegex(value: string): string
-    {
-        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Échappe les caractères spéciaux
-    }
-    /**
-     * Construit le filtre MongoDB à partir des critères
-     */
+
     protected buildFilter(pCritereDTO: CritereDTO): any
     {
         const lFilter: any = {};
@@ -81,8 +75,8 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         {
             if (value !== undefined && value !== null && value !== '')
             {
-                // Gestion spéciale pour l'ID
-                if (key === 'Id')
+                // Gestion spéciale pour l'ID MongoDB
+                if (key === 'id' || key === '_id')
                 {
                     try
                     {
@@ -92,14 +86,24 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
                         console.warn("ID non valide pour MongoDB:", value);
                     }
                 }
+                // Gestion des champs de recherche "Like"
+                else if (key.endsWith('Like') && typeof value === 'string')
+                {
+                    const fieldName = key.replace(/Like$/, ''); // Supprime 'Like' du nom de champ
+                    const escapedValue = this.escapeRegex(value);
+                    lFilter[fieldName] = { $regex: escapedValue, $options: 'i' }; // Insensible à la casse
+                }
                 // Recherche partielle pour les champs de type chaîne
                 else if (typeof value === 'string')
                 {
-                    // Échapper les caractères spéciaux dans la valeur
-                    const escapedValue = this.escapeRegex(value);
-                    lFilter[key] = { $regex: escapedValue, $options: 'i' }; // Insensible à la casse
+                    lFilter[key] = value.trim(); // Évite les espaces inutiles
                 }
-                // Autres champs
+                // Gestion des tableaux (ex: recherche avec $in)
+                else if (Array.isArray(value))
+                {
+                    lFilter[key] = { $in: value };
+                }
+                // Gestion des autres types (boolean, number, objets)
                 else
                 {
                     lFilter[key] = value;
@@ -107,15 +111,14 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             }
         }
 
-        // Si aucun filtre n'a été ajouté, retourner un filtre vide (pour tout sélectionner)
-        if (Object.keys(lFilter).length === 0)
-        {
-            return {};
-        }
-
-        return lFilter;
+        return Object.keys(lFilter).length > 0 ? lFilter : {};
     }
 
+    // Fonction d'échappement des caractères spéciaux pour les regex
+    private escapeRegex(value: string): string
+    {
+        return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
 
     /**
      * Obtenir tous les éléments selon des critères

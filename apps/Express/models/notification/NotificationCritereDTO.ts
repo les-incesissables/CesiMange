@@ -5,7 +5,11 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
  */
 export class NotificationCritereDTO extends BaseCritereDTO {
   recipient?: string;
+  recipientLike?: string;
   message?: string;
+  messageLike?: string;
   read?: boolean;
+  readLike?: boolean;
   created_at?: Date;
+  created_atLike?: Date;
 }

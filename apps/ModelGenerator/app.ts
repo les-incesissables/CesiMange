@@ -306,21 +306,29 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
         {
             // Importer le DTO correspondant
             const importPath = `../${baseType.toLowerCase()}/${baseType}DTO`;
+            const importPathCritere = `../${baseType.toLowerCase()}/${baseType}CritereDTO`;
+
             imports.add(`import { ${baseType}DTO } from "${importPath}";`);
+            imports.add(`import { ${baseType}CritereDTO } from "${importPathCritere}";`);
+
 
             // Utiliser le type avec DTO dans la propriété
             if (isArray)
             {
                 properties += `  ${key}?: ${baseType}DTO[];\n`;
+                properties += `  ${key}Like?: ${baseType}CritereDTO;\n`;
             } else
             {
                 properties += `  ${key}?: ${baseType}DTO;\n`;
+                properties += `  ${key}Like?: ${baseType}CritereDTO;\n`;
             }
         } else
         {
             // Utiliser le type primitif tel quel
             properties += `  ${key}?: ${type};\n`;
+            properties += `  ${key}Like?: ${type};\n`;
         }
+
     });
 
     // Construire le contenu du fichier

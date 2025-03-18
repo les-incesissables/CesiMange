@@ -5,6 +5,9 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
  */
 export class StatisticCritereDTO extends BaseCritereDTO {
   metric?: string;
+  metricLike?: string;
   value?: number;
+  valueLike?: number;
   timestamp?: Date;
+  timestampLike?: Date;
 }
