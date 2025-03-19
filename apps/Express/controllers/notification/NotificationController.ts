@@ -4,7 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� Notification
- * @Author ModelGenerator - 2025-03-18T11:10:29.586Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-19T19:32:22.694Z - Cr�ation
  */
 export class NotificationController extends BaseController<NotificationDTO, NotificationCritereDTO> {
 }

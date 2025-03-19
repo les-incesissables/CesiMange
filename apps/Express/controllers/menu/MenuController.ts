@@ -4,7 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� Menu
- * @Author ModelGenerator - 2025-03-18T11:10:29.588Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-19T19:32:22.696Z - Cr�ation
  */
 export class MenuController extends BaseController<MenuDTO, MenuCritereDTO> {
 }

@@ -4,7 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� Restaurant
- * @Author ModelGenerator - 2025-03-18T11:10:29.392Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-19T19:32:22.679Z - Cr�ation
  */
 export class RestaurantController extends BaseController<RestaurantDTO, RestaurantCritereDTO> {
 }

@@ -4,7 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� User
- * @Author ModelGenerator - 2025-03-18T11:10:29.581Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-19T19:32:22.690Z - Cr�ation
  */
 export class UserController extends BaseController<UserDTO, UserCritereDTO> {
 }

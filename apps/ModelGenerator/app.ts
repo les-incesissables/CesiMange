@@ -264,13 +264,11 @@ export class ${entityName}Metier extends BaseMetier<${entityName}DTO, ${entityNa
 }`;
 }
 
-
-
 // Fonction pour générer le contenu du fichier DTO
 function generateDTOContent(entityName: string, structure: PropertyDefinition, knownTypes: KnownTypes, entityDir: string): string
 {
     const imports = new Set<string>();
-    imports.add(`import { BaseDTO } from "../${config.baseImportPath}/BaseDTO";`);
+    imports.add(`import { BaseDTO } from "${config.baseImportPath}/BaseDTO";`);
 
     let properties = '';
 
@@ -329,7 +327,7 @@ ${properties}}
 function generateCritereDTOContent(entityName: string, structure: PropertyDefinition, entityDir: string): string
 {
     const imports = new Set<string>();
-    imports.add(`import { BaseCritereDTO } from "../${config.baseImportPath}/BaseCritereDTO";`);
+    imports.add(`import { BaseCritereDTO } from "${config.baseImportPath}/BaseCritereDTO";`);
 
     let properties = '';
 
@@ -437,6 +435,7 @@ async function generateDTOs(): Promise<void>
 
 
         ensureDirectoryExists(config.outputDir);
+        ensureDirectoryExists(path.join(config.outputDir,'base'));
         ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'base'));
 
         fs.writeFileSync(
@@ -444,10 +443,10 @@ async function generateDTOs(): Promise<void>
 
         // Générer les DTOs de base
         fs.writeFileSync(
-            path.join(config.outputDir.replace('models', ''), 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir.replace('models', ''), 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
 
         // Connexion à MongoDB
         client = new MongoClient(config.mongoUri);
