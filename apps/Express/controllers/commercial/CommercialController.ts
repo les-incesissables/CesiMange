@@ -7,4 +7,5 @@ import { BaseController } from "../BaseController";
  * @Author ModelGenerator - 2025-03-19T19:32:22.685Z - Cr�ation
  */
 export class CommercialController extends BaseController<CommercialDTO, CommercialCritereDTO> {
+
 }

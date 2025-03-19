@@ -28,16 +28,29 @@ interface KnownTypes
 }
 //#endregion
 
-// Configuration
+//// Configuration
+//const config = {
+//    modelsDir: './src/models',       // Répertoire des modèles
+//    outputDir: '../Express/models/',         // Répertoire où seront générés les DTOs
+//    baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
+//    excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
+//    excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
+//    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
+//    sampleSize: 10,                  // Nombre de documents à analyser par collection
+//    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+//    front: false,
+//};
+
 const config = {
     modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../Express/models/',         // Répertoire où seront générés les DTOs
+    outputDir: '../CesiMange/models/',         // Répertoire où seront générés les DTOs
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
-    mongoUri: 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
+    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
     sampleSize: 10,                  // Nombre de documents à analyser par collection
-    cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+    front: true,
 };
 
 //#region Methods
@@ -390,7 +403,7 @@ ${properties}}
 `;
 }
 
-function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure : PropertyDefinition, pKnownTypes : KnownTypes): void
+function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure: PropertyDefinition, pKnownTypes: KnownTypes): void
 {
     // Créer le dossier pour l'entité
     const lEntityDir = path.join(config.outputDir, pEntityName.toLowerCase());
@@ -404,21 +417,25 @@ function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefiniti
     const lCritereDTOContent = generateCritereDTOContent(pEntityName, pCriteriaStructure, lEntityDir);
     fs.writeFileSync(path.join(lEntityDir, `${pEntityName}CritereDTO.ts`), lCritereDTOContent);
 
-    // Créer le dossier pour l'entité
-    const lControllerDir = path.join(config.outputDir.replace('models', 'controllers'), pEntityName.toLowerCase());
-    ensureDirectoryExists(lControllerDir);
+    if (!config.front)
+    {
+        // Créer le dossier pour l'entité
+        const lControllerDir = path.join(config.outputDir.replace('models', 'controllers'), pEntityName.toLowerCase());
+        ensureDirectoryExists(lControllerDir);
 
-    // Générer et écrire le CritereDTO
-    const lController = generateController(pEntityName);
-    fs.writeFileSync(path.join(lControllerDir, `${pEntityName}Controller.ts`), lController);
+        // Générer et écrire le CritereDTO
+        const lController = generateController(pEntityName);
+        fs.writeFileSync(path.join(lControllerDir, `${pEntityName}Controller.ts`), lController);
 
-    // Créer le dossier pour l'entité
-    const lMetierDir = path.join(config.outputDir.replace('models', 'metier'), pEntityName.toLowerCase());
-    ensureDirectoryExists(lMetierDir);
+        // Créer le dossier pour l'entité
+        const lMetierDir = path.join(config.outputDir.replace('models', 'metier'), pEntityName.toLowerCase());
+        ensureDirectoryExists(lMetierDir);
 
-    // Générer et écrire le CritereDTO
-    const lMetier = generateMetier(pEntityName);
-    fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
+        // Générer et écrire le CritereDTO
+        const lMetier = generateMetier(pEntityName);
+        fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
+    }
+
 
     console.log(`  Fichiers générés pour ${pEntityName}`);
     return;
@@ -435,8 +452,9 @@ async function generateDTOs(): Promise<void>
 
 
         ensureDirectoryExists(config.outputDir);
-        ensureDirectoryExists(path.join(config.outputDir,'base'));
+        ensureDirectoryExists(path.join(config.outputDir, 'base'));
         ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'base'));
+        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'interfaces'));
 
         fs.writeFileSync(
             path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
