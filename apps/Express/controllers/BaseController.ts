@@ -38,7 +38,7 @@ export class BaseController<DTO extends BaseDTO, CritereDTO extends BaseCritereD
      * @param req
      * @param res
      */
-    protected async getAllItems (req: Request, res: Response): Promise<void>
+    protected getAllItems = async (req: Request, res: Response): Promise<void> =>
     {
         try
         {

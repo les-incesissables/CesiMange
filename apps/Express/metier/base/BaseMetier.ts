@@ -1,12 +1,9 @@
 import { IBaseRepository } from "../../DAL/repositories/base/IBaseRepository";
 import { IRepositoryConfig } from "../../DAL/repositories/base/IRepositoryConfig";
-import { Repository } from "../../DAL/repositories/base/Repository";
+import { Repository } from "../../DAL/repositories/Repository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../models/base/BaseDTO";
 import { IBaseMetier } from "./IBaseMetier";
-
-
-
 
 /**
  * Contrôleur de base générique
@@ -19,13 +16,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
 
     constructor (pCollectionName : string)
     {
-        const config: IRepositoryConfig = {
-            collectionName: pCollectionName, // Collection MongoDB
-            connectionString: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet',
-            dbName: 'CesiMange'
-        };
-
-        const lRepo = new Repository<DTO, CritereDTO>(config);
+        const lRepo = new Repository<DTO, CritereDTO>(pCollectionName);
         this.repository = lRepo;
     }
 

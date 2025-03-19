@@ -43,7 +43,7 @@ interface KnownTypes
 
 const config = {
     modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../CesiMange/models/',         // Répertoire où seront générés les DTOs
+    outputDir: '../CesiMange/src/models/',         // Répertoire où seront générés les DTOs
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
@@ -402,6 +402,7 @@ export class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
 }
+
 
 function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure: PropertyDefinition, pKnownTypes: KnownTypes): void
 {

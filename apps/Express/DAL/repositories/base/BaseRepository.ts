@@ -3,6 +3,7 @@ import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
 import { IRepositoryConfig } from "./IRepositoryConfig";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
+import { EDatabaseType } from "../../enums/EDatabaseType";
 
 /**
  * Repository de base générique pour MongoDB
@@ -33,21 +34,34 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
      */  
     async initialize(): Promise<void>
     {
+        if (this._config.TypeBDD == EDatabaseType.MONGODB)
+        {
+            await this.InitMongoDB();
+        }
+
+        // TODO Faire la connection poour SQL SERVER
+    }
+
+    /**
+     * Méthode d'initialisation de la connexion MongoDB avec un commentaire explicatif.
+     */  
+    private async InitMongoDB() : Promise<void>
+    {
         try
         {
             // Vérifier si la connexion existe déjà
             if (!this._client)
             {
-                this._client = new MongoClient(this._config.connectionString);
+                this._client = new MongoClient(this._config.ConnectionString);
                 await this._client.connect();
                 console.log("Connexion MongoDB établie");
             }
 
             // Initialiser la BD et la collection
-            this._db = this._client.db(this._config.dbName);
-            this._collection = this._db.collection(this._config.collectionName);
+            this._db = this._client.db(this._config.DbName);
+            this._collection = this._db.collection(this._config.CollectionName);
 
-            console.log(`Collection '${this._config.collectionName}' prête à l'emploi`);
+            console.log(`Collection '${this._config.CollectionName}' prête à l'emploi`);
         } catch (error)
         {
             console.error("Erreur lors de l'initialisation de MongoDB:", error);
@@ -55,11 +69,23 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         }
     }
 
-    //#region CRUD
     /**
-    * Obtenir tous les éléments selon des critères
-    * @param pCritereDTO - Critères de recherche
-    */
+     * S'assure que la connexion est établie avant d'exécuter une opération
+     */
+    protected async ensureConnection(): Promise<void>
+    {
+        if (!this._collection)
+        {
+            await this.initialize();
+        }
+    }
+
+    //#region CRUD
+
+    /**
+     * Obtenir tous les éléments selon des critères
+     * @param pCritereDTO - Critères de recherche
+     */
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
         try
@@ -81,9 +107,9 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
 
     /**
-    * Obtenir un élément par critères
-    * @param pCritereDTO - Critères identifiant l'élément
-    */
+     * Obtenir un élément par critères
+     * @param pCritereDTO - Critères identifiant l'élément
+     */
     async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
         try
@@ -126,7 +152,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             const lDoc = { ...pDTO } as any;
 
             // Gérer l'ID correctement
-            if (lDoc.id)
+            if (lDoc.id || lDoc.id == undefined)
             {
                 try
                 {
@@ -259,21 +285,10 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
     //#endregion
 
-    /**
-     * S'assure que la connexion est établie avant d'exécuter une opération
-     */
-    protected async ensureConnection(): Promise<void>
-    {
-        if (!this._collection)
-        {
-            await this.initialize();
-        }
-    }
-
     //#region Build
     /**
-* Construit les options de requête MongoDB (tri, pagination, etc.)
-*/
+    * Construit les options de requête MongoDB (tri, pagination, etc.)
+    */
     protected buildOptions(pCritereDTO: CritereDTO): any
     {
         const lOptions: any = {};
