@@ -1,5 +1,4 @@
 import { IBaseRepository } from "../../DAL/repositories/base/IBaseRepository";
-import { IRepositoryConfig } from "../../DAL/repositories/base/IRepositoryConfig";
 import { Repository } from "../../DAL/repositories/Repository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../models/base/BaseDTO";
