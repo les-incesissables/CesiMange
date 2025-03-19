@@ -246,16 +246,12 @@ function generateMetier(entityName: string): string
     const dtoImport = `import { ${entityName}DTO } from "../../models/${entityName.toLowerCase()}/${entityName}DTO";`;
     const critereImport = `import { ${entityName}CritereDTO } from "../../models/${entityName.toLowerCase()}/${entityName}CritereDTO";`;
     const baseMetierImport = `import { BaseMetier } from "../base/BaseMetier";`;
-    const repositoryImport = `import { Repository } from "../../DAL/repositories/base/Repository";`;
-    const repoConfigImport = `import { IRepositoryConfig } from "../../DAL/repositories/base/IRepositoryConfig";`;
 
     const generationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
 
     return `${dtoImport}
 ${critereImport}
 ${baseMetierImport}
-${repositoryImport}
-${repoConfigImport}
 
 /**
  * Métier pour l'entité ${entityName}
@@ -274,7 +270,7 @@ export class ${entityName}Metier extends BaseMetier<${entityName}DTO, ${entityNa
 function generateDTOContent(entityName: string, structure: PropertyDefinition, knownTypes: KnownTypes, entityDir: string): string
 {
     const imports = new Set<string>();
-    imports.add(`import { BaseDTO } from "${config.baseImportPath}/BaseDTO";`);
+    imports.add(`import { BaseDTO } from "../${config.baseImportPath}/BaseDTO";`);
 
     let properties = '';
 
@@ -333,7 +329,7 @@ ${properties}}
 function generateCritereDTOContent(entityName: string, structure: PropertyDefinition, entityDir: string): string
 {
     const imports = new Set<string>();
-    imports.add(`import { BaseCritereDTO } from "${config.baseImportPath}/BaseCritereDTO";`);
+    imports.add(`import { BaseCritereDTO } from "../${config.baseImportPath}/BaseCritereDTO";`);
 
     let properties = '';
 
@@ -441,19 +437,17 @@ async function generateDTOs(): Promise<void>
 
 
         ensureDirectoryExists(config.outputDir);
-        
-
-        ensureDirectoryExists(path.join(config.outputDir, 'base'));
+        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'base'));
 
         fs.writeFileSync(
             path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
 
         // Générer les DTOs de base
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
+            path.join(config.outputDir.replace('models', ''), 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+            path.join(config.outputDir.replace('models', ''), 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
 
         // Connexion à MongoDB
         client = new MongoClient(config.mongoUri);
