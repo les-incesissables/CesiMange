@@ -1,0 +1,46 @@
+{
+  "name": "cesi-mange-serveur",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "start": "node app",
+    "dev": "nodemon app"
+  },
+  "description": "CesiMangeServeur",
+  "author": {
+    "name": ""
+  },
+  "main": "app.ts",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "dotenv": "^16.4.7",
+    "escape-string-regexp": "^5.0.0",
+    "express": "^4.14.0",
+    "mongodb": "6.14.2",
+    "mssql": "11.0.1"
+  },
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/express": "^4.0.37",
+    "@types/mssql": "^9.1.7",
+    "@types/node": "^14.14.7",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "eslint": "^8.21.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.5.2"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ]
+  }
+}
