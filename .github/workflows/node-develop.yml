@@ -1,0 +1,37 @@
+name: Node.js CI - All Projects
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        project: ['api-gateway', 'customer-final', 'ModelGenerator', 'user-service']
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ matrix.project }}/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ${{ matrix.project }}
+    
+    - name: Build
+      run: npm run build --if-present
+      working-directory: ${{ matrix.project }}
+    
+    - name: Test
+      run: npm test
+      working-directory: ${{ matrix.project }}
