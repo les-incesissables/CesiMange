@@ -9,11 +9,13 @@ export interface IDbRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 {
     /**
      * Construit le filtre pour la requête
+     * @param pCritereDTO Critere de recherche
      */
     buildFilter(pCritereDTO: CritereDTO): any;
 
     /**
      * Formate les résultats de la base de données
+     * @param pResults Resultat de la base de données
      */
     formatResults(pResults: any[]): DTO[];
 }

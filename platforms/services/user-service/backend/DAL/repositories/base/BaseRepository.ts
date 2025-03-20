@@ -20,33 +20,40 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     //#endregion
 
     //#region CTOR
+
+    /**
+     * Constructeur du BaseRepository
+     * @param pConfig Config du repository
+     */
     constructor (pConfig: IRepositoryConfig)
     {
         this._config = pConfig;
+        try
+        {
+            // cm - Fabrique le repository approprié selon le type de base de données
+            if (this._config.TypeBDD === EDatabaseType.MONGODB)
+            {
+                // cm - Initialise le repo Mongo DB
+                this._repository = new MongoDBRepository<DTO, CritereDTO>(pConfig);
+            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER)
+            {
+                // cm - Initialise le repo SqlServer
+                this._repository = new SqlServerRepository<DTO, CritereDTO>(pConfig);
+            } else
+            {
+                throw new Error(`Type de base de données non supporté: ${this._config.TypeBDD}`);
+            }
 
-        // Fabrique le repository approprié selon le type de base de données
-        if (this._config.TypeBDD === EDatabaseType.MONGODB)
+        } catch (e: any)
         {
-            this._repository = new MongoDBRepository<DTO, CritereDTO>(pConfig);
-        } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER)
-        {
-            this._repository = new SqlServerRepository<DTO, CritereDTO>(pConfig);
-        } else
-        {
-            throw new Error(`Type de base de données non supporté: ${this._config.TypeBDD}`);
+            throw new Error(e);
         }
+
     }
 
     //#endregion
 
     //#region Methods
-    /**
-     * Méthode d'initialisation de la connexion
-     */
-    async initialize(): Promise<void>
-    {
-        await this._repository.initialize();
-    }
 
     /**
      * Obtenir tous les éléments selon des critères

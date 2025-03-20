@@ -10,6 +10,10 @@ export abstract class AbstractDbRepository<DTO extends BaseDTO, CritereDTO exten
 {
     protected _config: IRepositoryConfig;
 
+    /**
+     * Constructeur du AbstractDbRepository
+     * @param pConfig Configuration du repository
+     */
     constructor (pConfig: IRepositoryConfig)
     {
         this._config = pConfig;
@@ -41,8 +45,8 @@ export abstract class AbstractDbRepository<DTO extends BaseDTO, CritereDTO exten
     /**
      * Échappe les caractères spéciaux pour les expressions régulières
      */
-    protected escapeRegex(value: string): string
+    protected escapeRegex(pValue: string): string
     {
-        return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        return pValue.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 }
