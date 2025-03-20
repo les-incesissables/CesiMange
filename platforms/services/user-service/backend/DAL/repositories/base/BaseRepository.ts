@@ -1,4 +1,4 @@
-import { IBaseRepository } from "./IBaseRepository";
+ï»¿import { IBaseRepository } from "./IBaseRepository";
 import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
 import { IRepositoryConfig } from "./IRepositoryConfig";
@@ -6,9 +6,9 @@ import { Collection, Db, FindOptions, MongoClient, ObjectId } from "mongodb";
 import { EDatabaseType } from "../../enums/EDatabaseType";
 
 /**
- * Repository de base générique pour MongoDB
- * @template DTO - Type de données retourné/manipulé qui étend BaseDTO
- * @template CritereDTO - Type des critères de recherche qui étend BaseCritereDTO
+ * Repository de base gÃ©nÃ©rique pour MongoDB
+ * @template DTO - Type de donnÃ©es retournÃ©/manipulÃ© qui Ã©tend BaseDTO
+ * @template CritereDTO - Type des critÃ¨res de recherche qui Ã©tend BaseCritereDTO
  * @author Mahmoud Charif - CESIMANGE-118 - 17/03/2025 - Adaptation pour MongoDB
  */
 export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> implements IBaseRepository<DTO, CritereDTO>
@@ -30,7 +30,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     //#region Methods
 
     /**
-     * Méthode d'initialisation de la connexion MongoDB
+     * MÃ©thode d'initialisation de la connexion MongoDB
      */  
     async initialize(): Promise<void>
     {
@@ -43,25 +43,25 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
 
     /**
-     * Méthode d'initialisation de la connexion MongoDB avec un commentaire explicatif.
+     * MÃ©thode d'initialisation de la connexion MongoDB avec un commentaire explicatif.
      */  
     private async InitMongoDB() : Promise<void>
     {
         try
         {
-            // Vérifier si la connexion existe déjà
+            // VÃ©rifier si la connexion existe dÃ©jÃ 
             if (!this._client)
             {
                 this._client = new MongoClient(this._config.ConnectionString);
                 await this._client.connect();
-                console.log("Connexion MongoDB établie");
+                console.log("Connexion MongoDB Ã©tablie");
             }
 
             // Initialiser la BD et la collection
             this._db = this._client.db(this._config.DbName);
             this._collection = this._db.collection(this._config.CollectionName);
 
-            console.log(`Collection '${this._config.CollectionName}' prête à l'emploi`);
+            console.log(`Collection '${this._config.CollectionName}' prÃªte Ã  l'emploi`);
         } catch (error)
         {
             console.error("Erreur lors de l'initialisation de MongoDB:", error);
@@ -70,7 +70,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
 
     /**
-     * S'assure que la connexion est établie avant d'exécuter une opération
+     * S'assure que la connexion est Ã©tablie avant d'exÃ©cuter une opÃ©ration
      */
     protected async ensureConnection(): Promise<void>
     {
@@ -83,8 +83,8 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     //#region CRUD
 
     /**
-     * Obtenir tous les éléments selon des critères
-     * @param pCritereDTO - Critères de recherche
+     * Obtenir tous les Ã©lÃ©ments selon des critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
      */
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
@@ -101,14 +101,14 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             return this.formatResults(lResults);
         } catch (error)
         {
-            console.error("Erreur lors de la récupération des items:", error);
+            console.error("Erreur lors de la rÃ©cupÃ©ration des items:", error);
             throw error;
         }
     }
 
     /**
-     * Obtenir un élément par critères
-     * @param pCritereDTO - Critères identifiant l'élément
+     * Obtenir un Ã©lÃ©ment par critÃ¨res
+     * @param pCritereDTO - CritÃ¨res identifiant l'Ã©lÃ©ment
      */
     async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -120,27 +120,27 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (Object.keys(lFilter).length === 0)
             {
-                throw new Error("Au moins un critère est requis pour obtenir un élément");
+                throw new Error("Au moins un critÃ¨re est requis pour obtenir un Ã©lÃ©ment");
             }
 
             const lResult = await this._collection!.findOne(lFilter);
 
             if (!lResult)
             {
-                throw new Error("Élément non trouvé");
+                throw new Error("Ã‰lÃ©ment non trouvÃ©");
             }
 
             return this.formatResults([lResult])[0];
         } catch (error)
         {
-            console.error("Erreur lors de la récupération de l'item:", error);
+            console.error("Erreur lors de la rÃ©cupÃ©ration de l'item:", error);
             throw error;
         }
     }
 
     /**
-     * Créer un nouvel élément
-     * @param pDTO - Données pour la création
+     * CrÃ©er un nouvel Ã©lÃ©ment
+     * @param pDTO - DonnÃ©es pour la crÃ©ation
      */
     async createItem(pDTO: DTO): Promise<DTO>
     {
@@ -148,10 +148,10 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
         {
             await this.ensureConnection();
 
-            // Préparer le document
+            // PrÃ©parer le document
             const lDoc = { ...pDTO } as any;
 
-            // Gérer l'ID correctement
+            // GÃ©rer l'ID correctement
             if (lDoc.id || lDoc.id == undefined)
             {
                 try
@@ -159,8 +159,8 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
                     lDoc._id = new ObjectId(lDoc.id);
                 } catch (error)
                 {
-                    // Si l'ID n'est pas valide, on le supprime pour que MongoDB en génère un
-                    console.warn("ID non valide pour MongoDB, un nouvel ID sera généré");
+                    // Si l'ID n'est pas valide, on le supprime pour que MongoDB en gÃ©nÃ¨re un
+                    console.warn("ID non valide pour MongoDB, un nouvel ID sera gÃ©nÃ©rÃ©");
                 }
             }
             delete lDoc.id;
@@ -173,25 +173,26 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (!lResult.acknowledged)
             {
-                throw new Error("Échec de l'insertion du document");
+                throw new Error("Ã‰chec de l'insertion du document");
             }
 
-            // Créer un objet critère pour récupérer l'élément créé
+            // CrÃ©er un objet critÃ¨re pour rÃ©cupÃ©rer l'Ã©lÃ©ment crÃ©Ã©
             const lCritereDTO = {} as CritereDTO;
             lCritereDTO.Id = lResult.insertedId.toString();
 
-            return await this.getItem(lCritereDTO);
+            let lDTO : DTO = await this.getItem(lCritereDTO);
+            return lDTO;
         } catch (error)
         {
-            console.error("Erreur lors de la création de l'item:", error);
+            console.error("Erreur lors de la crÃ©ation de l'item:", error);
             throw error;
         }
     }
 
     /**
-     * Mettre à jour un élément existant
-     * @param pDTO - Données pour la mise à jour
-     * @param pCritereDTO - Critères identifiant l'élément à mettre à jour
+     * Mettre Ã  jour un Ã©lÃ©ment existant
+     * @param pDTO - DonnÃ©es pour la mise Ã  jour
+     * @param pCritereDTO - CritÃ¨res identifiant l'Ã©lÃ©ment Ã  mettre Ã  jour
      */
     async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -203,12 +204,12 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (Object.keys(lFilter).length === 0)
             {
-                throw new Error("Au moins un critère est requis pour la mise à jour");
+                throw new Error("Au moins un critÃ¨re est requis pour la mise Ã  jour");
             }
 
-            // Préparer les données à mettre à jour
+            // PrÃ©parer les donnÃ©es Ã  mettre Ã  jour
             const lUpdateData = { ...pDTO } as any;
-            delete lUpdateData.id; // Ne pas inclure l'id dans les champs à mettre à jour
+            delete lUpdateData.id; // Ne pas inclure l'id dans les champs Ã  mettre Ã  jour
             lUpdateData.updatedAt = new Date();
 
             const lResult = await this._collection!.findOneAndUpdate(
@@ -219,20 +220,20 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (!lResult)
             {
-                throw new Error("L'élément à mettre à jour n'existe pas");
+                throw new Error("L'Ã©lÃ©ment Ã  mettre Ã  jour n'existe pas");
             }
 
             return this.formatResults([lResult])[0];
         } catch (error)
         {
-            console.error("Erreur lors de la mise à jour de l'item:", error);
+            console.error("Erreur lors de la mise Ã  jour de l'item:", error);
             throw error;
         }
     }
 
     /**
-     * Supprimer un élément
-     * @param pCritereDTO - Critères pour la suppression
+     * Supprimer un Ã©lÃ©ment
+     * @param pCritereDTO - CritÃ¨res pour la suppression
      */
     async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -244,7 +245,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (Object.keys(lFilter).length === 0)
             {
-                throw new Error("Au moins un critère est requis pour la suppression");
+                throw new Error("Au moins un critÃ¨re est requis pour la suppression");
             }
 
             const lResult = await this._collection!.deleteOne(lFilter);
@@ -258,8 +259,8 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     }
 
     /**
-     * Vérifier si un élément existe selon des critères
-     * @param pCritereDTO - Critères de recherche
+     * VÃ©rifier si un Ã©lÃ©ment existe selon des critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
      */
     async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -271,7 +272,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
             if (Object.keys(lFilter).length === 0)
             {
-                throw new Error("Au moins un critère est requis pour vérifier l'existence");
+                throw new Error("Au moins un critÃ¨re est requis pour vÃ©rifier l'existence");
             }
 
             const lCount = await this._collection!.countDocuments(lFilter, { limit: 1 });
@@ -279,7 +280,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             return lCount > 0;
         } catch (error)
         {
-            console.error("Erreur lors de la vérification de l'existence:", error);
+            console.error("Erreur lors de la vÃ©rification de l'existence:", error);
             throw error;
         }
     }
@@ -287,7 +288,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
 
     //#region Build
     /**
-    * Construit les options de requête MongoDB (tri, pagination, etc.)
+    * Construit les options de requÃªte MongoDB (tri, pagination, etc.)
     */
     protected buildOptions(pCritereDTO: CritereDTO): FindOptions
     {
@@ -326,7 +327,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             // cm - Exclus les properties du baseCritere lors du filtre dans mongodb    
             if (value !== undefined && value !== null && value !== '' && !lKeyWords.includes(key))
             {
-                // Gestion spéciale pour l'ID MongoDB
+                // Gestion spÃ©ciale pour l'ID MongoDB
                 if (key.toLowerCase() === 'id' || key === '_id')
                 {
                     try
@@ -344,7 +345,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
                     const escapedValue = this.escapeRegex(value);
                     filter[fieldName] = { $regex: escapedValue, $options: 'i' };
                 }
-                // Gestion des objets imbriqués (ex: menuLike)
+                // Gestion des objets imbriquÃ©s (ex: menuLike)
                 else if (typeof value === 'object' && !Array.isArray(value))
                 {
                     const fieldName = key.replace(/Like$/, ''); // Supprime 'Like'
@@ -374,7 +375,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             }
         };
 
-        // Parcourir toutes les propriétés de CritereDTO
+        // Parcourir toutes les propriÃ©tÃ©s de CritereDTO
         for (const [key, value] of Object.entries(pCritereDTO))
         {
             processFilter(key, value, lFilter);
@@ -389,29 +390,31 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         return !isNaN(new Date(dateStr).getDate());
     }
-    // Fonction d'échappement des caractères spéciaux pour les regex
+    // Fonction d'Ã©chappement des caractÃ¨res spÃ©ciaux pour les regex
     private escapeRegex(value: string): string
     {
         return value.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
     /**
-     * Formate les résultats de la base de données en DTOs
+     * Formate les rï¿½sultats de la base de donnï¿½es en DTOs
      */
     private formatResults(pResults: any[]): DTO[]
     {
-        return pResults.map(lDoc =>
+        let lResult = pResults.map(lDoc =>
         {
             // Convertir _id en id pour respecter le format DTO
             const lFormatted: any = { ...lDoc, id: lDoc._id.toString() };
             delete lFormatted._id;
             return lFormatted as DTO;
         });
+
+        return lResult;
     } 
     //#endregion
 
     /**
-     * Ferme la connexion à la base de données
+     * Ferme la connexion Ã  la base de donnÃ©es
      */
     async disconnect(): Promise<void>
     {
@@ -421,12 +424,12 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             this._client = undefined;
             this._db = undefined;
             this._collection = undefined;
-            console.log("Connexion MongoDB fermée");
+            console.log("Connexion MongoDB fermÃ©e");
         }
     }
 
     /**
-     * À surcharger dans les classes dérivées pour ajouter des conditions spécifiques
+     * Ã€ surcharger dans les classes dÃ©rivÃ©es pour ajouter des conditions spÃ©cifiques
      */
     protected getAdditionalConditions(pCritereDTO: CritereDTO): any
     {
