@@ -2,7 +2,7 @@ import { IBaseRepository } from "./IBaseRepository";
 import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
 import { IRepositoryConfig } from "./IRepositoryConfig";
-import { Collection, Db, MongoClient, ObjectId } from "mongodb";
+import { Collection, Db, FindOptions, MongoClient, ObjectId } from "mongodb";
 import { EDatabaseType } from "../../enums/EDatabaseType";
 
 /**
@@ -93,7 +93,7 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
             await this.ensureConnection();
 
             const lFilter = this.buildFilter(pCritereDTO);
-            const lOptions = this.buildOptions(pCritereDTO);
+            const lOptions : FindOptions = this.buildOptions(pCritereDTO);
 
             const lCursor = this._collection!.find(lFilter, lOptions);
             const lResults = await lCursor.toArray();
@@ -289,9 +289,9 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     /**
     * Construit les options de requête MongoDB (tri, pagination, etc.)
     */
-    protected buildOptions(pCritereDTO: CritereDTO): any
+    protected buildOptions(pCritereDTO: CritereDTO): FindOptions
     {
-        const lOptions: any = {};
+        const lOptions: FindOptions = {};
 
         // Pagination
         if (pCritereDTO.Limit)
@@ -319,12 +319,15 @@ export abstract class BaseRepository<DTO extends BaseDTO, CritereDTO extends Bas
     {
         const lFilter: any = {};
 
+        const lKeyWords: string[] = ['Skip', 'SortDirection','Sort','Limit']
+
         const processFilter = (key: string, value: any, filter: any) =>
         {
-            if (value !== undefined && value !== null && value !== '')
+            // cm - Exclus les properties du baseCritere lors du filtre dans mongodb    
+            if (value !== undefined && value !== null && value !== '' && !lKeyWords.includes(key))
             {
                 // Gestion spéciale pour l'ID MongoDB
-                if (key === 'id' || key === '_id')
+                if (key.toLowerCase() === 'id' || key === '_id')
                 {
                     try
                     {
