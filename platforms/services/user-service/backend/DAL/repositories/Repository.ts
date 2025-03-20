@@ -1,8 +1,8 @@
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../models/base/BaseDTO";
 import { EDatabaseType } from "../enums/EDatabaseType";
+import { IRepositoryConfig } from "../interfaces/IRepositoryConfig";
 import { BaseRepository } from "./base/BaseRepository";
-import { IRepositoryConfig } from "./base/IRepositoryConfig";
 
 
 /**
