@@ -1,0 +1,9 @@
+Summary,Description,Issue Type,Priority,Labels
+"Architecture et Conception","Epic couvrant la phase d'architecture et de conception du système","Epic","High","architecture,conception"
+"Développement","Epic couvrant toutes les activités de développement du système","Epic","High","développement,implementation"
+"DevOps et Infrastructure","Epic couvrant la mise en place de l'infrastructure et des pratiques DevOps","Epic","High","devops,infrastructure"
+"Base de Données","Epic pour la conception et l'implémentation des bases de données","Epic","High","bdd,données"
+"Tests et Qualité","Epic couvrant tous les aspects de test et d'assurance qualité","Epic","High","test,qualité"
+"UX/UI","Epic pour la conception et l'implémentation de l'expérience utilisateur","Epic","High","ux,ui,design"
+"Sécurité","Epic couvrant tous les aspects de sécurité du système","Epic","High","sécurité,protection"
+"Documentation","Epic pour toute la documentation technique et utilisateur","Epic","Medium","documentation,guides"

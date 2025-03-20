@@ -1,0 +1,366 @@
+:root{
+  --fontStyle: "Arial";
+	--fontSize: 0.9em;
+  --maxWidth: 1200px;
+  --borderRadius:0;
+	--accentDarkBGalpha: #fbe216;
+  --accentDarkBG: #000;
+  --accentDarkFG: #fbe216; 
+  --accentLightBG: #f8f8f8;
+	--accentLightFG: #000;
+  --contentBG: white;
+	--contentFG: #000;
+	--contentEmp: #1b365d;
+  --pBkOthers: #484848;
+  --pBkOthersLight: #48484820;
+  --pBkWarning: #dc291e;
+  --pBkWarningLight: #dc291e40;
+  --pBkBasic: #9F590E;
+  --pBkBasicLight: #9F590E40;
+	--footerFG: white;
+}
+
+/* ===== SKIN CESI ===== */
+
+html{
+  overflow: auto;
+  position: static;
+}
+
+body{
+	background-image:none;
+  height: 100%;
+  margin: 0;
+}
+
+p {
+  margin: 0.9em 0;
+}
+
+a:focus, input:focus, video:focus, button:focus, [type="checkbox"]:checked:focus + label:before, [type="checkbox"]:not(:checked):focus + label:before{
+  outline:none;
+}
+
+.txt_tb tr:nth-child(2n+1) {
+  background-color: var(--contentBG);
+}
+.txt_tb tr {
+  background-color: var(--accentLightBG);
+}
+
+.default #main {
+  overflow: initial;
+  padding-top: 54px;
+}
+
+#document{
+  margin-top: 0;
+}
+
+.ref #main{
+  flex-flow: column;
+  padding:1em;
+}
+
+.is-phase #main {
+  padding-top: 44px;
+}
+
+.scroller{
+  position: static;
+}
+
+.default #footer, #footer {
+  background-color: #202020;
+}
+
+section.part:nth-of-type(2n+1) {
+  background-color: #fff;
+}
+
+/* HEADER */
+.default #header {
+  position: static;
+  padding: 0;
+}
+
+#header>#title {
+  background-color: #fff;
+  height: auto;
+}
+
+#header #title h1 {
+  background: url("../img/cesi/logo.svg") no-repeat left center / auto 100px;
+  height: 120px;
+  font-family: "Arial Black";
+  text-transform: uppercase;
+  color: var(--accentLightFG);
+  font-size: 2em;
+  padding-left: 160px;
+}
+
+/* MENU */
+nav.menu ul li a{
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
+/* OUTCAT */
+nav#outCat > ul li {
+    overflow: hidden;
+}
+nav#outCat ul li a  {
+  border-top: none;
+}
+nav#outCat ul li.outCat_sel_yes .outCat_i {
+  background-color: var(--accentDarkBG);
+  color: #fff;
+}
+nav#outCat ul li a span {
+  border-right: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* OUTSEC */
+#outSec {
+  text-align: center;
+  border-top: 2px solid #fbe216;
+  border-bottom: 2px solid #fbe216;
+  box-shadow: none;
+  font-family: "Arial Black";
+}
+#outSec > ul {
+  height: 40px;
+}
+#outSec ul li a{
+  border-bottom: none;
+}
+#outSec ul li .sel_yes {
+  color: #000;
+}
+#outSec ul li .sel_yes > span span{
+  background:linear-gradient(to bottom, transparent 60%, #fbe216 60%, #fbe216 90%, transparent 90%);
+}
+
+/* TOOLS */
+#tools a {
+  color: #202020;
+}
+#tools .objSynth {
+  background-color: #6fbc85;
+}
+#tools .topicSynth {
+  background-color: #f0869d;
+}
+#tools .teacherSynth {
+  background-color: #afa5d1;
+}
+
+#tools .topicSynth::after {
+  font-family: "app";
+  content: "\e812";
+}
+
+#tools .teacherSynth::after {
+  font-family: "app";
+  content: "\e813";
+}
+
+#tools a.cbkOpenBtn, 
+#tools a.cbkCloseBtn {
+  color: #fff;
+}
+
+#tools .cbkOpenBtn::after, 
+#tools .cbkCloseBtn::after {
+    color: #fff;
+}
+
+/* METAS */
+.metas>div {
+  border: none;
+}
+.metas .subjects {
+  background-color: #d2d2d2;
+}
+.metas .levels {
+  background-color: #F9CFD8;
+}
+.metas .duration {
+  background-color: #bebebe;
+}
+.metas .members {
+  background-color: #CFC9E3 ;
+}
+
+em.time {
+  font-style: normal;
+}
+
+.members .person strong {
+  font-weight: normal;
+}
+
+/* MAIN */
+.case_ti span strong {
+  text-align: center;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  width: 100%;
+  max-width: 100%;
+  text-shadow: rgb(0 0 0 / 25%) 0px 1px 3px;
+}
+
+section.part.context {
+  background-color: #afa5d1;
+}
+
+article.collapsed.subject, .part.context article.collapsed {
+  margin-bottom: 2em;
+}
+
+section.part>.part_ti {
+  text-align: center;
+  text-transform: uppercase;
+  font-family: "Arial Black";
+  margin: 0.5em 0;
+}
+
+section.context>.part_ti {
+  color: #202020;
+}
+
+section.part.intro > .part_ti span{
+  background:linear-gradient(to bottom, transparent 60%, #6dc6da 60%, #6dc6da 90%, transparent 90%);
+}
+section.part.topic > .part_ti span{
+  background:linear-gradient(to bottom, transparent 60%, #f0869d 60%, #f0869d 90%, transparent 90%);
+}
+section.part.obj > .part_ti span{
+  background:linear-gradient(to bottom, transparent 60%, #6fbc85 60%, #6fbc85 90%, transparent 90%);
+}
+section.part.context > .part_ti span{
+  background:linear-gradient(to bottom, transparent 60%, #fbe216 60%, #fbe216 90%, transparent 90%);
+}
+
+section.topic>.part_ti::before {
+  font-family: "app";
+  margin-right: 0.5em;
+  content: "\e812";
+  font-weight: normal;
+}
+
+section.context > .part_ti::before {
+  font-family: "app";
+  margin-right: 0.5em;
+  content:"\e813";
+  font-weight:normal;
+}
+
+.module .hBk > h2.hBk_ti {
+  align-items: flex-start;
+}
+section.article > .hBk_ti{
+  text-transform: uppercase;
+  font-family: "Arial Black";
+  border-bottom: 2px solid #fbe216;
+}
+
+.module .hBk > h2.hBk_ti span:before {
+  margin-right: .5em;
+  position: static;
+}
+
+.module .hBk > h2.hBk_ti:before {
+  flex: 0 0 30px;
+  background-color: #fbe216;
+  line-height: 30px;
+  font-size: 1em;
+}
+
+.module .hBk > h2.hBk_ti span {
+  padding-left: 0;
+}
+
+a.zoom, a.tooltip_a.info{
+  box-shadow: none;
+  border-radius: 0;
+}
+
+article.collapsed>a {
+  font-weight: bold;
+}
+
+article.collapsed>.collapsed_co>article.collapsed>a{
+  opacity: .9;
+}
+
+article.collapsed>a::before{
+  color:#fbe216;
+}
+
+article.collapsed>.collapsed_co {
+  border-left: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.collapsed_co article.collapsed {
+  margin-left: 1em;
+}
+
+.learnOut_ti {
+  border-bottom: none;
+}
+
+/* BLOCKS */
+.pBk {
+  border: 1px solid #bebebe;
+  margin-bottom: 15px;
+}
+
+.pBk_ti {
+  margin: 0.5em 0 0;
+  color: #69b3e7;
+  font-weight: normal;
+}
+
+.pBk_co, .complement_co {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* PAGE TURNER */
+.default .pageTurner a {
+  height: 40px;
+  width: 40px;
+  line-height: 40px;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid #fff;
+  background-color: var(--accentDarkBG);
+  color: #fbe216;
+  font-size: 1.2em;
+  text-shadow:none;
+}
+
+.default .pageTurner a:hover{
+  background-color: #fbe216;
+  border-color: #fbe216;
+	color:var(--accentLightFG);
+}
+
+/* === START - RESPONSIVE DESIGN ============================================ */
+@media (max-width: 800px){
+  .default #main, .is-phase #main {
+      padding-top: 0;
+  }
+  nav#outCat ul li a {
+    font-size: .9em;
+  }
+}
