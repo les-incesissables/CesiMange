@@ -12,8 +12,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
-        project: ['api-gateway', 'customer-final', 'ModelGenerator', 'user-service']
+        node-version: [20.x]
+        project: ['platforms\api-gateway', 'apps\customer-final\front\', 'platforms\services\ModelGenerator', 'platforms\services\user-service\backend']
 
     steps:
     - uses: actions/checkout@v4
