@@ -1,5 +1,5 @@
-import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../../models/base/BaseDTO";
+import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
+import { BaseDTO } from "../../models/base/BaseDTO";
 
 /**
  * Contrôleur de base générique
