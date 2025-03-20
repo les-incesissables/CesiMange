@@ -29,29 +29,29 @@ interface KnownTypes
 //#endregion
 
 //// Configuration
-//const config = {
-//    modelsDir: './src/models',       // Répertoire des modèles
-//    outputDir: '../Express/models/',         // Répertoire où seront générés les DTOs
-//    baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
-//    excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
-//    excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
-//    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
-//    sampleSize: 10,                  // Nombre de documents à analyser par collection
-//    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
-//    front: false,
-//};
-
 const config = {
     modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../CesiMange/src/models/',         // Répertoire où seront générés les DTOs
+    outputDir: '../user-service/backend/models/',         // Répertoire où seront générés les DTOs
     baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
     excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
     excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
     mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
     sampleSize: 10,                  // Nombre de documents à analyser par collection
     cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
-    front: true,
+    front: false,
 };
+
+//const config = {
+//    modelsDir: './src/models',       // Répertoire des modèles
+//    outputDir: '../../../apps/customer-final/front/src/models/',         // Répertoire où seront générés les DTOs
+//    baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
+//    excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
+//    excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
+//    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
+//    sampleSize: 10,                  // Nombre de documents à analyser par collection
+//    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+//    front: true,
+//};
 
 //#region Methods
 // Fonction pour créer le dossier de sortie s'il n'existe pas
