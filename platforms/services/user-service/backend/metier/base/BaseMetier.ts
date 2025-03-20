@@ -1,3 +1,4 @@
+import { EDatabaseType } from "../../DAL/enums/EDatabaseType";
 import { IBaseRepository } from "../../DAL/interfaces/IBaseRepository";
 import { Repository } from "../../DAL/repositories/Repository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
@@ -11,12 +12,12 @@ import { IBaseMetier } from "./IBaseMetier";
  */
 export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> implements IBaseMetier<DTO, CritereDTO>
 {
-    protected repository: IBaseRepository<DTO, CritereDTO>;
+    protected Repository: IBaseRepository<DTO, CritereDTO>;
 
-    constructor (pCollectionName : string)
+    constructor (pCollectionName: string)
     {
-        const lRepo = new Repository<DTO, CritereDTO>(pCollectionName);
-        this.repository = lRepo;
+        const lRepo = new Repository<DTO, CritereDTO>(pCollectionName, EDatabaseType.MONGODB);
+        this.Repository = lRepo;
     }
 
     /**
@@ -33,7 +34,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             this.beforeGetItems(pCritereDTO);
 
             // Déléguer la récupération au repository
-            const items = await this.repository.getItems(pCritereDTO);
+            const items = await this.Repository.getItems(pCritereDTO);
 
             // Appliquer des transformations ou règles après la récupération
             return items;
@@ -58,7 +59,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             this.beforeGetItem(pCritereDTO);
 
             // Déléguer la récupération au repository
-            const item = await this.repository.getItem(pCritereDTO);
+            const item = await this.Repository.getItem(pCritereDTO);
 
             return item;
         } catch (error)
@@ -82,7 +83,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             const preparedDTO = await this.beforeCreateItem(pDTO);
 
             // Déléguer la création au repository
-            const item = await this.repository.createItem(preparedDTO);
+            const item = await this.Repository.createItem(preparedDTO);
 
             return item;
         } catch (error)
@@ -107,7 +108,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             const preparedDTO = await this.beforeUpdateItem(pDTO, pCritereDTO);
 
             // Déléguer la mise à jour au repository
-            const item = await this.repository.updateItem(preparedDTO, pCritereDTO);
+            const item = await this.Repository.updateItem(preparedDTO, pCritereDTO);
 
             return item;
         } catch (error)
@@ -131,7 +132,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             await this.beforeDeleteItem(pCritereDTO);
 
             // Déléguer la suppression au repository
-            const result = await this.repository.deleteItem(pCritereDTO);
+            const result = await this.Repository.deleteItem(pCritereDTO);
 
             return result;
         } catch (error)
@@ -152,7 +153,7 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
             this.validateCritereDTO(pCritereDTO);
 
             // Déléguer la vérification au repository
-            return await this.repository.itemExists(pCritereDTO);
+            return await this.Repository.itemExists(pCritereDTO);
         } catch (error)
         {
             this.handleError(error, 'itemExists');
@@ -238,6 +239,6 @@ export abstract class BaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCri
     {
         console.error(`Erreur dans ${methodName}:`, error);
         // Logique spécifique de gestion des erreurs
-    } 
+    }
     //#endregion
 }

@@ -13,13 +13,13 @@ import { BaseRepository } from "./base/BaseRepository";
  */
 export class Repository<DTO extends BaseDTO, Critere extends BaseCritereDTO> extends BaseRepository<DTO, Critere>
 {
-    constructor (pCollectionName : string)
+    constructor (pCollectionName: string, pTypeBDD: EDatabaseType)
     {
         const config: IRepositoryConfig = {
             CollectionName: pCollectionName, // Collection MongoDB
             ConnectionString: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet',
             DbName: 'CesiMange',
-            TypeBDD: EDatabaseType.MONGODB
+            TypeBDD: pTypeBDD
         };
 
         super(config)
