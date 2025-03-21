@@ -43,6 +43,7 @@ export class BaseController<
     res: Response
   ): Promise<void> => {
     try {
+      console.log("getAllItems");
       const critere = req.body as CritereDTO;
       const items = await this.Metier.getItems(critere);
       res.status(200).json(items);

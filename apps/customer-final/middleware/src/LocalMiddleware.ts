@@ -86,7 +86,18 @@ export class LocalMiddleware {
     }
   }
 
-  // Example entity-specific methods
+  /**
+   * Récupère la liste des utilisateurs via le UserRepository.
+   * @returns Une promesse résolue en NormalizedResponse contenant la liste des utilisateurs.
+   */
+  public async getUsers(): Promise<NormalizedResponse> {
+    console.log("middleware getUsers");
+    return this.callLocalApi(() => this.userRepo.fetchAll());
+  }
+
+  /**
+   * Exemple d'autres méthodes spécifiques par entité…
+   */
   public async getOrders(): Promise<NormalizedResponse> {
     return this.callLocalApi(() => this.orderRepo.fetchAll());
   }

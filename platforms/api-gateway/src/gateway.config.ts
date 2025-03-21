@@ -23,6 +23,13 @@ export function loadGatewayConfig(): GatewayConfig {
           : true,
       },
       {
+        apiName: "users",
+        url: process.env.USER_SERVICE_URL || "http://localhost:8080",
+        enabled: process.env.USER_SERVICE_ENABLED
+          ? process.env.USER_SERVICE_ENABLED === "true"
+          : true,
+      },
+      {
         apiName: "orders",
         url: process.env.ORDER_SERVICE_URL || "http://localhost:4003",
         enabled: process.env.ORDER_SERVICE_ENABLED
