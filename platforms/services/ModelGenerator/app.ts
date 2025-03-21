@@ -1,21 +1,9 @@
-// generateDTOs.ts
-
 import * as fs from 'fs';
 import * as path from 'path';
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
-// Types pour le générateur
-type SchemaType = 'String' | 'Number' | 'Boolean' | 'Date' | 'ObjectId' | 'Array' | 'Mixed' | 'Map' | 'Buffer';
 
 //#region Interfaces
-interface SchemaField
-{
-    type: SchemaType;
-    ref?: string;
-    isArray?: boolean;
-    arrayType?: SchemaType;
-    arrayRef?: string;
-}
 
 interface PropertyDefinition
 {
@@ -87,7 +75,8 @@ function inferType(value: any): string
     if (value instanceof Date) return 'Date';
 
     // Pour les ObjectId de MongoDB
-    if (value && typeof value === 'object' && value.toString && typeof value.toString === 'function' && /^[0-9a-fA-F]{24}$/.test(value.toString()))
+    if (value && typeof value === 'object' && value.toString && typeof value.toString === 'function'
+        && (mongoose.Types.ObjectId.isValid(value) || /^[0-9a-fA-F]{24}$/.test(value.toString())))
     {
         return 'string';
     }
@@ -205,8 +194,6 @@ function transformToCriteriaStructure(structure: PropertyDefinition, knownTypes:
 
     return criteriaStructure;
 }
-
-
 
 // Fonction utilitaire pour vérifier si un type est primitif
 function isPrimitiveType(type: string): boolean
@@ -403,7 +390,6 @@ ${properties}}
 `;
 }
 
-
 function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure: PropertyDefinition, pKnownTypes: KnownTypes): void
 {
     // Créer le dossier pour l'entité
@@ -437,7 +423,6 @@ function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefiniti
         fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
     }
 
-
     console.log(`  Fichiers générés pour ${pEntityName}`);
     return;
 }
@@ -445,12 +430,14 @@ function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefiniti
 // Fonction principale pour générer les DTOs
 async function generateDTOs(): Promise<void>
 {
-    let client: MongoClient | null = null;
-
     try
     {
         console.log('Démarrage de la génération des DTOs...');
 
+        if (config.cleanOutputDir)
+        {
+            cleanDirectory(config.outputDir);
+        }
 
         ensureDirectoryExists(config.outputDir);
         ensureDirectoryExists(path.join(config.outputDir, 'base'));
@@ -458,38 +445,38 @@ async function generateDTOs(): Promise<void>
         ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'interfaces'));
 
         fs.writeFileSync(
-            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
+            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'),
+            fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
 
         // Générer les DTOs de base
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseDTO.ts'),
+            fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),
+            fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
 
-        // Connexion à MongoDB
-        client = new MongoClient(config.mongoUri);
-        await client.connect();
-        console.log('Connecté à MongoDB');
+        // Connexion à MongoDB avec Mongoose
+        await mongoose.connect(config.mongoUri);
+        console.log('Connecté à MongoDB avec Mongoose');
 
-        const dbName = config.mongoUri.split('/').pop()?.split('?')[0] || '';
-        const db = client.db(dbName);
+        // Récupérer toutes les collections
+        const collections = mongoose.connection.db.collections();
+        const collectionArray = await collections;
 
-        // Créer manuellement des exemples si aucune collection n'est trouvée
-        const collections = await db.listCollections().toArray();
-
-        if (collections.length > 0)
+        if (collectionArray.length > 0)
         {
             // Analyser les collections existantes
-            console.log(`${collections.length} collections trouvées.`);
+            console.log(`${collectionArray.length} collections trouvées.`);
 
             const knownTypes: KnownTypes = {};
             const entityStructures: Record<string, PropertyDefinition> = {};
 
             // Première passe : analyser les documents de chaque collection
-            for (const collection of collections)
+            for (const collection of collectionArray)
             {
-                const collectionName = collection.name;
+                const collectionName = collection.collectionName;
 
                 // Vérifier si la collection doit être exclue
                 if (shouldExcludeCollection(collectionName))
@@ -501,7 +488,8 @@ async function generateDTOs(): Promise<void>
                 console.log(`Analyse de la collection ${collectionName}...`);
 
                 // Obtenir des échantillons de documents
-                const documents = await db.collection(collectionName)
+                const documents = await mongoose.connection.db
+                    .collection(collectionName)
                     .find()
                     .limit(config.sampleSize)
                     .toArray();
@@ -557,7 +545,6 @@ async function generateDTOs(): Promise<void>
                 const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
 
                 generateFiles(typeName, criteriaStructure, structure, knownTypes);
-
             }
         }
 
@@ -568,11 +555,9 @@ async function generateDTOs(): Promise<void>
         console.error('Erreur lors de la génération des DTOs:', error);
     } finally
     {
-        if (client)
-        {
-            await client.close();
-            console.log('Déconnecté de MongoDB');
-        }
+        // Fermer la connexion Mongoose
+        await mongoose.disconnect();
+        console.log('Déconnecté de MongoDB');
     }
 }
 

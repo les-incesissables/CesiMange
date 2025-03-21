@@ -9,7 +9,7 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "customer-final", "apps\cust
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "user-service", "platforms\services\user-service\backend\user-service.esproj", "{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ModelGenerator", "platforms\services\ModelGenerator\ModelGenerator.esproj", "{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "models-generator", "platforms\services\ModelGenerator\models-generator.esproj", "{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
