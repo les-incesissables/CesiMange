@@ -1,11 +1,17 @@
+// api-gateway/src/index.ts
+
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import { loadGatewayConfig } from "./gateway.config";
-import { setupProxies } from "./proxySetup";
+
 import { securityMiddleware } from "./middlewares/security.middleware";
 import { rateLimitMiddleware } from "./middlewares/rateLimit.middleware";
 import { logger } from "./utils/logger";
 import { requestLogger } from "./middlewares/requestLogger.middleware";
+
+import { createProxyMiddleware } from "http-proxy-middleware";
+import type { Filter, Options, RequestHandler } from "http-proxy-middleware";
+import { setupProxies } from "./proxySetup";
 
 dotenv.config();
 
@@ -23,23 +29,34 @@ async function startGateway() {
   // Middleware personnalisé pour afficher la provenance
   app.use(requestLogger);
 
-  // Middlewares de sécurité
+  // Middlewares de sécurité (Helmet, CORS, etc.)
   app.use(...securityMiddleware());
 
   // Middleware de rate limiting
   app.use(rateLimitMiddleware);
 
-  // Configuration des proxys
   setupProxies(app, config);
 
+  /*  const proxyMiddleware = createProxyMiddleware<Request, Response>({
+    target: "http://localhost:8080",
+    changeOrigin: true,
+    pathRewrite: { "^/": "/api/users" },
+    on: {
+      proxyReq: (proxyReq, req, res) => {
+        //console.log(proxyReq);
+      },
+      proxyRes: (proxyRes, req, res) => {},
+      error: (err, req, res) => {},
+    },
+  });
 
-  // Route de test
-    app.get("/", (req: Request, res: Response) => {
-        console.log("[Index] Received GET /");
-        res.send("API Gateway is running with dynamic services and logging!");
-    });
+  app.use("/users", (req, res, next) => {
+    console.log("Middleware users called");
+    next();
+  });
 
-  // Middleware pour les requêtes non traitées (404)
+  app.use("/users", proxyMiddleware);
+ */
   app.use((req: Request, res: Response, next: NextFunction) => {
     console.warn(
       `[Index] [Gateway Warning] No matching proxy found for ${req.method} ${req.originalUrl}`

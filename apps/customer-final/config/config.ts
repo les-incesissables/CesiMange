@@ -10,15 +10,15 @@ interface ApiConfig {
 
 const config: { [key: string]: ApiConfig } = {
   development: {
-    baseURL: "http://localhost:3000/api", // URL du serveur backend en dev
+    baseURL: "http://localhost:3000/", // URL du serveur backend en dev
     timeout: 5000, // Timeout en millisecondes pour les requêtes HTTP
   },
   staging: {
-    baseURL: "https://staging.api.cesimange.com/api", // URL de staging
+    baseURL: "https://staging.api.cesimange.com/", // URL de staging
     timeout: 5000,
   },
   production: {
-    baseURL: "https://api.cesimange.com/api", // URL de production
+    baseURL: "https://api.cesimange.com/", // URL de production
     timeout: 5000,
   },
 };
