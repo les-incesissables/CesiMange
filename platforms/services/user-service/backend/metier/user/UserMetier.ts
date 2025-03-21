@@ -4,7 +4,7 @@ import { BaseMetier } from "../base/BaseMetier";
 
 /**
  * M�tier pour l'entit� User
- * @Author ModelGenerator - 2025-03-19T19:32:22.690Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:03:28.125Z - Cr�ation
  */
 export class UserMetier extends BaseMetier<UserDTO, UserCritereDTO> {
     constructor() {

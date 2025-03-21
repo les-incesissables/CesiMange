@@ -4,7 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� Component
- * @Author ModelGenerator - 2025-03-19T19:32:22.680Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:03:28.123Z - Cr�ation
  */
 export class ComponentController extends BaseController<ComponentDTO, ComponentCritereDTO> {
 }
