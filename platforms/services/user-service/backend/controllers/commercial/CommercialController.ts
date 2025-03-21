@@ -4,8 +4,7 @@ import { BaseController } from "../BaseController";
 
 /**
  * Contr�leur pour l'entit� Commercial
- * @Author ModelGenerator - 2025-03-19T19:32:22.685Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:03:28.137Z - Cr�ation
  */
 export class CommercialController extends BaseController<CommercialDTO, CommercialCritereDTO> {
-
 }

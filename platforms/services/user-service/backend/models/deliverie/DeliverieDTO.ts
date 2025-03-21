@@ -2,7 +2,7 @@ import { BaseDTO } from "../base/BaseDTO";
 
 /**
  * DTO pour l'entit� Deliverie
- * @Author ModelGenerator - 2025-03-19T19:32:22.691Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:03:28.134Z - Cr�ation
  */
 export class DeliverieDTO extends BaseDTO {
   order_id?: string;

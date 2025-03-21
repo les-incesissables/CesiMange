@@ -2,7 +2,7 @@ import { BaseDTO } from "../base/BaseDTO";
 
 /**
  * DTO pour l'entit� Notification
- * @Author ModelGenerator - 2025-03-19T19:32:22.693Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:03:28.126Z - Cr�ation
  */
 export class NotificationDTO extends BaseDTO {
   recipient?: string;
