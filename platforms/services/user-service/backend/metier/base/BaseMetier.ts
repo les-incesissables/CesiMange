@@ -1,4 +1,5 @@
-import { IBaseRepository } from "../../DAL/repositories/base/IBaseRepository";
+import { EDatabaseType } from "../../DAL/enums/EDatabaseType";
+import { IBaseRepository } from "../../DAL/interfaces/IBaseRepository";
 import { Repository } from "../../DAL/repositories/Repository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../models/base/BaseDTO";
@@ -14,11 +15,14 @@ export abstract class BaseMetier<
   CritereDTO extends BaseCritereDTO
 > implements IBaseMetier<DTO, CritereDTO>
 {
-  protected repository: IBaseRepository<DTO, CritereDTO>;
+  protected Repository: IBaseRepository<DTO, CritereDTO>;
 
   constructor(pCollectionName: string) {
-    const lRepo = new Repository<DTO, CritereDTO>(pCollectionName);
-    this.repository = lRepo;
+    const lRepo = new Repository<DTO, CritereDTO>(
+      pCollectionName,
+      EDatabaseType.MONGODB
+    );
+    this.Repository = lRepo;
   }
 
   /**
@@ -33,7 +37,7 @@ export abstract class BaseMetier<
       this.beforeGetItems(pCritereDTO);
 
       // D�l�guer la r�cup�ration au repository
-      const items = await this.repository.getItems(pCritereDTO);
+      const items = await this.Repository.getItems(pCritereDTO);
 
       // Appliquer des transformations ou r�gles apr�s la r�cup�ration
       return items;
@@ -55,7 +59,7 @@ export abstract class BaseMetier<
       this.beforeGetItem(pCritereDTO);
 
       // D�l�guer la r�cup�ration au repository
-      const item = await this.repository.getItem(pCritereDTO);
+      const item = await this.Repository.getItem(pCritereDTO);
 
       return item;
     } catch (error) {
@@ -76,7 +80,7 @@ export abstract class BaseMetier<
       const preparedDTO = await this.beforeCreateItem(pDTO);
 
       // D�l�guer la cr�ation au repository
-      const item = await this.repository.createItem(preparedDTO);
+      const item = await this.Repository.createItem(preparedDTO);
 
       return item;
     } catch (error) {
@@ -98,7 +102,7 @@ export abstract class BaseMetier<
       const preparedDTO = await this.beforeUpdateItem(pDTO, pCritereDTO);
 
       // D�l�guer la mise � jour au repository
-      const item = await this.repository.updateItem(preparedDTO, pCritereDTO);
+      const item = await this.Repository.updateItem(preparedDTO, pCritereDTO);
 
       return item;
     } catch (error) {
@@ -119,7 +123,7 @@ export abstract class BaseMetier<
       await this.beforeDeleteItem(pCritereDTO);
 
       // D�l�guer la suppression au repository
-      const result = await this.repository.deleteItem(pCritereDTO);
+      const result = await this.Repository.deleteItem(pCritereDTO);
 
       return result;
     } catch (error) {
@@ -137,7 +141,7 @@ export abstract class BaseMetier<
       this.validateCritereDTO(pCritereDTO);
 
       // D�l�guer la v�rification au repository
-      return await this.repository.itemExists(pCritereDTO);
+      return await this.Repository.itemExists(pCritereDTO);
     } catch (error) {
       this.handleError(error, "itemExists");
       throw error;

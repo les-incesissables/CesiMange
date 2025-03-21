@@ -4,7 +4,7 @@ import { ItemCritereDTO } from "../item/ItemCritereDTO";
 
 /**
  * Crit�res de recherche pour l'entit� Order
- * @Author ModelGenerator - 2025-03-19T19:32:22.686Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.796Z - Cr�ation
  */
 export class OrderCritereDTO extends BaseCritereDTO {
   user_id?: string;
@@ -14,9 +14,11 @@ export class OrderCritereDTO extends BaseCritereDTO {
   items?: ItemDTO[];
   itemsLike?: ItemCritereDTO;
   total_price?: number;
-  total_priceLike?: number;
+  total_priceMin?: number;
+  total_priceMax?: number;
   status?: string;
   statusLike?: string;
   created_at?: Date;
-  created_atLike?: Date;
+  created_atMin?: Date;
+  created_atMax?: Date;
 }

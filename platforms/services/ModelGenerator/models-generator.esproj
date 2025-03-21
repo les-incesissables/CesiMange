@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1738743">
   <ItemGroup>
-    <Folder Include="controllers\statistic\" />
+    <Folder Include="src\controllers\" />
+    <Folder Include="src\models\" />
   </ItemGroup>
 </Project>

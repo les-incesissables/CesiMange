@@ -32,11 +32,12 @@ async function startGateway() {
   // Configuration des proxys
   setupProxies(app, config);
 
+
   // Route de test
-  app.get("/", (req: Request, res: Response) => {
-    console.log("[Index] Received GET /");
-    res.send("API Gateway is running with dynamic services and logging!");
-  });
+    app.get("/", (req: Request, res: Response) => {
+        console.log("[Index] Received GET /");
+        res.send("API Gateway is running with dynamic services and logging!");
+    });
 
   // Middleware pour les requêtes non traitées (404)
   app.use((req: Request, res: Response, next: NextFunction) => {

@@ -2,7 +2,7 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
 
 /**
  * Crit�res de recherche pour l'entit� Notification
- * @Author ModelGenerator - 2025-03-19T19:32:22.694Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.810Z - Cr�ation
  */
 export class NotificationCritereDTO extends BaseCritereDTO {
   recipient?: string;
@@ -12,5 +12,6 @@ export class NotificationCritereDTO extends BaseCritereDTO {
   read?: boolean;
   readLike?: boolean;
   created_at?: Date;
-  created_atLike?: Date;
+  created_atMin?: Date;
+  created_atMax?: Date;
 }
