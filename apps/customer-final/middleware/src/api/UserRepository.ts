@@ -19,26 +19,31 @@ export class UserRepository implements IApiRepository<User> {
     }
 
     public async fetchAll(): Promise<User[]> {
-        const response = await this.apiProxy.get(this.endpoint);
+        // Spécifiez que vous attendez un tableau de User
+        const response = await this.apiProxy.get<User[]>(this.endpoint);
         return response.data;
     }
 
     public async fetchById(id: string): Promise<User> {
-        const response = await this.apiProxy.get(`${this.endpoint}/${id}`);
+        // Spécifiez que vous attendez un User
+        const response = await this.apiProxy.get<User>(`${this.endpoint}/${id}`);
         return response.data;
     }
 
     public async create(data: User): Promise<User> {
-        const response = await this.apiProxy.post(this.endpoint, data);
+        // Spécifiez que vous attendez un User
+        const response = await this.apiProxy.post<User>(this.endpoint, data);
         return response.data;
     }
 
     public async update(id: string, data: Partial<User>): Promise<User> {
-        const response = await this.apiProxy.put(`${this.endpoint}/${id}`, data);
+        // Spécifiez que vous attendez un User
+        const response = await this.apiProxy.put<User>(`${this.endpoint}/${id}`, data);
         return response.data;
     }
 
     public async delete(id: string): Promise<void> {
-        await this.apiProxy.delete(`${this.endpoint}/${id}`);
+        // Spécifiez void pour l'absence de donnée en retour
+        await this.apiProxy.delete<void>(`${this.endpoint}/${id}`);
     }
 }
