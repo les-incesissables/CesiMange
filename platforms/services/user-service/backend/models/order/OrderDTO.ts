@@ -3,7 +3,7 @@ import { ItemDTO } from "../item/ItemDTO";
 
 /**
  * DTO pour l'entit� Order
- * @Author ModelGenerator - 2025-03-21T10:03:28.119Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.794Z - Cr�ation
  */
 export class OrderDTO extends BaseDTO {
   user_id?: string;

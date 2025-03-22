@@ -4,7 +4,7 @@ import { ItemCritereDTO } from "../item/ItemCritereDTO";
 
 /**
  * Crit�res de recherche pour l'entit� Order
- * @Author ModelGenerator - 2025-03-21T10:03:28.120Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.796Z - Cr�ation
  */
 export class OrderCritereDTO extends BaseCritereDTO {
   user_id?: string;

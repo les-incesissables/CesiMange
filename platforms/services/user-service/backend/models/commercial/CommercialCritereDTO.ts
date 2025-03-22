@@ -2,7 +2,7 @@ import { BaseCritereDTO } from "../base/BaseCritereDTO";
 
 /**
  * Crit�res de recherche pour l'entit� Commercial
- * @Author ModelGenerator - 2025-03-21T10:03:28.137Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.840Z - Cr�ation
  */
 export class CommercialCritereDTO extends BaseCritereDTO {
   name?: string;

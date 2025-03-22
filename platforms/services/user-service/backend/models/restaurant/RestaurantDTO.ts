@@ -3,7 +3,7 @@ import { MenuDTO } from "../menu/MenuDTO";
 
 /**
  * DTO pour l'entit� Restaurant
- * @Author ModelGenerator - 2025-03-21T10:03:28.132Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-21T10:28:38.826Z - Cr�ation
  */
 export class RestaurantDTO extends BaseDTO {
   name?: string;
