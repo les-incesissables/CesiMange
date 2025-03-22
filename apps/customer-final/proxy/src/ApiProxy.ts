@@ -2,7 +2,7 @@
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig, CancelTokenSource } from 'axios';
 
-// La configuration dynamique est importée depuis un fichier commun situé dans customer-app/config
+// Importez la config dynamique depuis votre fichier commun
 import { API_CONFIG } from '../../config/config';
 
 /**
@@ -23,18 +23,18 @@ export class ApiProxy {
 
         // Intercepteur de requête : ajout automatique du token d'authentification
         this.client.interceptors.request.use(
-            (config: InternalAxiosRequestConfig) => {
-                const token = localStorage.getItem('authToken');
-
+            (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+                // En mode strict, config.headers peut être undefined
                 config.headers = config.headers ?? {};
 
+                const token = localStorage.getItem('authToken');
                 if (token) {
                     config.headers['Authorization'] = `Bearer ${token}`;
                 }
-
+                // Possibilité de transformation ou de log ici
                 return config;
             },
-            (error: AxiosError) => {
+            (error: AxiosError): Promise<never> => {
                 console.error('Request error:', error);
                 return Promise.reject(error);
             }
@@ -42,24 +42,22 @@ export class ApiProxy {
 
         // Intercepteur de réponse : gestion centralisée des erreurs et transformation de données
         this.client.interceptors.response.use(
-            (response: AxiosResponse) => {
+            (response: AxiosResponse<unknown>): AxiosResponse<unknown> => {
                 // Optionnel : transformation de la réponse
                 return response;
             },
-            (error: AxiosError) => {
+            (error: AxiosError): Promise<never> => {
                 if (error.response) {
                     // Erreur côté serveur
                     console.error('Response error:', error.response.data);
-                    return Promise.reject(error);
                 } else if (error.request) {
                     // Pas de réponse du serveur
                     console.error('No response received:', error.request);
-                    return Promise.reject(error);
                 } else {
                     // Erreur lors de l'initialisation de la requête
                     console.error('Axios setup error:', error.message);
-                    return Promise.reject(error);
                 }
+                return Promise.reject(error);
             }
         );
     }
@@ -68,9 +66,10 @@ export class ApiProxy {
      * Performs a GET request.
      * @param endpoint - API endpoint (e.g., "/orders")
      * @param params - Optional query parameters.
+     * @returns AxiosResponse<T> où T est le type de la donnée retournée
      */
-    public async get(endpoint: string, params = {}): Promise<AxiosResponse<any>> {
-        return this.client.get(endpoint, { params });
+    public async get<T = unknown>(endpoint: string, params: Record<string, unknown> = {}): Promise<AxiosResponse<T>> {
+        return this.client.get<T>(endpoint, { params });
     }
 
     /**
@@ -78,8 +77,8 @@ export class ApiProxy {
      * @param endpoint - API endpoint (e.g., "/orders")
      * @param data - Request payload.
      */
-    public async post(endpoint: string, data: any): Promise<AxiosResponse<any>> {
-        return this.client.post(endpoint, data);
+    public async post<T = unknown>(endpoint: string, data: unknown): Promise<AxiosResponse<T>> {
+        return this.client.post<T>(endpoint, data);
     }
 
     /**
@@ -87,8 +86,8 @@ export class ApiProxy {
      * @param endpoint - API endpoint (e.g., "/orders/123")
      * @param data - Request payload.
      */
-    public async put(endpoint: string, data: any): Promise<AxiosResponse<any>> {
-        return this.client.put(endpoint, data);
+    public async put<T = unknown>(endpoint: string, data: unknown): Promise<AxiosResponse<T>> {
+        return this.client.put<T>(endpoint, data);
     }
 
     /**
@@ -96,16 +95,16 @@ export class ApiProxy {
      * @param endpoint - API endpoint (e.g., "/orders/123")
      * @param data - Request payload.
      */
-    public async patch(endpoint: string, data: any): Promise<AxiosResponse<any>> {
-        return this.client.patch(endpoint, data);
+    public async patch<T = unknown>(endpoint: string, data: unknown): Promise<AxiosResponse<T>> {
+        return this.client.patch<T>(endpoint, data);
     }
 
     /**
      * Performs a DELETE request.
      * @param endpoint - API endpoint (e.g., "/orders/123")
      */
-    public async delete(endpoint: string): Promise<AxiosResponse<any>> {
-        return this.client.delete(endpoint);
+    public async delete<T = unknown>(endpoint: string): Promise<AxiosResponse<T>> {
+        return this.client.delete<T>(endpoint);
     }
 
     /**
