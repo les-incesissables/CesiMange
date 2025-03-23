@@ -1,10 +1,5 @@
-import { Schema } from "mongoose";
 import { EDatabaseType } from "../../DAL/enums/EDatabaseType";
-import { IBaseRepository } from "../../DAL/interfaces/IBaseRepository";
-import { AbstractDbRepository } from "../../DAL/repositories/base/AbstractDbRepository";
 import { Repository } from "../../DAL/repositories/Repository";
-import { ICritereDTO } from "../../interfaces/ICritereDTO";
-import { IDTO } from "../../interfaces/IDTO";
 import { IBaseMetier } from "./IBaseMetier";
 
 /**
@@ -16,6 +11,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
 {
     protected Repository: Repository<DTO, CritereDTO>;
 
+    //#region CTOR
     constructor (pCollectionName: string)
     {
         const lRepo = new Repository<DTO, CritereDTO>(
@@ -25,9 +21,12 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
         this.Repository = lRepo;
     }
 
+    //#endregion
+
+    //#region CRUD
     /**
-     * Obtenir tous les �l�ments selon des crit�res
-     */
+* Obtenir tous les �l�ments selon des crit�res
+*/
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
         try
@@ -164,7 +163,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             this.handleError(error, "itemExists");
             throw error;
         }
-    }
+    } 
+    //#endregion
 
     //#region Validation Errors
 

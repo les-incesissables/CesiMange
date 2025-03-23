@@ -1,16 +1,13 @@
-import { IUser } from "../models/interfaces/IUser";
-import { userSchema } from "../models/schemas/userSchema";
-import { BaseMetier } from "./base/BaseMetier";
-
+import { UserDTO } from "../../models/user/UserDTO";
+import { UserCritereDTO } from "../../models/user/UserCritereDTO";
+import { BaseMetier } from "../base/BaseMetier";
 
 /**
  * M�tier pour l'entit� User
- * @Author ModelGenerator - 2025-03-23T13:08:52.323Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-23T15:27:54.004Z - Cr�ation
  */
-export class UserMetier extends BaseMetier<IUser, Partial<IUser>>
-{
-    constructor ()
-    {
+export class UserMetier extends BaseMetier<UserDTO, UserCritereDTO> {
+    constructor() {
         super('user');
     }
 }

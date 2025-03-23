@@ -286,7 +286,6 @@ function generateInterfaceContent(className: string, schema: CollectionSchema): 
     return content;
 }
 
-
 // Fonction pour générer le contenu du fichier métier
 function generateMetierContent(className: string, collectionName: string): string
 {
@@ -305,49 +304,6 @@ function generateMetierContent(className: string, collectionName: string): strin
     content += `        super('${collectionName}');\n`;
     content += `    }\n`;
     content += `}\n`;
-
-    return content;
-}
-
-// Fonction pour générer le contenu du fichier de schéma
-function generateSchemaContent(className: string, schema: CollectionSchema): string
-{
-    const schemaName = `${toCamelCase(className)}Schema`;
-
-    let content = `import { Schema } from 'mongoose';\n\n`;
-    content += `export const ${schemaName} = new Schema({\n`;
-
-    Object.keys(schema).forEach(field =>
-    {
-        if (field !== '_id')
-        {
-            const { mongooseType, isRequired, ref } = schema[field];
-            content += `  ${field}: {\n`;
-            content += `    type: ${mongooseType},\n`;
-            content += `    required: ${isRequired},\n`;
-            if (ref && ref !== 'needs_manual_definition')
-            {
-                content += `    ref: '${ref}',\n`;
-            }
-            content += `  },\n`;
-        }
-    });
-
-    content += `}, { timestamps: true });\n`;
-
-    return content;
-}
-
-// Fonction pour générer le contenu du fichier de modèle
-function generateModelContent(className: string): string
-{
-    const interfaceName = `I${className}`;
-    const schemaName = `${toCamelCase(className)}Schema`;
-
-    let content = `import { model } from 'mongoose';\n`;
-    content += `import { ${interfaceName} } from '../interfaces/${interfaceName}';\n`;
-    content += `import { ${schemaName} } from '../schemas/${schemaName}';\n\n`;
-    content += `export const ${className} = model<${interfaceName}>('${className}', ${schemaName});\n`;
 
     return content;
 }
@@ -448,19 +404,6 @@ async function generateModels(): Promise<void>
                     const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
                     fs.writeFileSync(interfaceFilePath, interfaceContent);
                     console.log(`  Interface générée: ${interfaceFilePath}`);
-
-
-                    // Générer le fichier de schéma
-                    const schemaContent = generateSchemaContent(className, schema);
-                    const schemaFilePath = path.join(serviceConfig.outputDir, folders.schemas, `${schemaName}.ts`);
-                    fs.writeFileSync(schemaFilePath, schemaContent);
-                    console.log(`  Schéma généré: ${schemaFilePath}`);
-
-                    // Générer le fichier de modèle
-                    const modelContent = generateModelContent(className);
-                    const modelFilePath = path.join(serviceConfig.outputDir, folders.models, `${className}.ts`);
-                    fs.writeFileSync(modelFilePath, modelContent);
-                    console.log(`  Modèle généré: ${modelFilePath}`);
 
                     // Générer le fichier métier
                     const metierContent = generateMetierContent(className, collectionName);
