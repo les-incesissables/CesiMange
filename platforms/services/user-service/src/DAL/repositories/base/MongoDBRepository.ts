@@ -1,44 +1,56 @@
-import { Collection, Db, FindOptions, MongoClient, ObjectId } from "mongodb";
-import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../../models/base/BaseDTO";
-import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
-import { AbstractDbRepository } from "./AbstractDbRepository";
+import mongoose, { Model, Document, FilterQuery, PipelineStage, UpdateQuery, Schema } from 'mongoose';
+import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
+import { AbstractDbRepository } from './AbstractDbRepository';
+import { BaseCritereDTO } from '../../../models/base/BaseCritereDTO';
 
 /**
- * Implémentation du repository pour MongoDB
+ * Implémentation du repository pour Mongoose
+ * @template DTO - Type de document Mongoose
+ * @template CritereDTO - Type des critères de recherche
  */
-export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> extends AbstractDbRepository<DTO, CritereDTO>
+export class MongoDBRepository<DTO extends Document, CritereDTO> extends AbstractDbRepository<DTO, CritereDTO>
 {
-    private _client: MongoClient | undefined;
-    private _db: Db | undefined;
-    private _collection: Collection | undefined;
+    private _model: Model<DTO> | undefined;
+    private _isConnected: boolean = false;
+    private _schema: Schema | undefined;
 
+    /**
+     * Constructeur du repository Mongoose
+     * @param pConfig Configuration du repository
+     */
     constructor (pConfig: IRepositoryConfig)
     {
         super(pConfig);
     }
 
     /**
-     * Initialise la connexion MongoDB
+     * Initialise la connection a la base de données
      */
     public async initialize(): Promise<void>
     {
         try
         {
-            if (!this._client)
+            // cm - Etabli la connexion a la base de donnees si elle n existe pas deja
+            if (mongoose.connection.readyState !== 1)
             {
-                this._client = new MongoClient(this._config.ConnectionString);
-                await this._client.connect();
-                console.log("Connexion MongoDB établie");
+                await mongoose.connect(this._config.ConnectionString);
+                console.log("Connexion Mongoose établie");
+                this._isConnected = true;
             }
 
-            this._db = this._client.db(this._config.DbName);
-            this._collection = this._db.collection(this._config.CollectionName);
+            // cm - Recuperation du Schema en fonction de la collection
+            this._schema = new mongoose.Schema({}, {
+                strict: false,
+                collection: this._config.CollectionName,
+                timestamps: true,
+                versionKey: false
+            });
 
-            console.log(`Collection '${this._config.CollectionName}' prête à l'emploi`);
+            // cm - Recuperation du Model
+            this._model = mongoose.model<DTO>(this._config.CollectionName, this._schema);
         } catch (error)
         {
-            console.error("Erreur lors de l'initialisation de MongoDB:", error);
+            console.error("Erreur lors de l'initialisation de Mongoose:", error);
             throw error;
         }
     }
@@ -48,14 +60,16 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
      */
     private async ensureConnection(): Promise<void>
     {
-        if (!this._collection)
+        if (!this._model)
         {
             await this.initialize();
         }
     }
 
+    //#region CRUD
     /**
      * Obtient tous les éléments selon des critères
+     * @param pCritereDTO Critères de recherche
      */
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
@@ -63,13 +77,34 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lFilter = this.buildFilter(pCritereDTO);
-            const lOptions = this.buildOptions(pCritereDTO);
+            const filter = this.buildFilter(pCritereDTO);
+            const options = this.buildOptions(pCritereDTO);
 
-            const lCursor = this._collection!.find(lFilter, lOptions);
-            const lResults = await lCursor.toArray();
+            let query = this._model!.find(filter);
 
-            return this.formatResults(lResults);
+            // Appliquer les options
+            if (options.sort)
+            {
+                query = query.sort(options.sortDirection);
+            }
+            if (options.skip !== undefined)
+            {
+                query = query.skip(options.skip);
+            }
+            if (options.limit !== undefined)
+            {
+                query = query.limit(options.limit);
+            }
+            if (options.populate && options.populate.length > 0)
+            {
+                options.populate.forEach(field =>
+                {
+                    query = query.populate(field);
+                });
+            }
+
+            const results = await query.exec();
+            return this.formatResults(results);
         } catch (error)
         {
             console.error("Erreur lors de la récupération des items:", error);
@@ -79,6 +114,7 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 
     /**
      * Obtient un élément par critères
+     * @param pCritereDTO Critères de recherche
      */
     async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -86,21 +122,33 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lFilter = this.buildFilter(pCritereDTO);
+            const filter = this.buildFilter(pCritereDTO);
+            const options = this.buildOptions(pCritereDTO);
 
-            if (Object.keys(lFilter).length === 0)
+            if (Object.keys(filter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour obtenir un élément");
             }
 
-            const lResult = await this._collection!.findOne(lFilter);
+            let query = this._model!.findOne(filter);
 
-            if (!lResult)
+            // Appliquer les options de populate
+            if (options.populate && options.populate.length > 0)
+            {
+                options.populate.forEach(field =>
+                {
+                    query = query.populate(field);
+                });
+            }
+
+            const result = await query.exec();
+
+            if (!result)
             {
                 throw new Error("Élément non trouvé");
             }
 
-            return this.formatResults([lResult])[0];
+            return this.formatResults([result])[0];
         } catch (error)
         {
             console.error("Erreur lors de la récupération de l'item:", error);
@@ -110,6 +158,7 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 
     /**
      * Crée un nouvel élément
+     * @param pDTO Données pour la création
      */
     async createItem(pDTO: DTO): Promise<DTO>
     {
@@ -117,34 +166,16 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lDoc = { ...pDTO } as any;
-
-            if (lDoc.id || lDoc.id === undefined)
+            // Si pDTO est déjà un document Mongoose non sauvegardé
+            if (pDTO instanceof mongoose.Document && pDTO.isNew)
             {
-                try
-                {
-                    lDoc._id = new ObjectId(lDoc.id);
-                } catch (error)
-                {
-                    console.warn("ID non valide pour MongoDB, un nouvel ID sera généré");
-                }
-            }
-            delete lDoc.id;
-
-            lDoc.createdAt = new Date();
-            lDoc.updatedAt = new Date();
-
-            const lResult = await this._collection!.insertOne(lDoc);
-
-            if (!lResult.acknowledged)
-            {
-                throw new Error("Échec de l'insertion du document");
+                return this.formatResults([await pDTO.save()])[0];
             }
 
-            const lCritereDTO = {} as CritereDTO;
-            lCritereDTO.Id = lResult.insertedId.toString();
+            const document = new this._model!(this.prepareDataForCreate(pDTO));
+            const result = await document.save();
 
-            return await this.getItem(lCritereDTO);
+            return this.formatResults([result])[0];
         } catch (error)
         {
             console.error("Erreur lors de la création de l'item:", error);
@@ -154,6 +185,8 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 
     /**
      * Met à jour un élément existant
+     * @param pDTO Données pour la mise à jour
+     * @param pCritereDTO Critères identifiant l'élément à mettre à jour
      */
     async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -161,29 +194,34 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lFilter = this.buildFilter(pCritereDTO);
+            // Si pDTO est un document Mongoose déjà existant
+            if (pDTO instanceof mongoose.Document && !pDTO.isNew)
+            {
+                return this.formatResults([await pDTO.save()])[0];
+            }
 
-            if (Object.keys(lFilter).length === 0)
+            const filter = this.buildFilter(pCritereDTO);
+
+            if (Object.keys(filter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour la mise à jour");
             }
 
-            const lUpdateData = { ...pDTO } as any;
-            delete lUpdateData.id;
-            lUpdateData.updatedAt = new Date();
+            const updateData = this.prepareDataForUpdate(pDTO);
+            const options = { new: true, runValidators: true };
 
-            const lResult = await this._collection!.findOneAndUpdate(
-                lFilter,
-                { $set: lUpdateData },
-                { returnDocument: 'after' }
-            );
+            const result = await this._model!.findOneAndUpdate(
+                filter,
+                updateData,
+                options
+            ).exec();
 
-            if (!lResult)
+            if (!result)
             {
                 throw new Error("L'élément à mettre à jour n'existe pas");
             }
 
-            return this.formatResults([lResult])[0];
+            return this.formatResults([result])[0];
         } catch (error)
         {
             console.error("Erreur lors de la mise à jour de l'item:", error);
@@ -193,6 +231,7 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 
     /**
      * Supprime un élément
+     * @param pCritereDTO Critères pour la suppression
      */
     async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -200,16 +239,16 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lFilter = this.buildFilter(pCritereDTO);
+            const filter = this.buildFilter(pCritereDTO);
 
-            if (Object.keys(lFilter).length === 0)
+            if (Object.keys(filter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour la suppression");
             }
 
-            const lResult = await this._collection!.deleteOne(lFilter);
+            const result = await this._model!.deleteOne(filter).exec();
 
-            return lResult.deletedCount > 0;
+            return result.deletedCount > 0;
         } catch (error)
         {
             console.error("Erreur lors de la suppression de l'item:", error);
@@ -219,6 +258,7 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
 
     /**
      * Vérifie si un élément existe selon des critères
+     * @param pCritereDTO Critères de recherche
      */
     async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -226,16 +266,16 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
         {
             await this.ensureConnection();
 
-            const lFilter = this.buildFilter(pCritereDTO);
+            const filter = this.buildFilter(pCritereDTO);
 
-            if (Object.keys(lFilter).length === 0)
+            if (Object.keys(filter).length === 0)
             {
                 throw new Error("Au moins un critère est requis pour vérifier l'existence");
             }
 
-            const lCount = await this._collection!.countDocuments(lFilter, { limit: 1 });
+            const count = await this._model!.countDocuments(filter).limit(1).exec();
 
-            return lCount > 0;
+            return count > 0;
         } catch (error)
         {
             console.error("Erreur lors de la vérification de l'existence:", error);
@@ -244,92 +284,350 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
     }
 
     /**
-     * Construit les options de requête MongoDB
+     * Compte les éléments selon des critères
+     * @param pCritereDTO Critères de recherche
      */
-    private buildOptions(pCritereDTO: CritereDTO): FindOptions
+    async countItems(pCritereDTO: CritereDTO): Promise<number>
     {
-        const lOptions: FindOptions = {};
-
-        if (pCritereDTO.Limit)
+        try
         {
-            lOptions.limit = pCritereDTO.Limit;
-        }
+            await this.ensureConnection();
 
-        if (pCritereDTO.Skip)
+            const filter = this.buildFilter(pCritereDTO);
+            const count = await this._model!.countDocuments(filter).exec();
+
+            return count;
+        } catch (error)
         {
-            lOptions.skip = pCritereDTO.Skip;
+            console.error("Erreur lors du comptage des items:", error);
+            throw error;
         }
+    }
+    //#endregion
 
-        if (pCritereDTO.Sort)
+    /**
+     * Exécute une agrégation MongoDB
+     * @param pipeline Étapes de l'agrégation
+     */
+    async aggregate(pipeline: PipelineStage[]): Promise<any[]>
+    {
+        try
         {
-            const sortDirection = pCritereDTO.SortDirection || 1;
-            lOptions.sort = { [pCritereDTO.Sort]: sortDirection };
-        }
+            await this.ensureConnection();
 
-        return lOptions;
+            const results = await this._model!.aggregate(pipeline).exec();
+            return results;
+        } catch (error)
+        {
+            console.error("Erreur lors de l'agrégation:", error);
+            throw error;
+        }
     }
 
     /**
-     * Construit le filtre pour MongoDB
+     * Construit les options pour la requête Mongoose
      */
-    buildFilter(pCritereDTO: CritereDTO): any
+    private buildOptions(pCritereDTO: CritereDTO): BaseCritereDTO
     {
-        const lFilter: any = {};
-        const lKeyWords: string[] = ['Skip', 'SortDirection', 'Sort', 'Limit'];
+        const options: BaseCritereDTO = {};
 
-        const processFilter = (key: string, value: any, filter: any) =>
+        const criteriaObj = pCritereDTO as BaseCritereDTO;
+
+        // Option de limite
+        if (criteriaObj.limit !== undefined)
         {
-            if (value !== undefined && value !== null && value !== '' && !lKeyWords.includes(key))
+            options.limit = Number(criteriaObj.limit);
+        } else if (criteriaObj.limit !== undefined)
+        {
+            options.limit = Number(criteriaObj.limit);
+        }
+
+        // Option de saut (pagination)
+        if (criteriaObj.skip !== undefined)
+        {
+            options.skip = Number(criteriaObj.skip);
+        } else if (criteriaObj.skip !== undefined)
+        {
+            options.skip = Number(criteriaObj.skip);
+        } else if (criteriaObj.page !== undefined && options.limit)
+        {
+            options.skip = (Number(criteriaObj.page) - 1) * options.limit;
+        }
+
+        // Option de population (relations)
+        if (criteriaObj.populate)
+        {
+            options.populate = Array.isArray(criteriaObj.populate)
+                ? criteriaObj.populate
+                : [criteriaObj.populate];
+        }
+
+        return options;
+    }
+
+    /**
+     * Construit le filtre pour la requête Mongoose
+     */
+    buildFilter(pCritereDTO: CritereDTO): FilterQuery<DTO>
+    {
+        // Utiliser un objet de type 'any' pour la construction du filtre
+        const filter: any = {};
+        const criteriaObj = pCritereDTO as any;
+
+        // Liste des mots-clés à ignorer (paramètres de pagination, etc.)
+        const skipFields = ['page', 'limit', 'skip', 'sort', 'order', 'populate',
+            'Skip', 'Limit', 'Sort', 'SortDirection'];
+
+        // Cas spécial: si pCritereDTO est un document Mongoose
+        if (pCritereDTO instanceof mongoose.Document && pCritereDTO._id)
+        {
+            filter._id = pCritereDTO._id;
+            return filter as FilterQuery<DTO>;
+        }
+
+        // Parcourir tous les critères
+        for (const [key, value] of Object.entries(criteriaObj))
+        {
+            // Ignorer les champs de pagination et les valeurs vides
+            if (skipFields.includes(key) || value === undefined || value === null || value === '')
             {
-                if (key.toLowerCase() === 'id' || key === '_id')
-                {
-                    try
-                    {
-                        filter._id = new ObjectId(value as string);
-                    } catch (error)
-                    {
-                        console.warn("ID non valide pour MongoDB:", value);
-                    }
-                } else if (key.endsWith('Like') && typeof value === 'string')
-                {
-                    const fieldName = key.replace(/Like$/, '');
-                    const escapedValue = this.escapeRegex(value);
-                    filter[fieldName] = { $regex: escapedValue, $options: 'i' };
-                } else if (typeof value === 'object' && !Array.isArray(value))
-                {
-                    const fieldName = key.replace(/Like$/, '');
-                    filter[fieldName] = { "$elemMatch": this.buildFilter(value) };
-                } else if (Array.isArray(value))
-                {
-                    filter[key] = { $in: value };
-                } else if (this.isDate(value))
-                {
-                    filter[key] = { $gte: value };
-                } else
-                {
-                    filter[key] = value;
-                }
+                continue;
             }
-        };
 
-        for (const [key, value] of Object.entries(pCritereDTO))
-        {
-            processFilter(key, value, lFilter);
+            // Gestion des IDs
+            if (key.toLowerCase() === 'id' || key === 'Id' || key === '_id')
+            {
+                try
+                {
+                    filter._id = this.convertToObjectId(value as string);
+                } catch (error)
+                {
+                    // Si l'ID n'est pas un ObjectId valide, on l'utilise tel quel
+                    filter._id = value;
+                }
+                continue;
+            }
+
+            // Gestion des recherches "LIKE"
+            if (key.endsWith('Like') && typeof value === 'string')
+            {
+                const fieldName = key.replace(/Like$/, '');
+                filter[fieldName] = { $regex: this.escapeRegex(value), $options: 'i' };
+                continue;
+            }
+
+            // Gestion des opérateurs de comparaison (ex: age__gt, price__lte)
+            if (key.includes('__'))
+            {
+                const [fieldName, operator] = key.split('__');
+
+                switch (operator)
+                {
+                    case 'gt':
+                        filter[fieldName] = { $gt: value };
+                        break;
+                    case 'gte':
+                        filter[fieldName] = { $gte: value };
+                        break;
+                    case 'lt':
+                        filter[fieldName] = { $lt: value };
+                        break;
+                    case 'lte':
+                        filter[fieldName] = { $lte: value };
+                        break;
+                    case 'ne':
+                        filter[fieldName] = { $ne: value };
+                        break;
+                    case 'in':
+                        filter[fieldName] = { $in: Array.isArray(value) ? value : [value] };
+                        break;
+                    case 'nin':
+                        filter[fieldName] = { $nin: Array.isArray(value) ? value : [value] };
+                        break;
+                    case 'regex':
+                        filter[fieldName] = { $regex: value, $options: 'i' };
+                        break;
+                    case 'exists':
+                        filter[fieldName] = { $exists: Boolean(value) };
+                        break;
+                    default:
+                        // Opérateur inconnu, on utilise comme champ normal
+                        filter[key] = value;
+                }
+                continue;
+            }
+
+            // Gestion des tableaux
+            if (Array.isArray(value))
+            {
+                filter[key] = { $in: value };
+                continue;
+            }
+
+            // Gestion des objets (critères imbriqués)
+            if (typeof value === 'object' && !Array.isArray(value) && value !== null && !(value instanceof Date))
+            {
+                const subFilter = this.buildFilter(value as any);
+                if (Object.keys(subFilter).length > 0)
+                {
+                    filter[key] = subFilter;
+                }
+                continue;
+            }
+
+            // Cas par défaut
+            filter[key] = value;
         }
 
-        return Object.keys(lFilter).length > 0 ? lFilter : {};
+        // Convertir le filtre 'any' en FilterQuery<DTO> à la fin
+        return filter as FilterQuery<DTO>;
     }
 
     /**
-     * Formate les résultats de MongoDB en DTOs
+     * Convertit une chaîne en ObjectId MongoDB
      */
-    formatResults(pResults: any[]): DTO[]
+    private convertToObjectId(id: string): mongoose.Types.ObjectId
     {
-        return pResults.map(lDoc =>
+        try
         {
-            const lFormatted: any = { ...lDoc, id: lDoc._id.toString() };
-            delete lFormatted._id;
-            return lFormatted as DTO;
+            return new mongoose.Types.ObjectId(id);
+        } catch (e)
+        {
+            throw new Error(`ID invalide: ${id}`);
+        }
+    }
+
+    /**
+     * Prépare les données pour la création
+     */
+    private prepareDataForCreate(pDTO: DTO): any
+    {
+        // Si c'est déjà un document Mongoose
+        if (pDTO instanceof mongoose.Document)
+        {
+            const data = pDTO.toObject();
+            // Suppression des métadonnées Mongoose pour éviter les conflits
+            delete data._id;
+            delete data.__v;
+            return data;
+        }
+
+        // Vérifier que pDTO est bien un objet avant de faire un spread
+        const preparedData = (typeof pDTO === 'object' && pDTO !== null)
+            ? { ...pDTO as Record<string, any> }
+            : {};
+
+        // Gestion de l'ID
+        if (preparedData.id)
+        {
+            try
+            {
+                preparedData._id = this.convertToObjectId(preparedData.id);
+            } catch (error)
+            {
+                console.warn("ID non valide pour MongoDB, un nouvel ID sera généré");
+            }
+            delete preparedData.id;
+        }
+
+        // Supprimer les propriétés Mongoose qui pourraient causer des problèmes
+        delete preparedData._id;
+        delete preparedData.__v;
+        delete preparedData.isNew;
+
+        // Ajout des timestamps
+        if (!preparedData.createdAt)
+        {
+            preparedData.createdAt = new Date();
+        }
+        if (!preparedData.updatedAt)
+        {
+            preparedData.updatedAt = new Date();
+        }
+
+        return preparedData;
+    }
+
+    /**
+     * Prépare les données pour la mise à jour
+     */
+    private prepareDataForUpdate(pDTO: DTO): any
+    {
+        // Si c'est un document Mongoose
+        if (pDTO instanceof mongoose.Document)
+        {
+            const modifiedPaths = pDTO.modifiedPaths();
+            const updateData: any = {};
+
+            // Ne récupérer que les champs modifiés
+            for (const path of modifiedPaths)
+            {
+                updateData[path] = (pDTO as any)[path];
+            }
+
+            // Ajouter le timestamp de mise à jour
+            updateData.updatedAt = new Date();
+
+            return { $set: updateData };
+        }
+
+        // Vérifier que pDTO est bien un objet avant de faire un spread
+        const updateData = (typeof pDTO === 'object' && pDTO !== null)
+            ? { ...pDTO as Record<string, any> }
+            : {};
+
+        // Suppression des IDs pour éviter les conflits
+        delete updateData.id;
+        delete updateData._id;
+        delete updateData.__v;
+
+        // Mise à jour du timestamp
+        updateData.updatedAt = new Date();
+
+        return { $set: updateData };
+    }
+
+    /**
+     * Formate les résultats de Mongoose en objets standard
+     */
+    formatResults(results: Document[]): DTO[]
+    {
+        return results.map(doc =>
+        {
+            // Si c'est déjà un document Mongoose et qu'on veut le garder tel quel
+            if (doc instanceof mongoose.Document)
+            {
+                const formatted = doc.toObject({ virtuals: true }) as any;
+
+                // Conversion _id en id
+                if (formatted._id)
+                {
+                    formatted.id = formatted._id.toString();
+                    delete formatted._id;
+                }
+
+                // Suppression des métadonnées Mongoose
+                delete formatted.__v;
+
+                return formatted as DTO;
+            }
+
+            // Pour un objet simple, vérifier qu'il s'agit bien d'un objet
+            const obj = (typeof doc === 'object' && doc !== null)
+                ? { ...doc as Record<string, any> }
+                : {} as Record<string, any>;
+
+            // Conversion _id en id
+            if (obj._id)
+            {
+                obj.id = obj._id.toString();
+                delete obj._id;
+            }
+
+            // Suppression des métadonnées Mongoose
+            delete obj.__v;
+
+            return obj as DTO;
         });
     }
 
@@ -338,13 +636,14 @@ export class MongoDBRepository<DTO extends BaseDTO, CritereDTO extends BaseCrite
      */
     async disconnect(): Promise<void>
     {
-        if (this._client)
+        this._model = undefined;
+
+        // Si nous avons initialisé notre propre connexion, nous la fermons
+        if (this._isConnected && mongoose.connection.readyState === 1)
         {
-            await this._client.close();
-            this._client = undefined;
-            this._db = undefined;
-            this._collection = undefined;
-            console.log("Connexion MongoDB fermée");
+            await mongoose.disconnect();
+            this._isConnected = false;
+            console.log("Connexion Mongoose fermée");
         }
     }
 }

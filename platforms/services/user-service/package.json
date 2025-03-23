@@ -1,5 +1,5 @@
 {
-  "name": "cesi-mange-serveur",
+  "name": "user-service",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "node app",
     "dev": "nodemon app"
   },
-  "description": "CesiMangeServeur",
+  "description": "user-service",
   "author": {
     "name": ""
   },
@@ -22,7 +22,8 @@
     "helmet": "^8.1.0",
     "mongodb": "6.14.2",
     "morgan": "^1.10.0",
-    "mssql": "11.0.1"
+    "mssql": "11.0.1",
+    "mongoose": "8.12.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

@@ -6,7 +6,7 @@ import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
 /**
  * Classe abstraite avec les méthodes communes pour tous les repositories
  */
-export abstract class AbstractDbRepository<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO> implements IDbRepository<DTO, CritereDTO>
+export abstract class AbstractDbRepository<DTO, CritereDTO> implements IDbRepository<DTO, CritereDTO>
 {
     protected _config: IRepositoryConfig;
 

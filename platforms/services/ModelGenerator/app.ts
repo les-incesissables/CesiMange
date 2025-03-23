@@ -1,678 +1,484 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import mongoose from 'mongoose';
-require('dotenv').config()
+import { Schema } from 'mongoose';
+require('dotenv').config();
 
-//#region Interfaces
+// Configuration des services et des collections associées
+const serviceConfigs = [
+    {
+        serviceName: 'user-service',
+        collections: ['user', 'developer'],
+        outputDir: '../user-service/src/models/',
+        metierDir: '../user-service/src/metier/' // Répertoire pour les classes métier
+    },
+    {
+        serviceName: 'restaurant-service',
+        collections: ['restaurant', 'component'],
+        outputDir: '../restaurant-service/src/models/',
+        metierDir: '../restaurant-service/src/metier/'
+    }
+    //{
+    //    serviceName: 'order-service',
+    //    collections: ['order', 'commercial'],
+    //    outputDir: '../order-service/src/models/',
+    //    metierDir: '../order-service/src/metier/'
+    //},
+    //{
+    //    serviceName: 'delivery-service',
+    //    collections: ['deliverie'],
+    //    outputDir: '../delivery-service/src/models/',
+    //    metierDir: '../delivery-service/src/metier/'
+    //},
+    //{
+    //    serviceName: 'notification-service',
+    //    collections: ['notification'],
+    //    outputDir: '../notification-service/src/models/',
+    //    metierDir: '../notification-service/src/metier/'
+    //},
+    //{
+    //    serviceName: 'technical-service',
+    //    collections: ['technical'],
+    //    outputDir: '../technical-service/src/models/',
+    //    metierDir: '../technical-service/src/metier/'
+    //}
+];
 
-interface PropertyDefinition
-{
-    [key: string]: string;
-}
-
-interface KnownTypes
-{
-    [typeName: string]: PropertyDefinition;
-}
-//#endregion
-
-//// Configuration
+// Configuration générale
 const config = {
-    modelsDir: './src/models',       // Répertoire des modèles
-    outputDir: '../user-service/backend/models/',         // Répertoire où seront générés les DTOs
-    baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
-    excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
-    excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
-    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
+    excludedFields: ['__v'],         // Champs à exclure des modèles
+    excludedCollections: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],
+    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/CesiMange',
     sampleSize: 10,                  // Nombre de documents à analyser par collection
-    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
-    front: false,
+    cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+    protectedFolders: ['base']       // Dossiers à ne pas supprimer lors du nettoyage
 };
 
-//const config = {
-//    modelsDir: './src/models',       // Répertoire des modèles
-//    outputDir: '../../../apps/customer-final/front/src/models/',         // Répertoire où seront générés les DTOs
-//    baseImportPath: '../base',       // Chemin d'importation relatif pour les DTOs de base
-//    excludedFields: ['__v', 'deleted'], // Champs à exclure des DTOs
-//    excludedDirectories: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],  // Dossiers à ne pas créer/traiter
-//    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/projet', // URL de connexion MongoDB
-//    sampleSize: 10,                  // Nombre de documents à analyser par collection
-//    cleanOutputDir: true,           // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
-//    front: true,
-//};
+// Structure des dossiers pour les modèles
+const folders = {
+    interfaces: 'interfaces',
+    schemas: 'schemas',
+    models: 'models',
+};
 
-//#region Methods
-// Fonction pour créer le dossier de sortie s'il n'existe pas
-function ensureDirectoryExists(directory: string): void
+// Types et interfaces pour l'analyse
+interface FieldInfo
 {
-    if (!fs.existsSync(directory))
+    type: string;
+    mongooseType: string;
+    isRequired: boolean;
+    isArray: boolean;
+    ref?: string;
+}
+
+interface CollectionSchema
+{
+    [fieldName: string]: FieldInfo;
+}
+
+// Fonction pour s'assurer qu'un répertoire existe
+function ensureDirectoryExists(dirPath: string): void
+{
+    if (!fs.existsSync(dirPath))
     {
-        fs.mkdirSync(directory, { recursive: true });
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
-// Fonction pour nettoyer le répertoire de sortie
-function cleanDirectory(directory: string): void
+// Fonction pour nettoyer un répertoire tout en préservant certains dossiers
+function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void
 {
-    if (fs.existsSync(directory))
+    if (fs.existsSync(dirPath))
     {
-        fs.rmSync(directory, { recursive: true, force: true });
-    }
-    ensureDirectoryExists(directory);
-}
-
-// Inférer le type d'une valeur avec support des types spéciaux MongoDB
-function inferType(value: any): string
-{
-    if (value === null || value === undefined) return 'any';
-
-    if (Array.isArray(value))
-    {
-        if (value.length === 0) return 'any[]';
-        return `${inferType(value[0])}[]`;
-    }
-
-    if (value instanceof Date) return 'Date';
-
-    // Pour les ObjectId de MongoDB
-    if (value && typeof value === 'object' && value.toString && typeof value.toString === 'function'
-        && (mongoose.Types.ObjectId.isValid(value) || /^[0-9a-fA-F]{24}$/.test(value.toString())))
-    {
-        return 'string';
-    }
-
-    // Gestion des types spéciaux MongoDB
-    if (value && typeof value === 'object')
-    {
-        // Vérifier si c'est un type BSON spécifique
-        if (value._bsontype)
+        fs.readdirSync(dirPath).forEach(file =>
         {
-            switch (value._bsontype)
+            const currentPath = path.join(dirPath, file);
+
+            // Si c'est un dossier à préserver, on le garde
+            if (fs.lstatSync(currentPath).isDirectory() && preserveFolders.includes(file))
             {
-                case 'Int32':
-                case 'Int64':
-                case 'Long':
-                    return 'number';
-                case 'Decimal128':
-                case 'Double':
-                    return 'number';
-                case 'Binary':
-                    return 'Buffer';
-                case 'ObjectID':
-                    return 'string';
-                case 'Timestamp':
-                    return 'Date';
-                case 'Code':
-                    return 'string';
-                case 'Symbol':
-                    return 'string';
-                case 'DBRef':
-                case 'MaxKey':
-                case 'MinKey':
-                    return 'object';
-                case 'BSONRegExp':
-                    return 'RegExp';
-                default:
-                    return 'object';
+                console.log(`  Dossier préservé: ${file}`);
+                return;
             }
-        }
 
-        // Détecter les types numériques spéciaux
-        if (value.constructor && value.constructor.name)
-        {
-            const constructorName = value.constructor.name;
-            switch (constructorName)
+            if (fs.lstatSync(currentPath).isDirectory())
             {
-                case 'Int32':
-                case 'NumberInt':
-                    return 'number';
-                case 'Decimal128':
-                    return 'number';
-                case 'Long':
-                    return 'number';
-                case 'ObjectID':
-                    return 'string';
-            }
-        }
-
-        // Si c'est un objet vide ou non reconnu
-        return 'object';
-    }
-
-    // Pour les types primitifs de JavaScript
-    return typeof value;
-}
-
-// Analyser un document MongoDB et déduire sa structure
-function analyzeDocument(document: any, knownTypes: KnownTypes = {}): PropertyDefinition
-{
-    const structure: PropertyDefinition = {};
-
-    Object.entries(document).forEach(([key, value]) =>
-    {
-        if (key === '_id')
-        {
-            structure['id'] = 'string';
-            return;
-        }
-
-        if (config.excludedFields.includes(key))
-        {
-            return;
-        }
-
-        const type = inferType(value);
-
-        if (type === 'object')
-        {
-            // Analyser les propriétés de l'objet
-            const objectName = key.charAt(0).toUpperCase() + key.slice(1);
-            if (!knownTypes[objectName])
-            {
-                knownTypes[objectName] = analyzeDocument(value, knownTypes);
-            }
-            structure[key] = objectName;
-        } else if (type.endsWith('[]'))
-        {
-            // Si c'est un tableau, vérifier les éléments
-            if (Array.isArray(value) && value.length > 0)
-            {
-                // Vérifier le premier élément pour déterminer le type
-                const firstElement = value[0];
-                if (typeof firstElement === 'object' && firstElement !== null && !(firstElement instanceof Date))
+                cleanDirectory(currentPath, preserveFolders);
+                try
                 {
-                    // C'est un tableau d'objets - créer un type pour l'élément
-                    const singularKey = key.endsWith('s') ? key.slice(0, -1) : key;
-                    const elementTypeName = singularKey.charAt(0).toUpperCase() + singularKey.slice(1);
-
-                    if (!knownTypes[elementTypeName])
-                    {
-                        knownTypes[elementTypeName] = analyzeDocument(firstElement, knownTypes);
-                    }
-
-                    // Définir le type comme un tableau de ce type
-                    structure[key] = `${elementTypeName}[]`;
-                } else
+                    fs.rmdirSync(currentPath);
+                } catch (err)
                 {
-                    // Tableau de types primitifs
-                    structure[key] = type;
+                    console.warn(`  Impossible de supprimer le dossier ${currentPath}: ${err}`);
                 }
             } else
             {
-                // Tableau vide ou non reconnu
-                structure[key] = type;
+                fs.unlinkSync(currentPath);
             }
-        } else
-        {
-            structure[key] = type;
-        }
-    });
-
-    return structure;
+        });
+    }
 }
 
-// Fusionner plusieurs structures avec détection intelligente de types
-function mergeStructures(structures: PropertyDefinition[]): PropertyDefinition
+// Fonction pour convertir le nom d'une collection en nom de classe (PascalCase)
+function collectionNameToClassName(name: string): string
 {
-    const result: PropertyDefinition = {};
-    const typeFrequency: Record<string, Record<string, number>> = {};
+    // Enlever le "s" final pour les pluriels
+    const singularName = name.endsWith('s') ? name.slice(0, -1) : name;
 
-    // Compter la fréquence d'apparition de chaque type pour chaque propriété
-    structures.forEach(structure =>
+    // Convertir en PascalCase
+    return singularName
+        .split(/[-_]/)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join('');
+}
+
+// Fonction pour convertir en camelCase
+function toCamelCase(name: string): string
+{
+    const pascalCase = collectionNameToClassName(name);
+    return pascalCase.charAt(0).toLowerCase() + pascalCase.slice(1);
+}
+
+// Fonction pour déterminer le type Mongoose à partir d'une valeur
+function getMongooseType(value: any): { type: string; mongooseType: string; isArray: boolean; ref?: string }
+{
+    if (value === null || value === undefined)
     {
-        Object.entries(structure).forEach(([key, type]) =>
+        return { type: 'any', mongooseType: 'Schema.Types.Mixed', isArray: false };
+    }
+
+    if (Array.isArray(value))
+    {
+        if (value.length === 0)
         {
-            if (!typeFrequency[key])
-            {
-                typeFrequency[key] = {};
-            }
+            return { type: 'any[]', mongooseType: '[Schema.Types.Mixed]', isArray: true };
+        }
+        const elemType = getMongooseType(value[0]);
+        return {
+            type: `${elemType.type}[]`,
+            mongooseType: `[${elemType.mongooseType}]`,
+            isArray: true,
+            ref: elemType.ref
+        };
+    }
 
-            if (!typeFrequency[key][type])
-            {
-                typeFrequency[key][type] = 0;
-            }
+    if (value instanceof Date)
+    {
+        return { type: 'Date', mongooseType: 'Date', isArray: false };
+    }
 
-            typeFrequency[key][type]++;
+    if (mongoose.Types.ObjectId.isValid(value) && typeof value !== 'number')
+    {
+        return {
+            type: 'string',
+            mongooseType: 'Schema.Types.ObjectId',
+            isArray: false,
+            ref: 'needs_manual_definition' // Référence à définir manuellement
+        };
+    }
+
+    switch (typeof value)
+    {
+        case 'string':
+            return { type: 'string', mongooseType: 'String', isArray: false };
+        case 'number':
+            if (Number.isInteger(value))
+            {
+                return { type: 'number', mongooseType: 'Number', isArray: false };
+            }
+            return { type: 'number', mongooseType: 'Number', isArray: false };
+        case 'boolean':
+            return { type: 'boolean', mongooseType: 'Boolean', isArray: false };
+        case 'object':
+            return { type: 'Record<string, any>', mongooseType: 'Schema.Types.Mixed', isArray: false };
+        default:
+            return { type: 'any', mongooseType: 'Schema.Types.Mixed', isArray: false };
+    }
+}
+
+// Fonction pour analyser la structure d'une collection
+async function analyzeCollection(collectionName: string): Promise<CollectionSchema>
+{
+    // S'assurer que db est défini
+    const connection = mongoose.connection;
+    if (!connection.db)
+    {
+        throw new Error('La connexion à la base de données n\'est pas établie');
+    }
+
+    const db = connection.db;
+    const collection = db.collection(collectionName);
+
+    // Récupérer un échantillon de documents
+    const sampleDocs = await collection.find({}).limit(config.sampleSize).toArray();
+
+    if (sampleDocs.length === 0)
+    {
+        console.log(`  La collection ${collectionName} est vide.`);
+        return {};
+    }
+
+    const schema: CollectionSchema = {};
+    const requiredFields = new Set<string>();
+
+    // Première passe: identifier tous les champs possibles
+    sampleDocs.forEach(doc =>
+    {
+        Object.keys(doc).forEach(field =>
+        {
+            if (!config.excludedFields.includes(field))
+            {
+                if (!schema[field])
+                {
+                    const typeInfo = getMongooseType(doc[field]);
+                    schema[field] = {
+                        ...typeInfo,
+                        isRequired: true // Supposer d'abord que tous les champs sont requis
+                    };
+                    requiredFields.add(field);
+                }
+            }
         });
     });
 
-    // Déterminer le type le plus pertinent pour chaque propriété
-    Object.entries(typeFrequency).forEach(([key, types]) =>
+    // Deuxième passe: vérifier quels champs sont réellement requis
+    sampleDocs.forEach(doc =>
     {
-        // Si la propriété a un seul type, l'utiliser
-        if (Object.keys(types).length === 1)
-        {
-            result[key] = Object.keys(types)[0];
-            return;
-        }
+        const docFields = new Set(Object.keys(doc));
 
-        // Si la propriété a plusieurs types, essayer de les réconcilier
-        const allTypes = Object.keys(types);
-
-        // Tous les types numériques deviennent 'number'
-        if (allTypes.every(t => ['number', 'int', 'float', 'double', 'Int32', 'Long', 'Decimal128'].includes(t)))
+        requiredFields.forEach(field =>
         {
-            result[key] = 'number';
-            return;
-        }
-
-        // Si on a des types primitifs et 'null', garder le type primitif
-        if (allTypes.includes('null') && allTypes.length === 2)
-        {
-            const nonNullType = allTypes.find(t => t !== 'null');
-            if (nonNullType)
+            if (!docFields.has(field))
             {
-                result[key] = nonNullType;
-                return;
+                requiredFields.delete(field);
             }
-        }
-
-        // Si les types incluent string et objectId, utiliser string
-        if (allTypes.includes('string') && allTypes.includes('ObjectID'))
-        {
-            result[key] = 'string';
-            return;
-        }
-
-        // Par défaut, utiliser 'any' pour les types mixtes incompatibles
-        result[key] = 'any';
+        });
     });
 
-    return result;
-}
-
-// Transformer la structure d'un DTO en structure de CritereDTO
-function transformToCriteriaStructure(structure: PropertyDefinition, knownTypes: KnownTypes): PropertyDefinition
-{
-    const criteriaStructure: PropertyDefinition = {};
-
-    // Copier tous les champs du DTO (par défaut "contient" pour les chaînes)
-    Object.entries(structure).forEach(([key, type]) =>
+    // Mettre à jour l'information de requis
+    Object.keys(schema).forEach(field =>
     {
-        if (key === 'id') return; // Déjà inclus dans BaseCritereDTO
-        criteriaStructure[key] = type;
+        schema[field].isRequired = requiredFields.has(field);
     });
 
-    return criteriaStructure;
+    return schema;
 }
 
-// Fonction utilitaire pour vérifier si un type est primitif
-function isPrimitiveType(type: string): boolean
+// Fonction pour générer le contenu du fichier d'interface
+function generateInterfaceContent(className: string, schema: CollectionSchema): string
 {
-    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object', 'Buffer', 'RegExp'];
-    return primitiveTypes.some(pt => type === pt);
+    const interfaceName = `I${className}`;
+
+    let content = `import { Document } from 'mongoose';\n\n`;
+    content += `export interface ${interfaceName} extends Document {\n`;
+
+    Object.keys(schema).forEach(field =>
+    {
+        if (field !== '_id')
+        {
+            const { type, isRequired } = schema[field];
+            content += `  ${field}${isRequired ? '' : '?'}: ${type};\n`;
+        }
+    });
+
+    content += `}\n`;
+
+    return content;
 }
 
-// Convertir un nom de collection en nom d'entité
-function collectionToEntityName(collectionName: string): string
+
+// Fonction pour générer le contenu du fichier métier
+function generateMetierContent(className: string, collectionName: string): string
 {
-    return collectionName
-        .replace(/^[_]/, '')
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join('')
-        .replace(/s$/, ''); // Enlever le 's' final si présent
+    const dtoName = `${className}DTO`;
+    const critereDtoName = `${className}CritereDTO`;
+
+    let content = `import { ${dtoName} } from "../../models/${collectionName}/${dtoName}";\n`;
+    content += `import { ${critereDtoName} } from "../../models/${collectionName}/${critereDtoName}";\n`;
+    content += `import { BaseMetier } from "../base/BaseMetier";\n\n`;
+    content += `/**\n`;
+    content += ` * Métier pour l'entité ${className}\n`;
+    content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
+    content += ` */\n`;
+    content += `export class ${className}Metier extends BaseMetier<${dtoName}, ${critereDtoName}> {\n`;
+    content += `    constructor() {\n`;
+    content += `        super('${collectionName}');\n`;
+    content += `    }\n`;
+    content += `}\n`;
+
+    return content;
 }
 
-// Fonction pour déterminer si une collection doit être exclue
-function shouldExcludeCollection(collectionName: string): boolean
+// Fonction pour générer le contenu du fichier de schéma
+function generateSchemaContent(className: string, schema: CollectionSchema): string
 {
-    return config.excludedDirectories.includes(collectionName.toLowerCase());
+    const schemaName = `${toCamelCase(className)}Schema`;
+
+    let content = `import { Schema } from 'mongoose';\n\n`;
+    content += `export const ${schemaName} = new Schema({\n`;
+
+    Object.keys(schema).forEach(field =>
+    {
+        if (field !== '_id')
+        {
+            const { mongooseType, isRequired, ref } = schema[field];
+            content += `  ${field}: {\n`;
+            content += `    type: ${mongooseType},\n`;
+            content += `    required: ${isRequired},\n`;
+            if (ref && ref !== 'needs_manual_definition')
+            {
+                content += `    ref: '${ref}',\n`;
+            }
+            content += `  },\n`;
+        }
+    });
+
+    content += `}, { timestamps: true });\n`;
+
+    return content;
 }
 
-
-//#region Generate
-
-// Fonction pour générer le contenu du fichier DTO
-function generateController(entityName: string): string
+// Fonction pour générer le contenu du fichier de modèle
+function generateModelContent(className: string): string
 {
-    const dtoImport = `import { ${entityName}DTO } from "../../models/${entityName.toLowerCase()}/${entityName}DTO";`;
-    const critereImport = `import { ${entityName}CritereDTO } from "../../models/${entityName.toLowerCase()}/${entityName}CritereDTO";`;
-    const baseControllerImport = `import { BaseController } from "../BaseController";`;
-    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
+    const interfaceName = `I${className}`;
+    const schemaName = `${toCamelCase(className)}Schema`;
 
-    return `${dtoImport}
-${critereImport}
-${baseControllerImport}
+    let content = `import { model } from 'mongoose';\n`;
+    content += `import { ${interfaceName} } from '../interfaces/${interfaceName}';\n`;
+    content += `import { ${schemaName} } from '../schemas/${schemaName}';\n\n`;
+    content += `export const ${className} = model<${interfaceName}>('${className}', ${schemaName});\n`;
 
-/**
- * Contrôleur pour l'entité ${entityName}
- * @Author ModelGenerator - ${lGenerationDate} - Création
- */
-export class ${entityName}Controller extends BaseController<${entityName}DTO, ${entityName}CritereDTO> {
-}`;
+    return content;
 }
 
-function generateMetier(entityName: string): string
+// Fonction pour initialiser les dossiers d'un service
+function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
 {
-    const dtoImport = `import { ${entityName}DTO } from "../../models/${entityName.toLowerCase()}/${entityName}DTO";`;
-    const critereImport = `import { ${entityName}CritereDTO } from "../../models/${entityName.toLowerCase()}/${entityName}CritereDTO";`;
-    const baseMetierImport = `import { BaseMetier } from "../base/BaseMetier";`;
+    const { outputDir, metierDir } = serviceConfig;
 
-    const generationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
-
-    return `${dtoImport}
-${critereImport}
-${baseMetierImport}
-
-/**
- * Métier pour l'entité ${entityName}
- * @Author ModelGenerator - ${generationDate} - Création
- */
-export class ${entityName}Metier extends BaseMetier<${entityName}DTO, ${entityName}CritereDTO> {
-    constructor() {
-        super('${entityName.toLowerCase()}');
+    // Initialiser le dossier des modèles
+    if (config.cleanOutputDir && fs.existsSync(outputDir))
+    {
+        cleanDirectory(outputDir);
+        console.log(`Répertoire nettoyé: ${outputDir}`);
     }
-}`;
-}
+    ensureDirectoryExists(outputDir);
 
-// Fonction pour générer le contenu du fichier DTO
-function generateDTOContent(entityName: string, structure: PropertyDefinition, knownTypes: KnownTypes, entityDir: string): string
-{
-    const imports = new Set<string>();
-    imports.add(`import { BaseDTO } from "${config.baseImportPath}/BaseDTO";`);
-
-    let properties = '';
-
-    // Parcourir chaque propriété pour générer les imports et le contenu
-    Object.entries(structure).forEach(([key, type]) =>
+    // Créer les sous-répertoires pour les modèles
+    for (const folder of Object.values(folders))
     {
-        if (key === 'id') return; // id est déjà dans BaseDTO
-
-        // Analyser le type pour déterminer s'il s'agit d'un type primitif ou complexe
-        let baseType = type;
-        let isArray = false;
-
-        if (type.endsWith('[]'))
-        {
-            baseType = type.substring(0, type.length - 2);
-            isArray = true;
-        }
-
-        // Si c'est un type personnalisé (non primitif)
-        if (!isPrimitiveType(baseType))
-        {
-            // Importer le DTO correspondant
-            const importPath = `../${baseType.toLowerCase()}/${baseType}DTO`;
-            imports.add(`import { ${baseType}DTO } from "${importPath}";`);
-
-            // Utiliser le type avec DTO dans la propriété
-            if (isArray)
-            {
-                properties += `  ${key}?: ${baseType}DTO[];\n`;
-            } else
-            {
-                properties += `  ${key}?: ${baseType}DTO;\n`;
-            }
-        } else
-        {
-            // Utiliser le type primitif tel quel
-            properties += `  ${key}?: ${type};\n`;
-        }
-    });
-    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
-
-    // Construire le contenu du fichier
-    const importStatements = Array.from(imports).join('\n');
-    return `${importStatements}
-
-/**
- * DTO pour l'entité ${entityName}
- * @Author ModelGenerator - ${lGenerationDate} - Création
- */
-export class ${entityName}DTO extends BaseDTO {
-${properties}}
-`;
-}
-
-// Fonction pour générer le contenu du fichier CritereDTO
-function generateCritereDTOContent(entityName: string, structure: PropertyDefinition, entityDir: string): string
-{
-    const imports = new Set<string>();
-    imports.add(`import { BaseCritereDTO } from "${config.baseImportPath}/BaseCritereDTO";`);
-
-    let properties = '';
-
-    // Parcourir chaque propriété pour générer les imports et le contenu
-    Object.entries(structure).forEach(([key, type]) =>
-    {
-        if (key === 'id') return; // id est déjà dans BaseCritereDTO
-
-        // Analyser le type pour déterminer s'il s'agit d'un type primitif ou complexe
-        let baseType = type;
-        let isArray = false;
-
-        if (type.endsWith('[]'))
-        {
-            baseType = type.substring(0, type.length - 2);
-            isArray = true;
-        }
-
-        // Si c'est un type personnalisé (non primitif)
-        if (!isPrimitiveType(baseType))
-        {
-            // Importer le DTO correspondant
-            const importPath = `../${baseType.toLowerCase()}/${baseType}DTO`;
-            const importPathCritere = `../${baseType.toLowerCase()}/${baseType}CritereDTO`;
-
-            imports.add(`import { ${baseType}DTO } from "${importPath}";`);
-            imports.add(`import { ${baseType}CritereDTO } from "${importPathCritere}";`);
-
-
-            // Utiliser le type avec DTO dans la propriété
-            if (isArray)
-            {
-                properties += `  ${key}?: ${baseType}DTO[];\n`;
-                properties += `  ${key}Like?: ${baseType}CritereDTO;\n`;
-            } else
-            {
-                properties += `  ${key}?: ${baseType}DTO;\n`;
-                properties += `  ${key}Like?: ${baseType}CritereDTO;\n`;
-            }
-        } else
-        {
-            // Gestion spécifique selon le type
-            properties += `  ${key}?: ${type};\n`;
-
-            if (type === 'string')
-            {
-                properties += `  ${key}Like?: string;\n`;
-            }
-            else if (type === 'number')
-            {
-                properties += `  ${key}Min?: number;\n`;
-                properties += `  ${key}Max?: number;\n`;
-            }
-            else if (type === 'Date')
-            {
-                properties += `  ${key}Min?: Date;\n`;
-                properties += `  ${key}Max?: Date;\n`;
-            }
-            else
-            {
-                properties += `  ${key}Like?: ${type};\n`;
-            }
-        }
-    });
-    const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
-
-    // Construire le contenu du fichier
-    const importStatements = Array.from(imports).join('\n');
-    return `${importStatements}
-
-/**
- * Critères de recherche pour l'entité ${entityName}
- * @Author ModelGenerator - ${lGenerationDate} - Création
- */
-export class ${entityName}CritereDTO extends BaseCritereDTO {
-${properties}}
-`;
-}
-
-function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure: PropertyDefinition, pKnownTypes: KnownTypes): void
-{
-    // Créer le dossier pour l'entité
-    const lEntityDir = path.join(config.outputDir, pEntityName.toLowerCase());
-    ensureDirectoryExists(lEntityDir);
-
-    // Générer et écrire le DTO
-    const lDtoContent = generateDTOContent(pEntityName, pStructure, pKnownTypes, lEntityDir);
-    fs.writeFileSync(path.join(lEntityDir, `${pEntityName}DTO.ts`), lDtoContent);
-
-    // Générer et écrire le CritereDTO
-    const lCritereDTOContent = generateCritereDTOContent(pEntityName, pCriteriaStructure, lEntityDir);
-    fs.writeFileSync(path.join(lEntityDir, `${pEntityName}CritereDTO.ts`), lCritereDTOContent);
-
-    if (!config.front)
-    {
-        // Créer le dossier pour l'entité (controller)
-        const lControllerDir = path.join(config.outputDir.replace('models', 'controllers'), pEntityName.toLowerCase());
-        ensureDirectoryExists(lControllerDir);
-
-        // Générer et écrire le Controller
-        const lController = generateController(pEntityName);
-        fs.writeFileSync(path.join(lControllerDir, `${pEntityName}Controller.ts`), lController);
-
-        // Créer le dossier pour l'entité (metier)
-        const lMetierDir = path.join(config.outputDir.replace('models', 'metier'), pEntityName.toLowerCase());
-        ensureDirectoryExists(lMetierDir);
-
-        // Générer et écrire le Metier
-        const lMetier = generateMetier(pEntityName);
-        fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
+        ensureDirectoryExists(path.join(outputDir, folder));
     }
 
-    console.log(`  Fichiers générés pour ${pEntityName}`);
-    return;
+    // Initialiser le dossier métier
+    if (fs.existsSync(metierDir))
+    {
+        // Nettoyer en préservant le dossier base
+        cleanDirectory(metierDir, config.protectedFolders);
+        console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
+    }
+    ensureDirectoryExists(metierDir);
+
+    console.log(`Dossiers initialisés pour ${serviceConfig.serviceName}`);
 }
 
-// Fonction principale pour générer les DTOs
-async function generateDTOs(): Promise<void>
+// Fonction principale pour générer les modèles
+async function generateModels(): Promise<void>
 {
     try
     {
-        console.log('Démarrage de la génération des DTOs...');
-
-        if (config.cleanOutputDir)
-        {
-            cleanDirectory(config.outputDir);
-        }
-
-        ensureDirectoryExists(config.outputDir);
-        ensureDirectoryExists(path.join(config.outputDir, 'base'));
-        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'base'));
-        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'interfaces'));
-        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'services'));
-
-        fs.writeFileSync(
-            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'),
-            fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
-
-        // Générer les DTOs de base
-        fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseDTO.ts'),
-            fs.readFileSync('./src/models/base/BaseDTO.ts'));
-
-        fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),
-            fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+        console.log('Démarrage de la génération des modèles et métiers...');
 
         // Connexion à MongoDB avec Mongoose
         await mongoose.connect(config.mongoUri);
         console.log('Connecté à MongoDB avec Mongoose');
 
-        // Récupérer toutes les collections
-        const collections = mongoose.connection.db.collections();
-        const collectionArray = await collections;
-
-        if (collectionArray.length > 0)
+        // Vérifier que la connexion est établie
+        if (!mongoose.connection.db)
         {
-            // Analyser les collections existantes
-            console.log(`${collectionArray.length} collections trouvées.`);
+            throw new Error('La connexion à la base de données n\'est pas établie');
+        }
 
-            const knownTypes: KnownTypes = {};
-            const entityStructures: Record<string, PropertyDefinition> = {};
+        // Récupérer toutes les collections et les filtrer
+        const db = mongoose.connection.db;
+        const collections = await db.listCollections().toArray();
+        const allCollections = collections
+            .map(c => c.name)
+            .filter(name => !config.excludedCollections.includes(name));
 
-            // Première passe : analyser les documents de chaque collection
-            for (const collection of collectionArray)
+        console.log(`${allCollections.length} collections trouvées après filtrage initial.`);
+
+        // Pour chaque service configuré
+        for (const serviceConfig of serviceConfigs)
+        {
+            console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
+
+            // Initialiser les dossiers pour ce service
+            initializeServiceFolders(serviceConfig);
+
+            // Filtrer les collections pour ce service
+            const serviceCollections = allCollections.filter(name =>
+                serviceConfig.collections.includes(name)
+            );
+
+            console.log(`${serviceCollections.length} collections associées à ce service.`);
+
+            // Traiter chaque collection pour ce service
+            for (const collectionName of serviceCollections)
             {
-                const collectionName = collection.collectionName;
+                console.log(`Analyse de la collection: ${collectionName}`);
 
-                // Vérifier si la collection doit être exclue
-                if (shouldExcludeCollection(collectionName))
+                const schema = await analyzeCollection(collectionName);
+
+                if (Object.keys(schema).length > 0)
                 {
-                    console.log(`Collection ${collectionName} exclue.`);
-                    continue;
-                }
+                    const className = collectionNameToClassName(collectionName);
+                    const interfaceName = `I${className}`;
+                    const schemaName = `${toCamelCase(className)}Schema`;
+                    const dtoName = `${className}DTO`;
+                    const critereDtoName = `${className}CritereDTO`;
 
-                console.log(`Analyse de la collection ${collectionName}...`);
+                    // Créer un dossier spécifique pour cette collection dans le répertoire des modèles
+                    const collectionDir = path.join(serviceConfig.outputDir, collectionName);
+                    ensureDirectoryExists(collectionDir);
 
-                // Obtenir des échantillons de documents
-                const documents = await mongoose.connection.db
-                    .collection(collectionName)
-                    .find()
-                    .limit(config.sampleSize)
-                    .toArray();
+                    // Générer le fichier d'interface
+                    const interfaceContent = generateInterfaceContent(className, schema);
+                    const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
+                    fs.writeFileSync(interfaceFilePath, interfaceContent);
+                    console.log(`  Interface générée: ${interfaceFilePath}`);
 
-                if (documents.length === 0)
+
+                    // Générer le fichier de schéma
+                    const schemaContent = generateSchemaContent(className, schema);
+                    const schemaFilePath = path.join(serviceConfig.outputDir, folders.schemas, `${schemaName}.ts`);
+                    fs.writeFileSync(schemaFilePath, schemaContent);
+                    console.log(`  Schéma généré: ${schemaFilePath}`);
+
+                    // Générer le fichier de modèle
+                    const modelContent = generateModelContent(className);
+                    const modelFilePath = path.join(serviceConfig.outputDir, folders.models, `${className}.ts`);
+                    fs.writeFileSync(modelFilePath, modelContent);
+                    console.log(`  Modèle généré: ${modelFilePath}`);
+
+                    // Générer le fichier métier
+                    const metierContent = generateMetierContent(className, collectionName);
+                    const metierFilePath = path.join(serviceConfig.metierDir, `${className}Metier.ts`);
+                    fs.writeFileSync(metierFilePath, metierContent);
+                    console.log(`  Métier généré: ${metierFilePath}`);
+                } else
                 {
-                    console.log(`  Aucun document trouvé dans ${collectionName}, ignoré.`);
-                    continue;
+                    console.log(`  Aucun modèle généré pour ${collectionName} (collection vide ou structure non détectée).`);
                 }
-
-                // Analyser les structures de documents
-                const structures = documents.map(doc => analyzeDocument(doc, knownTypes));
-                const mergedStructure = mergeStructures(structures);
-
-                // Stocker la structure
-                const entityName = collectionToEntityName(collectionName);
-                entityStructures[entityName] = mergedStructure;
-            }
-
-            // Deuxième passe : générer les DTOs et CritereDTOs
-            for (const [entityName, structure] of Object.entries(entityStructures))
-            {
-                // Vérifier si l'entité figure dans la liste des exclusions
-                const entityLower = entityName.toLowerCase();
-                if (config.excludedDirectories.some(dir => dir.toLowerCase() === entityLower))
-                {
-                    console.log(`Entité ${entityName} exclue.`);
-                    continue;
-                }
-
-                console.log(`Génération des fichiers pour ${entityName}...`);
-
-                // Transformer la structure en critères
-                const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
-
-                generateFiles(entityName, criteriaStructure, structure, knownTypes);
-            }
-
-            // Troisième passe : générer les DTOs et CritereDTOs pour les types complexes découverts
-            for (const [typeName, structure] of Object.entries(knownTypes))
-            {
-                // Vérifier si le type figure dans la liste des exclusions
-                const typeLower = typeName.toLowerCase();
-                if (config.excludedDirectories.some(dir => dir.toLowerCase() === typeLower))
-                {
-                    console.log(`Type complexe ${typeName} exclu.`);
-                    continue;
-                }
-
-                console.log(`Génération des fichiers pour le type complexe ${typeName}...`);
-
-                // Transformer la structure en critères
-                const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
-
-                generateFiles(typeName, criteriaStructure, structure, knownTypes);
             }
         }
 
-        console.log('Génération des DTOs terminée avec succès!');
+        console.log('\nGénération des modèles et métiers terminée avec succès pour tous les services!');
 
     } catch (error)
     {
-        console.error('Erreur lors de la génération des DTOs:', error);
+        console.error('Erreur lors de la génération des modèles et métiers:', error);
     } finally
     {
         // Fermer la connexion Mongoose
@@ -680,9 +486,6 @@ async function generateDTOs(): Promise<void>
         console.log('Déconnecté de MongoDB');
     }
 }
-generateDTOs();
-//#endregion
-
-//#endregion
 
 // Exécuter la génération
+generateModels();

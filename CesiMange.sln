@@ -7,9 +7,11 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "api-gateway", "platforms\ap
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "customer-final", "apps\customer-final\front\customer-final.esproj", "{E674D76B-3B31-8C72-5AEF-99CC4936861E}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "user-service", "platforms\services\user-service\backend\user-service.esproj", "{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}"
-EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "models-generator", "platforms\services\ModelGenerator\models-generator.esproj", "{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "user-service", "platforms\services\user-service\user-service.esproj", "{D6AC3342-2409-853B-C443-41A01D7CA753}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "restaurant-service", "platforms\services\restaurant-service\restaurant-service.esproj", "{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,18 +31,24 @@ Global
 		{E674D76B-3B31-8C72-5AEF-99CC4936861E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E674D76B-3B31-8C72-5AEF-99CC4936861E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E674D76B-3B31-8C72-5AEF-99CC4936861E}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D49FFD33-B829-FDE6-48A9-F7BADB7C9549}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D6E900E-6D04-EB0C-5E34-F1BCF0AC6248}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6AC3342-2409-853B-C443-41A01D7CA753}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47A9E3E1-FF92-7379-329C-8CFA421ABEF8}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -38,13 +38,13 @@ app.use(
  */
 app.use(morgan('dev'));
 
-const userController = new UserController(new UserMetier());
-const restaurantController = new RestaurantController(new RestaurantMetier());
-const orderMetier = new OrderController(new OrderMetier());
+//const userController = new UserController(new UserMetier());
+//const restaurantController = new RestaurantController(new RestaurantMetier());
+//const orderMetier = new OrderController(new OrderMetier());
 
-app.use('/api/users', userController.getRouter());
-app.use('/api/resto', restaurantController.getRouter());
-app.use('/api/order', orderMetier.getRouter());
+//app.use('/api/users', userController.getRouter());
+//app.use('/api/resto', restaurantController.getRouter());
+//app.use('/api/order', orderMetier.getRouter());
 
 // We assign the port number 8080.
 const port = 4002;

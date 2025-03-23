@@ -4,7 +4,7 @@ import { BaseDTO } from "../../models/base/BaseDTO";
 /**
  * Interface pour les controllers
  */
-export interface IBaseMetier<DTO extends BaseDTO, CritereDTO extends BaseCritereDTO>
+export interface IBaseMetier<DTO, CritereDTO>
 {
     getItems(pCritereDTO: CritereDTO): Promise<DTO[]>;
     getItem(pCritereDTO: CritereDTO): Promise<DTO>;

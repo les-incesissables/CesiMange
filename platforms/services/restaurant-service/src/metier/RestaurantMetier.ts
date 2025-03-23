@@ -4,7 +4,7 @@ import { BaseMetier } from "../base/BaseMetier";
 
 /**
  * M�tier pour l'entit� Restaurant
- * @Author ModelGenerator - 2025-03-23T12:56:17.845Z - Cr�ation
+ * @Author ModelGenerator - 2025-03-23T13:08:52.369Z - Cr�ation
  */
 export class RestaurantMetier extends BaseMetier<RestaurantDTO, RestaurantCritereDTO> {
     constructor() {
