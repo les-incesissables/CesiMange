@@ -1,5 +1,5 @@
 {
-    "name": "cesimange",
+    "name": "customer-final-app",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -16,17 +16,18 @@
         "@tanstack/react-router-devtools": "^1.114.25",
         "@tanstack/router-plugin": "^1.114.25",
         "@types/jest": "^29.5.14",
+        "customer-final-middleware": "*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
         "@tanstack/eslint-plugin-query": "^5.68.0",
+        "@testing-library/dom": "^10.4.0",
         "@testing-library/jest-dom": "6.6.3",
-        "@testing-library/react": "16.2.0",
+        "@testing-library/react": "^16.2.0",
         "@types/debug": "0.0.30",
-        "@types/mocha": "^10.0.10",
-        "@types/react": "^19.0.10",
+        "@types/react": "^19.0.12",
         "@types/react-dom": "^19.0.4",
         "@vitejs/plugin-react": "^4.3.4",
         "eslint": "^9.21.0",
