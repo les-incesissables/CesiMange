@@ -10,13 +10,15 @@ const serviceConfigs = [
         serviceName: 'user-service',
         collections: ['user', 'developer'],
         outputDir: '../user-service/src/models/',
-        metierDir: '../user-service/src/metier/' // Répertoire pour les classes métier
+        metierDir: '../user-service/src/metier/',
+        controllerDir: '../user-service/src/controllers/'
     },
     {
         serviceName: 'restaurant-service',
         collections: ['restaurant', 'component'],
         outputDir: '../restaurant-service/src/models/',
-        metierDir: '../restaurant-service/src/metier/'
+        metierDir: '../restaurant-service/src/metier/',
+        controllerDir: '../restaurant-service/src/controllers/'
     }
     //{
     //    serviceName: 'order-service',
@@ -286,28 +288,6 @@ function generateInterfaceContent(className: string, schema: CollectionSchema): 
     return content;
 }
 
-// Fonction pour générer le contenu du fichier métier
-function generateMetierContent(className: string, collectionName: string): string
-{
-    const dtoName = `${className}DTO`;
-    const critereDtoName = `${className}CritereDTO`;
-
-    let content = `import { ${dtoName} } from "../../models/${collectionName}/${dtoName}";\n`;
-    content += `import { ${critereDtoName} } from "../../models/${collectionName}/${critereDtoName}";\n`;
-    content += `import { BaseMetier } from "../base/BaseMetier";\n\n`;
-    content += `/**\n`;
-    content += ` * Métier pour l'entité ${className}\n`;
-    content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
-    content += ` */\n`;
-    content += `export class ${className}Metier extends BaseMetier<${dtoName}, ${critereDtoName}> {\n`;
-    content += `    constructor() {\n`;
-    content += `        super('${collectionName}');\n`;
-    content += `    }\n`;
-    content += `}\n`;
-
-    return content;
-}
-
 // Fonction pour initialiser les dossiers d'un service
 function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
 {
@@ -316,7 +296,7 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
     // Initialiser le dossier des modèles
     if (config.cleanOutputDir && fs.existsSync(outputDir))
     {
-        cleanDirectory(outputDir);
+        cleanDirectory(outputDir, config.protectedFolders);
         console.log(`Répertoire nettoyé: ${outputDir}`);
     }
     ensureDirectoryExists(outputDir);
@@ -339,12 +319,85 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
     console.log(`Dossiers initialisés pour ${serviceConfig.serviceName}`);
 }
 
-// Fonction principale pour générer les modèles
+// Fonction pour générer le contenu du fichier contrôleur
+function generateControllerContent(className: string, collectionName: string): string
+{
+    const interfaceName = `I${className}`;
+
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    content += `import { BaseController } from "../base/BaseController";\n\n\n`;
+    content += `/**\n`;
+    content += ` * Contrôleur pour l'entité ${className}\n`;
+    content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
+    content += ` */\n`;
+    content += `export class ${className}Controller extends BaseController<${interfaceName}, Partial<${interfaceName}>> {\n`;
+    content += `}\n`;
+
+    return content;
+}
+
+// Fonction pour générer le contenu du fichier métier mis à jour
+function generateMetierContent(className: string, collectionName: string): string
+{
+    const interfaceName = `I${className}`;
+
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    content += `import { BaseMetier } from "../base/BaseMetier";\n\n\n`;
+    content += `/**\n`;
+    content += ` * Métier pour l'entité ${className}\n`;
+    content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
+    content += ` */\n`;
+    content += `export class ${className}Metier extends BaseMetier<${interfaceName}, Partial<${interfaceName}>> {\n`;
+    content += `    constructor() {\n`;
+    content += `        super('${collectionName}');\n`;
+    content += `    }\n`;
+    content += `}\n`;
+
+    return content;
+}
+
+// Fonction pour initialiser le dossier des contrôleurs d'un service
+function initializeControllerFolder(controllerDir: string): void
+{
+    // Initialiser le dossier des contrôleurs
+    if (fs.existsSync(controllerDir))
+    {
+        // Nettoyer en préservant le dossier base
+        cleanDirectory(controllerDir, config.protectedFolders);
+        console.log(`Répertoire des contrôleurs nettoyé: ${controllerDir} (en préservant ${config.protectedFolders.join(', ')})`);
+    }
+    ensureDirectoryExists(controllerDir);
+
+    // S'assurer que le dossier "base" existe
+    const baseDir = path.join(controllerDir, 'base');
+    ensureDirectoryExists(baseDir);
+}
+
+// Fonction pour initialiser les dossiers métier d'un service
+function initializeMetierFolder(metierDir: string): void
+{
+    // Initialiser le dossier métier
+    if (fs.existsSync(metierDir))
+    {
+        // Nettoyer en préservant le dossier base
+        cleanDirectory(metierDir, config.protectedFolders);
+        console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
+    }
+    ensureDirectoryExists(metierDir);
+
+    // S'assurer que le dossier "base" existe
+    const baseDir = path.join(metierDir, 'base');
+    ensureDirectoryExists(baseDir);
+}
+
+// Modifier la fonction principale pour inclure la génération des contrôleurs
+
+// Modifier la fonction principale pour inclure la génération des contrôleurs
 async function generateModels(): Promise<void>
 {
     try
     {
-        console.log('Démarrage de la génération des modèles et métiers...');
+        console.log('Démarrage de la génération des modèles, métiers et contrôleurs...');
 
         // Connexion à MongoDB avec Mongoose
         await mongoose.connect(config.mongoUri);
@@ -373,6 +426,15 @@ async function generateModels(): Promise<void>
             // Initialiser les dossiers pour ce service
             initializeServiceFolders(serviceConfig);
 
+            // Initialiser le dossier des contrôleurs si spécifié
+            if (serviceConfig.controllerDir)
+            {
+                initializeControllerFolder(serviceConfig.controllerDir);
+            }
+
+            // Initialiser le dossier des métiers
+            initializeMetierFolder(serviceConfig.metierDir);
+
             // Filtrer les collections pour ce service
             const serviceCollections = allCollections.filter(name =>
                 serviceConfig.collections.includes(name)
@@ -391,13 +453,6 @@ async function generateModels(): Promise<void>
                 {
                     const className = collectionNameToClassName(collectionName);
                     const interfaceName = `I${className}`;
-                    const schemaName = `${toCamelCase(className)}Schema`;
-                    const dtoName = `${className}DTO`;
-                    const critereDtoName = `${className}CritereDTO`;
-
-                    // Créer un dossier spécifique pour cette collection dans le répertoire des modèles
-                    const collectionDir = path.join(serviceConfig.outputDir, collectionName);
-                    ensureDirectoryExists(collectionDir);
 
                     // Générer le fichier d'interface
                     const interfaceContent = generateInterfaceContent(className, schema);
@@ -405,11 +460,28 @@ async function generateModels(): Promise<void>
                     fs.writeFileSync(interfaceFilePath, interfaceContent);
                     console.log(`  Interface générée: ${interfaceFilePath}`);
 
+                    // Créer le dossier métier pour cette entité
+                    const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
+                    ensureDirectoryExists(metierEntityDir);
+
                     // Générer le fichier métier
                     const metierContent = generateMetierContent(className, collectionName);
-                    const metierFilePath = path.join(serviceConfig.metierDir, `${className}Metier.ts`);
+                    const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
                     fs.writeFileSync(metierFilePath, metierContent);
                     console.log(`  Métier généré: ${metierFilePath}`);
+
+                    // Générer le fichier contrôleur si le dossier est spécifié
+                    if (serviceConfig.controllerDir)
+                    {
+                        // Créer le dossier contrôleur pour cette entité
+                        const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
+                        ensureDirectoryExists(controllerEntityDir);
+
+                        const controllerContent = generateControllerContent(className, collectionName);
+                        const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
+                        fs.writeFileSync(controllerFilePath, controllerContent);
+                        console.log(`  Contrôleur généré: ${controllerFilePath}`);
+                    }
                 } else
                 {
                     console.log(`  Aucun modèle généré pour ${collectionName} (collection vide ou structure non détectée).`);
@@ -417,11 +489,11 @@ async function generateModels(): Promise<void>
             }
         }
 
-        console.log('\nGénération des modèles et métiers terminée avec succès pour tous les services!');
+        console.log('\nGénération des modèles, métiers et contrôleurs terminée avec succès pour tous les services!');
 
     } catch (error)
     {
-        console.error('Erreur lors de la génération des modèles et métiers:', error);
+        console.error('Erreur lors de la génération des modèles, métiers et contrôleurs:', error);
     } finally
     {
         // Fermer la connexion Mongoose

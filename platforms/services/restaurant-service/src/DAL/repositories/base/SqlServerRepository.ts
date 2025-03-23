@@ -449,21 +449,21 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
         }
 
         // Ajouter le tri
-        if (pCritereDTO.Sort)
+        if (pCritereDTO.sort)
         {
-            const direction = pCritereDTO.SortDirection ? 'DESC' : 'ASC';
-            query += ` ORDER BY ${pCritereDTO.Sort} ${direction}`;
+            const direction = pCritereDTO.sortDirection ? 'DESC' : 'ASC';
+            query += ` ORDER BY ${pCritereDTO.sort} ${direction}`;
         }
 
         // Ajouter la pagination pour les requêtes qui ne demandent pas un seul élément
         if (!singleItem)
         {
-            if (pCritereDTO.Skip && pCritereDTO.Limit)
+            if (pCritereDTO.skip && pCritereDTO.limit)
             {
-                query += ` OFFSET ${pCritereDTO.Skip} ROWS FETCH NEXT ${pCritereDTO.Limit} ROWS ONLY`;
-            } else if (pCritereDTO.Limit)
+                query += ` OFFSET ${pCritereDTO.skip} ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
+            } else if (pCritereDTO.limit)
             {
-                query += ` OFFSET 0 ROWS FETCH NEXT ${pCritereDTO.Limit} ROWS ONLY`;
+                query += ` OFFSET 0 ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
             }
         } else
         {

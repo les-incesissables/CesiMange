@@ -9,52 +9,54 @@ export interface IBaseCritereDTO
     /**
      * Identifiant unique de l'élément recherché
      */
-    Id?: string;
+    id?: string;
 
     /**
      * Liste d'identifiants pour recherche multiple
      */
-    Ids?: string[];
+    ids?: string[];
 
     /**
      * Terme de recherche textuelle
      */
-    Search?: string;
+    search?: string;
 
     /**
      * Numéro de la page courante (pour pagination)
      */
-    Page?: number;
+    page?: number;
 
     /**
      * Nombre d'éléments par page (pour pagination)
      */
-    PageSize?: number;
+    pageSize?: number;
 
     /**
      * Champ utilisé pour le tri
      */
-    Sort?: string;
+    sort?: string;
 
     /**
      * Direction du tri (ascendant ou descendant)
      */
-    SortDirection?: 'asc' | 'desc';
+    sortDirection?: 'asc' | 'desc';
 
     /**
      * Indique si les éléments supprimés doivent être inclus
      */
-    IncludeDeleted?: boolean;
+    includeDeleted?: boolean;
 
     /**
      * Nombre maximum d'éléments à retourner
      */
-    Limit?: number;
+    limit?: number;
 
     /**
      * Nombre d'éléments à sauter (pour pagination)
      */
-    Skip?: number; 
+    skip?: number; 
+
+    populate?: string[];
 
     //#endregion
 }

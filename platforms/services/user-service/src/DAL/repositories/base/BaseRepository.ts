@@ -7,7 +7,6 @@ import { MongoDBRepository } from "./MongoDBRepository";
 import { SqlServerRepository } from "./SqlServerRepository";
 import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
 import { BaseDTO } from "../../../models/base/BaseDTO";
-import { Schema } from "inspector";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques

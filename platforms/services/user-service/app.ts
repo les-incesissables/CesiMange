@@ -14,7 +14,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { UserController } from './src/controllers/user/UserController';
-import { UserMetier } from './src/metier/UserMetier';
+import { UserMetier } from './src/metier/user/UserMetier';
+
 
 //#endregion
 

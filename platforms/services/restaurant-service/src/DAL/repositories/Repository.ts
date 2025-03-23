@@ -1,5 +1,3 @@
-import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../models/base/BaseDTO";
 import { EDatabaseType } from "../enums/EDatabaseType";
 import { IRepositoryConfig } from "../interfaces/IRepositoryConfig";
 import { BaseRepository } from "./base/BaseRepository";
@@ -11,7 +9,7 @@ import { BaseRepository } from "./base/BaseRepository";
  * @template CritereDTO - Type des critères de recherche qui étend BaseCritereDTO
  * @author Mahmoud Charif - CESIMANGE-118 - 17/03/2025 - Adaptation pour MongoDB
  */
-export class Repository<DTO extends BaseDTO, Critere extends BaseCritereDTO> extends BaseRepository<DTO, Critere>
+export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere>
 {
     constructor (pCollectionName: string, pTypeBDD: EDatabaseType)
     {

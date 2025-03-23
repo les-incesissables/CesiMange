@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { BaseMetier } from "../metier/base/BaseMetier";
+import { BaseMetier } from "../../metier/base/BaseMetier";
 
 export class BaseController<DTO, CritereDTO>
 {

@@ -1,12 +1,7 @@
 import { Router, Request, Response } from "express";
-import { BaseMetier } from "../metier/base/BaseMetier";
-import { BaseDTO } from "../models/base/BaseDTO";
-import { BaseCritereDTO } from "../models/base/BaseCritereDTO";
+import { BaseMetier } from "../../metier/base/BaseMetier";
 
-export class BaseController<
-  DTO extends BaseDTO,
-  CritereDTO extends BaseCritereDTO
-> {
+export class BaseController<DTO, CritereDTO> {
   private _router: Router;
   protected Metier: BaseMetier<DTO, CritereDTO>;
 

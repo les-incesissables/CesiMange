@@ -1,6 +1,3 @@
-import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../models/base/BaseDTO";
-
 /**
  * Interface pour les controllers
  */

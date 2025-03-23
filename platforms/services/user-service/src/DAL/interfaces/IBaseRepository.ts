@@ -1,6 +1,3 @@
-import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../models/base/BaseDTO";
-
 /**
  * Contrôleur de base générique
  * @template DTO - Type de données retourné/manipulé

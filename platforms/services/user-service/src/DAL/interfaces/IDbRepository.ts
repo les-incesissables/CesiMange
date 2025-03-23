@@ -1,5 +1,3 @@
-import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../models/base/BaseDTO";
 import { IBaseRepository } from "./IBaseRepository";
 
 /**

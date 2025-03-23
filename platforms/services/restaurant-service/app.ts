@@ -9,6 +9,8 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
+import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
 
 //#endregion
 
@@ -38,16 +40,12 @@ app.use(
  */
 app.use(morgan('dev'));
 
-//const userController = new UserController(new UserMetier());
-//const restaurantController = new RestaurantController(new RestaurantMetier());
-//const orderMetier = new OrderController(new OrderMetier());
+const restaurantController = new RestaurantController(new RestaurantMetier());
 
-//app.use('/api/users', userController.getRouter());
-//app.use('/api/resto', restaurantController.getRouter());
-//app.use('/api/order', orderMetier.getRouter());
+app.use('/api/restaurant', restaurantController.getRouter());
 
 // We assign the port number 8080.
-const port = 4002;
+const port = 4003;
 
 // We can see that the app is listening on which port.
 app.listen(port, () =>
