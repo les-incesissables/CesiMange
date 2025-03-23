@@ -24,21 +24,14 @@ export function loadGatewayConfig(): GatewayConfig {
       },
       {
         apiName: "users",
-        url: process.env.USER_SERVICE_URL || "http://localhost:8080",
+        url: process.env.USER_SERVICE_URL || "http://localhost:4002",
         enabled: process.env.USER_SERVICE_ENABLED
           ? process.env.USER_SERVICE_ENABLED === "true"
           : true,
       },
       {
-        apiName: "orders",
-        url: process.env.ORDER_SERVICE_URL || "http://localhost:4003",
-        enabled: process.env.ORDER_SERVICE_ENABLED
-          ? process.env.ORDER_SERVICE_ENABLED === "true"
-          : true,
-      },
-      {
         apiName: "restaurant",
-        url: process.env.RESTAURANT_SERVICE_URL || "http://localhost:4004",
+        url: process.env.RESTAURANT_SERVICE_URL || "http://localhost:4003",
         enabled: process.env.RESTAURANT_SERVICE_ENABLED
           ? process.env.RESTAURANT_SERVICE_ENABLED === "true"
           : true,
