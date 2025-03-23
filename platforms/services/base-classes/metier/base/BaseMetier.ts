@@ -1,6 +1,7 @@
-import { EDatabaseType } from "../../DAL/enums/EDatabaseType";
-import { Repository } from "../../DAL/repositories/Repository";
 import { IBaseMetier } from "./IBaseMetier";
+import { Repository } from "../../../data-access-layer/repositories/Repository"
+import { EDatabaseType } from "../../../data-access-layer/enums/EDatabaseType";
+
 
 /**
  * Contr�leur de base g�n�rique
@@ -163,7 +164,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             this.handleError(error, "itemExists");
             throw error;
         }
-    }
+    } 
     //#endregion
 
     //#region Validation Errors

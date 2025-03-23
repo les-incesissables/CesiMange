@@ -5,8 +5,8 @@ import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
 import { AbstractDbRepository } from "./AbstractDbRepository";
 import { MongoDBRepository } from "./MongoDBRepository";
 import { SqlServerRepository } from "./SqlServerRepository";
-import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../../models/base/BaseDTO";
+import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
+import { BaseDTO } from "../../models/base/BaseDTO";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques

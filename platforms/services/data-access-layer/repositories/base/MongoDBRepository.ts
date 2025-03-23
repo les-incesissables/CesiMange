@@ -1,7 +1,7 @@
-import mongoose, { Model, Document, FilterQuery, PipelineStage, UpdateQuery, Schema } from 'mongoose';
+import mongoose, { Model, Document, FilterQuery, PipelineStage, Schema } from 'mongoose';
 import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
 import { AbstractDbRepository } from './AbstractDbRepository';
-import { BaseCritereDTO } from '../../../models/base/BaseCritereDTO';
+import { BaseCritereDTO } from '../../models/base/BaseCritereDTO';
 
 /**
  * Implémentation du repository pour Mongoose

@@ -1,4 +1,4 @@
-import { IBaseCritereDTO } from "../../interfaces/IBaseCritereDTO";
+import { IBaseCritereDTO } from "../../../../base-classes/interfaces/IBaseCritereDTO";
 
 /**
  * Crit�res de base dont h�ritent tous les CritereDTOs

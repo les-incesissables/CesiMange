@@ -325,7 +325,7 @@ function generateControllerContent(className: string, collectionName: string): s
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
-    content += `import { BaseController } from "../base/BaseController";\n\n\n`;
+    content += `import { BaseController } from "../../../../base-classes/controllers/base/BaseController";\n\n\n`;
     content += `/**\n`;
     content += ` * Contrôleur pour l'entité ${className}\n`;
     content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
@@ -342,7 +342,7 @@ function generateMetierContent(className: string, collectionName: string): strin
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
-    content += `import { BaseMetier } from "../base/BaseMetier";\n\n\n`;
+    content += `import { BaseMetier } from "../../../../base-classes/metier/base/BaseMetier";\n\n\n`;
     content += `/**\n`;
     content += ` * Métier pour l'entité ${className}\n`;
     content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;

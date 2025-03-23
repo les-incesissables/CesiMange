@@ -1,8 +1,8 @@
-import { BaseCritereDTO } from "../../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../../models/base/BaseDTO";
 import { AbstractDbRepository } from "./AbstractDbRepository";
 import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
 import * as sql from 'mssql';
+import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
+import { BaseDTO } from "../../models/base/BaseDTO";
 
 /**
  * Repository de base générique pour SQL Server
