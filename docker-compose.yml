@@ -1,0 +1,17 @@
+services:
+    # Defines the nginx container, which acts as the API gateway.
+    nginx:
+        build: ./platforms/nginx-gateway
+        container_name: nginx-gateway
+        networks:
+            - api_gateway_network
+        environment:
+            - NGINX_PORT=8080
+            - NGINX_HOST=localhost
+        ports:
+            - '8080:80' # Exposes port 80 on the host and forwards it to port 80 in the container.
+
+networks:
+    # Defines a custom network named api_gateway_network.
+    api_gateway_network:
+        driver: bridge
