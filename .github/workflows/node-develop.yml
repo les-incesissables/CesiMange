@@ -1,4 +1,4 @@
-name: Node.js CI - All Projects
+name: CI
 
 on:
   push:
@@ -7,39 +7,81 @@ on:
     branches: [ "develop" ]
 
 jobs:
-  build:
+  # -----------------------------
+  # JOB 1 : Build NPM projects
+  # -----------------------------
+  build-npm:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version:
-          - "22.x"
         project:
           - "platforms/api-gateway"
-          - "apps/customer-final/front"
           - "platforms/services/ModelGenerator"
           - "platforms/services/user-service/backend"
+        node-version: [ "20.x" ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node (NPM)
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          # On utilise le cache npm
+          cache: "npm"
+          # On pointe sur le package-lock.json du projet
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (NPM)
         run: npm ci
         working-directory: ${{ matrix.project }}
 
-      - name: Build
+      - name: Build (NPM)
         run: npm run build --if-present
         working-directory: ${{ matrix.project }}
 
-    
-    # - name: Test
-    #   run: npm test
-    #   working-directory: ${{ matrix.project }}
+      # - name: Test (NPM)
+      #   run: npm test
+      #   working-directory: ${{ matrix.project }}
+
+  # -----------------------------
+  # JOB 2 : Build Yarn project(s)
+  # -----------------------------
+  build-yarn:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project:
+          - "apps/customer-final/front"
+        node-version: [ "22.14" ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node (Yarn)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          # On utilise le cache yarn
+          cache: "yarn"
+          # On suppose que le fichier yarn.lock est à la racine du repo
+          cache-dependency-path: |
+            yarn.lock
+
+      # Installation de toutes les dépendances Yarn à la racine du monorepo
+      - name: Yarn install (monorepo)
+        run: yarn install
+
+      # Build du sous-projet "apps/customer-final/front"
+      - name: Build (Yarn)
+        run: yarn build
+        working-directory: ${{ matrix.project }}
+
+      # - name: Test (Yarn)
+      #   run: yarn test
+      #   working-directory: ${{ matrix.project }}
+
