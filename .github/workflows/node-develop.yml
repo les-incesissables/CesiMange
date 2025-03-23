@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
+
+jobs:
+  # -----------------------------
+  # JOB 1 : Build des projets NPM (plateformes)
+  # -----------------------------
+  build-npm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - "platforms/api-gateway"
+          - "platforms/services/ModelGenerator"
+          - "platforms/services/user-service"
+        node-version: ["22.14"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node for NPM projects
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+
+      - name: Install NPM dependencies
+        run: npm ci
+        working-directory: ${{ matrix.project }}
+
+      - name: Build NPM project
+        run: npm run build --if-present
+        working-directory: ${{ matrix.project }}
+
+  # -----------------------------
+  # JOB 2 : Build des apps Yarn (workspaces)
+  # -----------------------------
+  build-yarn:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Listez ici le nom de chaque app (chaque app correspond à un dossier dans apps/)
+        app: [ "customer-final"]
+        node-version: ["22.14"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node for Yarn apps
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          # Le cache se base sur le yarn.lock racine
+          cache-dependency-path: "yarn.lock"
+
+      # Installation globale en mode Workspaces (une seule installation pour tous les workspaces)
+      - name: Yarn install (monorepo)
+        run: yarn install --frozen-lockfile
+
+      # Build des composants de l'app dans l'ordre voulu
+      - name: Build app components
+        run: |
+          components=(proxy local-middleware front)
+          for component in "${components[@]}"; do
+            componentDir="apps/${{ matrix.app }}/$component"
+            if [ -d "$componentDir" ]; then
+              echo "Building $component for app ${{ matrix.app }}..."
+              cd "$componentDir"
+              yarn build
+              cd - > /dev/null
+            else
+              echo "Directory $componentDir does not exist, skipping."
+            fi
+          done
+
+

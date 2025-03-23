@@ -1,21 +1,9 @@
-// generateDTOs.ts
-
 import * as fs from 'fs';
 import * as path from 'path';
-import { MongoClient } from 'mongodb';
-
-// Types pour le générateur
-type SchemaType = 'String' | 'Number' | 'Boolean' | 'Date' | 'ObjectId' | 'Array' | 'Mixed' | 'Map' | 'Buffer';
+import mongoose from 'mongoose';
+require('dotenv').config()
 
 //#region Interfaces
-interface SchemaField
-{
-    type: SchemaType;
-    ref?: string;
-    isArray?: boolean;
-    arrayType?: SchemaType;
-    arrayRef?: string;
-}
 
 interface PropertyDefinition
 {
@@ -73,7 +61,7 @@ function cleanDirectory(directory: string): void
     ensureDirectoryExists(directory);
 }
 
-// Inférer le type d'une valeur
+// Inférer le type d'une valeur avec support des types spéciaux MongoDB
 function inferType(value: any): string
 {
     if (value === null || value === undefined) return 'any';
@@ -87,16 +75,71 @@ function inferType(value: any): string
     if (value instanceof Date) return 'Date';
 
     // Pour les ObjectId de MongoDB
-    if (value && typeof value === 'object' && value.toString && typeof value.toString === 'function' && /^[0-9a-fA-F]{24}$/.test(value.toString()))
+    if (value && typeof value === 'object' && value.toString && typeof value.toString === 'function'
+        && (mongoose.Types.ObjectId.isValid(value) || /^[0-9a-fA-F]{24}$/.test(value.toString())))
     {
         return 'string';
     }
 
-    if (typeof value === 'object')
+    // Gestion des types spéciaux MongoDB
+    if (value && typeof value === 'object')
     {
+        // Vérifier si c'est un type BSON spécifique
+        if (value._bsontype)
+        {
+            switch (value._bsontype)
+            {
+                case 'Int32':
+                case 'Int64':
+                case 'Long':
+                    return 'number';
+                case 'Decimal128':
+                case 'Double':
+                    return 'number';
+                case 'Binary':
+                    return 'Buffer';
+                case 'ObjectID':
+                    return 'string';
+                case 'Timestamp':
+                    return 'Date';
+                case 'Code':
+                    return 'string';
+                case 'Symbol':
+                    return 'string';
+                case 'DBRef':
+                case 'MaxKey':
+                case 'MinKey':
+                    return 'object';
+                case 'BSONRegExp':
+                    return 'RegExp';
+                default:
+                    return 'object';
+            }
+        }
+
+        // Détecter les types numériques spéciaux
+        if (value.constructor && value.constructor.name)
+        {
+            const constructorName = value.constructor.name;
+            switch (constructorName)
+            {
+                case 'Int32':
+                case 'NumberInt':
+                    return 'number';
+                case 'Decimal128':
+                    return 'number';
+                case 'Long':
+                    return 'number';
+                case 'ObjectID':
+                    return 'string';
+            }
+        }
+
+        // Si c'est un objet vide ou non reconnu
         return 'object';
     }
 
+    // Pour les types primitifs de JavaScript
     return typeof value;
 }
 
@@ -168,24 +211,71 @@ function analyzeDocument(document: any, knownTypes: KnownTypes = {}): PropertyDe
     return structure;
 }
 
-// Fusionner plusieurs structures
+// Fusionner plusieurs structures avec détection intelligente de types
 function mergeStructures(structures: PropertyDefinition[]): PropertyDefinition
 {
     const result: PropertyDefinition = {};
+    const typeFrequency: Record<string, Record<string, number>> = {};
 
+    // Compter la fréquence d'apparition de chaque type pour chaque propriété
     structures.forEach(structure =>
     {
         Object.entries(structure).forEach(([key, type]) =>
         {
-            // Si la clé existe déjà mais avec un type différent, utiliser any
-            if (result[key] && result[key] !== type)
+            if (!typeFrequency[key])
             {
-                result[key] = 'any';
-            } else
-            {
-                result[key] = type;
+                typeFrequency[key] = {};
             }
+
+            if (!typeFrequency[key][type])
+            {
+                typeFrequency[key][type] = 0;
+            }
+
+            typeFrequency[key][type]++;
         });
+    });
+
+    // Déterminer le type le plus pertinent pour chaque propriété
+    Object.entries(typeFrequency).forEach(([key, types]) =>
+    {
+        // Si la propriété a un seul type, l'utiliser
+        if (Object.keys(types).length === 1)
+        {
+            result[key] = Object.keys(types)[0];
+            return;
+        }
+
+        // Si la propriété a plusieurs types, essayer de les réconcilier
+        const allTypes = Object.keys(types);
+
+        // Tous les types numériques deviennent 'number'
+        if (allTypes.every(t => ['number', 'int', 'float', 'double', 'Int32', 'Long', 'Decimal128'].includes(t)))
+        {
+            result[key] = 'number';
+            return;
+        }
+
+        // Si on a des types primitifs et 'null', garder le type primitif
+        if (allTypes.includes('null') && allTypes.length === 2)
+        {
+            const nonNullType = allTypes.find(t => t !== 'null');
+            if (nonNullType)
+            {
+                result[key] = nonNullType;
+                return;
+            }
+        }
+
+        // Si les types incluent string et objectId, utiliser string
+        if (allTypes.includes('string') && allTypes.includes('ObjectID'))
+        {
+            result[key] = 'string';
+            return;
+        }
+
+        // Par défaut, utiliser 'any' pour les types mixtes incompatibles
+        result[key] = 'any';
     });
 
     return result;
@@ -206,12 +296,10 @@ function transformToCriteriaStructure(structure: PropertyDefinition, knownTypes:
     return criteriaStructure;
 }
 
-
-
 // Fonction utilitaire pour vérifier si un type est primitif
 function isPrimitiveType(type: string): boolean
 {
-    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object'];
+    const primitiveTypes = ['string', 'number', 'boolean', 'Date', 'any', 'object', 'Buffer', 'RegExp'];
     return primitiveTypes.some(pt => type === pt);
 }
 
@@ -231,6 +319,7 @@ function shouldExcludeCollection(collectionName: string): boolean
 {
     return config.excludedDirectories.includes(collectionName.toLowerCase());
 }
+
 
 //#region Generate
 
@@ -382,11 +471,28 @@ function generateCritereDTOContent(entityName: string, structure: PropertyDefini
             }
         } else
         {
-            // Utiliser le type primitif tel quel
+            // Gestion spécifique selon le type
             properties += `  ${key}?: ${type};\n`;
-            properties += `  ${key}Like?: ${type};\n`;
-        }
 
+            if (type === 'string')
+            {
+                properties += `  ${key}Like?: string;\n`;
+            }
+            else if (type === 'number')
+            {
+                properties += `  ${key}Min?: number;\n`;
+                properties += `  ${key}Max?: number;\n`;
+            }
+            else if (type === 'Date')
+            {
+                properties += `  ${key}Min?: Date;\n`;
+                properties += `  ${key}Max?: Date;\n`;
+            }
+            else
+            {
+                properties += `  ${key}Like?: ${type};\n`;
+            }
+        }
     });
     const lGenerationDate = new Date().toISOString(); // Génère la date actuelle en format ISO
 
@@ -402,7 +508,6 @@ export class ${entityName}CritereDTO extends BaseCritereDTO {
 ${properties}}
 `;
 }
-
 
 function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefinition, pStructure: PropertyDefinition, pKnownTypes: KnownTypes): void
 {
@@ -420,23 +525,22 @@ function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefiniti
 
     if (!config.front)
     {
-        // Créer le dossier pour l'entité
+        // Créer le dossier pour l'entité (controller)
         const lControllerDir = path.join(config.outputDir.replace('models', 'controllers'), pEntityName.toLowerCase());
         ensureDirectoryExists(lControllerDir);
 
-        // Générer et écrire le CritereDTO
+        // Générer et écrire le Controller
         const lController = generateController(pEntityName);
         fs.writeFileSync(path.join(lControllerDir, `${pEntityName}Controller.ts`), lController);
 
-        // Créer le dossier pour l'entité
+        // Créer le dossier pour l'entité (metier)
         const lMetierDir = path.join(config.outputDir.replace('models', 'metier'), pEntityName.toLowerCase());
         ensureDirectoryExists(lMetierDir);
 
-        // Générer et écrire le CritereDTO
+        // Générer et écrire le Metier
         const lMetier = generateMetier(pEntityName);
         fs.writeFileSync(path.join(lMetierDir, `${pEntityName}Metier.ts`), lMetier);
     }
-
 
     console.log(`  Fichiers générés pour ${pEntityName}`);
     return;
@@ -445,51 +549,54 @@ function generateFiles(pEntityName: string, pCriteriaStructure: PropertyDefiniti
 // Fonction principale pour générer les DTOs
 async function generateDTOs(): Promise<void>
 {
-    let client: MongoClient | null = null;
-
     try
     {
         console.log('Démarrage de la génération des DTOs...');
 
+        if (config.cleanOutputDir)
+        {
+            cleanDirectory(config.outputDir);
+        }
 
         ensureDirectoryExists(config.outputDir);
         ensureDirectoryExists(path.join(config.outputDir, 'base'));
         ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'base'));
         ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'interfaces'));
+        ensureDirectoryExists(path.join(config.outputDir.replace('models', ''), 'services'));
 
         fs.writeFileSync(
-            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'), fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
+            path.join(config.outputDir.replace('models', ''), 'interfaces', 'IBaseCritereDTO.ts'),
+            fs.readFileSync('./src/interfaces/IBaseCritereDTO.ts'));
 
         // Générer les DTOs de base
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseDTO.ts'), fs.readFileSync('./src/models/base/BaseDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseDTO.ts'),
+            fs.readFileSync('./src/models/base/BaseDTO.ts'));
 
         fs.writeFileSync(
-            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'), fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
+            path.join(config.outputDir, 'base', 'BaseCritereDTO.ts'),
+            fs.readFileSync('./src/models/base/BaseCritereDTO.ts'));
 
-        // Connexion à MongoDB
-        client = new MongoClient(config.mongoUri);
-        await client.connect();
-        console.log('Connecté à MongoDB');
+        // Connexion à MongoDB avec Mongoose
+        await mongoose.connect(config.mongoUri);
+        console.log('Connecté à MongoDB avec Mongoose');
 
-        const dbName = config.mongoUri.split('/').pop()?.split('?')[0] || '';
-        const db = client.db(dbName);
+        // Récupérer toutes les collections
+        const collections = mongoose.connection.db.collections();
+        const collectionArray = await collections;
 
-        // Créer manuellement des exemples si aucune collection n'est trouvée
-        const collections = await db.listCollections().toArray();
-
-        if (collections.length > 0)
+        if (collectionArray.length > 0)
         {
             // Analyser les collections existantes
-            console.log(`${collections.length} collections trouvées.`);
+            console.log(`${collectionArray.length} collections trouvées.`);
 
             const knownTypes: KnownTypes = {};
             const entityStructures: Record<string, PropertyDefinition> = {};
 
             // Première passe : analyser les documents de chaque collection
-            for (const collection of collections)
+            for (const collection of collectionArray)
             {
-                const collectionName = collection.name;
+                const collectionName = collection.collectionName;
 
                 // Vérifier si la collection doit être exclue
                 if (shouldExcludeCollection(collectionName))
@@ -501,7 +608,8 @@ async function generateDTOs(): Promise<void>
                 console.log(`Analyse de la collection ${collectionName}...`);
 
                 // Obtenir des échantillons de documents
-                const documents = await db.collection(collectionName)
+                const documents = await mongoose.connection.db
+                    .collection(collectionName)
                     .find()
                     .limit(config.sampleSize)
                     .toArray();
@@ -557,7 +665,6 @@ async function generateDTOs(): Promise<void>
                 const criteriaStructure = transformToCriteriaStructure(structure, knownTypes);
 
                 generateFiles(typeName, criteriaStructure, structure, knownTypes);
-
             }
         }
 
@@ -568,17 +675,14 @@ async function generateDTOs(): Promise<void>
         console.error('Erreur lors de la génération des DTOs:', error);
     } finally
     {
-        if (client)
-        {
-            await client.close();
-            console.log('Déconnecté de MongoDB');
-        }
+        // Fermer la connexion Mongoose
+        await mongoose.disconnect();
+        console.log('Déconnecté de MongoDB');
     }
 }
-
+generateDTOs();
 //#endregion
 
 //#endregion
 
 // Exécuter la génération
-generateDTOs();
