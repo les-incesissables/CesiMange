@@ -1,49 +1,188 @@
-# WebAvance
+# WebAvance – Monorepo CESIMANGE
 
-[Templates de Smart Commits](docs/workflow/Git/Commit_Template.md)
+[📝 Templates de Smart Commits](docs/workflow/Git/Commit_Template.md)  
+[📐 Normes de codage](docs/workflow/Normes_de_Codage.md)  
+[🔀 Git Flow](docs/workflow/Git/WorkFlow.md)
 
-[Normes de codage](docs/workflow/Normes_de_Codage.md)
+---
 
-[Git Flow](docs/workflow/Git/WorkFlow.md)
+## Initialisation & Lancement du Projet
 
-# Stratégie de gestion des branches Git
+Ce projet est organisé en **monorepo hybride** combinant :
 
-Notre projet adopte une stratégie de gestion des branches Git structurée autour de trois branches principales : `main`, `develop` et `staging`. Cette organisation facilite le développement, les tests et le déploiement de notre application.
+- Des **apps** (front, proxy, middleware) gérées via **Yarn Workspaces** dans le dossier `apps/`.
+- Des **services** (API, microservices, etc.) gérés avec **npm** dans le dossier `platforms/`.
 
-## Branches principales
+### Ordre d'Initialisation et de Build
 
-1. **`main`** :
-   - **Rôle :** Contient le code stable prêt pour la production. Chaque commit sur cette branche représente une version publiée de l'application.
-   - **Actions :**
+1. **Installation globale (Cesimange/apps)**  
+   Depuis la racine du projet, exécutez :
+
+   ```bash
+   yarn install
+   ```
+
+   Cette commande installe toutes les dépendances partagées et prépare l'environnement des workspaces.
+
+2. **Build des modules des apps (Yarn Workspaces)**  
+   Important : Vous devez builder le proxy et le middleware avant de lancer le front en mode développement.  
+   Par exemple, pour le client **customer-final** :
+
+   - **Build du proxy** :
+     ```bash
+     yarn workspace customer-final-proxy build
+     ```
+   - **Build du middleware** :
+     ```bash
+     yarn workspace customer-final-middleware build
+     ```
+
+3. **Lancement de l'app front (customer-final)**  
+   Une fois le proxy et le middleware buildés, lancez le front en mode développement :
+
+   ```bash
+   cd apps/customer-final/front
+   npm run dev
+   ```
+
+4. **Installation des services (platforms) (npm)**  
+   Pour chaque service, installez les dépendances localement :
+
+   - **ModelGenerator** :
+     ```bash
+     cd platforms/services/ModelGenerator
+     npm install
+     ```
+   - **user-service** :
+     ```bash
+     cd platforms/services/user-service
+     npm install
+     ```
+
+5. **Lancement de l’API Gateway avec Nginx**  
+   Pour lancer l'API Gateway, assurez-vous que **make** est installé globalement.
+   - Installez make (si nécessaire) :
+     ```bash
+     npm install -g make
+     ```
+   - Ensuite, lancez l'API Gateway depuis la racine :
+     ```bash
+     make up
+     ```
+
+---
+
+## Structure du Projet (Arborescence Simplifiée)
+
+```
+.
+├── apps/
+│   └── customer-final/
+│       ├── front/
+│       ├── proxy/
+│       └── local-middleware/
+├── platforms/
+│   ├── api-gateway/
+│   └── services/
+│       ├── ModelGenerator/
+│       └── user-service/
+├── yarn.lock
+├── package.json
+└── Makefile
+```
+
+---
+
+## Stratégie de Gestion des Branches Git
+
+Le projet suit une stratégie de gestion des branches inspirée de Git Flow, organisée autour de trois branches principales :
+
+### Branches Principales
+
+1. **`main`**
+
+   - **Rôle :** Code stable prêt pour la production. Chaque commit représente une version publiée.
+   - **Actions :**
      - Fusionner les versions validées depuis `staging`.
      - Déployer en production à partir de cette branche.
 
-2. **`develop`** :
-   - **Rôle :** Branche d'intégration principale où les développeurs fusionnent les nouvelles fonctionnalités en cours de développement.
-   - **Actions :**
+2. **`develop`**
+
+   - **Rôle :** Branche d'intégration principale où les développeurs fusionnent les nouvelles fonctionnalités.
+   - **Actions :**
      - Créer des branches de fonctionnalités (`feature/*`) à partir de `develop`.
-     - Après le développement et les tests unitaires, fusionner les branches de fonctionnalités dans `develop`.
+     - Après développement et tests unitaires, fusionner les branches de fonctionnalités dans `develop`.
 
-3. **`staging`** :
-   - **Rôle :** Environnement intermédiaire utilisé pour les tests approfondis et la validation avant le déploiement en production.
-   - **Actions :**
+3. **`staging`**
+   - **Rôle :** Environnement intermédiaire pour les tests approfondis et la validation avant production.
+   - **Actions :**
      - Fusionner `develop` dans `staging` pour préparer une nouvelle version.
-     - Effectuer des tests d'intégration et des validations sur `staging`.
-     - Une fois validée, fusionner `staging` dans `main` pour le déploiement en production.
+     - Effectuer des tests d'intégration et valider sur `staging`.
+     - Fusionner `staging` dans `main` pour le déploiement en production.
 
-## Flux de travail recommandé
+### Flux de Travail Recommandé
 
-1. **Développement de fonctionnalités :**
-   - Créer des branches de fonctionnalités (`feature/*`) à partir de `develop`.
-   - Développer et tester les fonctionnalités sur ces branches.
-   - Fusionner les branches de fonctionnalités terminées dans `develop`.
+1. **Développement de Fonctionnalités**
 
-2. **Phase de test :**
-   - Fusionner la branche `develop` dans `staging`.
-   - Réaliser des tests approfondis sur `staging` pour s'assurer de la stabilité et de la qualité du code.
+   ```bash
+   git checkout develop
+   git checkout -b feature/ma-nouvelle-fonction
+   # Développement, commits et tests...
+   git checkout develop
+   git merge feature/ma-nouvelle-fonction
+   ```
 
-3. **Mise en production :**
-   - Après validation sur `staging`, fusionner `staging` dans `main`.
-   - Déployer le code en production à partir de la branche `main`.
+2. **Phase de Test**
 
-Cette organisation en trois branches principales assure une séparation claire entre le développement, les tests et la production, réduisant ainsi les risques d'introduire des bugs en production et facilitant la gestion des versions du code.
+   ```bash
+   git checkout staging
+   git merge develop
+   # Réaliser des tests approfondis
+   ```
+
+3. **Mise en Production**
+   ```bash
+   git checkout main
+   git merge staging
+   # Déploiement depuis main
+   ```
+
+---
+
+## Récapitulatif des Commandes Utiles
+
+| Étape                                   | Commande                                              |
+| --------------------------------------- | ----------------------------------------------------- |
+| Installer toutes les dépendances        | `yarn install`                                        |
+| Build du proxy                          | `yarn workspace customer-final-proxy build`           |
+| Build du middleware                     | `yarn workspace customer-final-middleware build`      |
+| Lancer le front en mode dev             | `cd apps/customer-final/front` puis `npm run dev`     |
+| Installer les services (ModelGenerator) | `cd platforms/services/ModelGenerator && npm install` |
+| Installer les services (user-service)   | `cd platforms/services/user-service && npm install`   |
+| Installer make globalement              | `npm install -g make`                                 |
+| Lancer l'API Gateway                    | `make up`                                             |
+
+---
+
+## Notes & Adaptations
+
+- **Ajout de Nouveaux Apps :**  
+  Pour chaque nouvelle app dans `apps/`, suivez le même modèle :
+
+  - Ajoutez un workspace dans le `package.json` à la racine.
+  - Utilisez `yarn workspace <workspace-name> build` pour builder les modules requis.
+
+- **Ordre de Build :**  
+  Il est impératif de builder **proxy** et **middleware** avant de lancer le front pour garantir le bon fonctionnement des dépendances.
+
+- **Services :**  
+  Les services situés dans `platforms/services/` utilisent npm et nécessitent leur propre installation (`npm install`).
+
+- **API Gateway :**  
+  L’API Gateway est lancée via un Makefile, en s'assurant que `make` est installé globalement.
+
+---
+
+Ce README structuré permet à l'équipe de bien comprendre l'ordre d'exécution et les commandes à utiliser pour initialiser, builder et lancer chaque partie du projet.  
+N'hésitez pas à l'adapter en fonction de l'évolution de l'architecture ou des outils utilisés.
+
