@@ -1,6 +1,5 @@
 {
-    "name": "customer-final-proxy",
-    "description": "Proxy layer for Customer App, handling backend communication via Axios.",
+    "name": "customer-final-middleware",
     "version": "1.0.0",
     "type": "module",
     "main": "dist/index.js",
@@ -13,13 +12,15 @@
         "lint": "eslint . --ext .ts",
         "test": "jest --coverage"
     },
-    "keywords": [],
+    "description": "Local middleware for processing and normalizing API messages between the platform and the application.",
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "axios": "^1.8.4"
+        "customer-final-proxy": "*"
     },
     "devDependencies": {
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.13.10",
         "eslint": "^9.22.0",
         "jest": "^29.7.0",
         "ts-node": "^10.9.2",

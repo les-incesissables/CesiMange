@@ -5,13 +5,13 @@ require('dotenv').config();
 
 import * as path from 'path';
 
-import { OrderController } from './controllers/order/OrderController';
-import { RestaurantController } from './controllers/restaurant/RestaurantController';
-import { UserController } from './controllers/user/UserController';
+import { OrderController } from './src/controllers/order/OrderController';
 
-import { RestaurantMetier } from './metier/restaurant/RestaurantMetier';
-import { UserMetier } from './metier/user/UserMetier';
-import { OrderMetier } from './metier/order/OrderMetier';
+import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
+import { UserController } from './src/controllers/user/UserController';
+import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
+import { UserMetier } from './src/metier/user/UserMetier';
+import { OrderMetier } from './src/metier/order/OrderMetier';
 
 import cors from 'cors';
 import helmet from 'helmet';
