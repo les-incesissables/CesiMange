@@ -18,7 +18,7 @@ jobs:
           - "platforms/api-gateway"
           - "platforms/services/ModelGenerator"
           - "platforms/services/user-service/backend"
-        node-version: ["20.x"]
+        node-version: ["22.14"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
