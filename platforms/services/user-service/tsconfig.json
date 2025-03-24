@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "data-access-layer/": [ "../data-access-layer/src" ]
+      "data-access-layer": [ "../data-access-layer/src" ]
     },
     /* Language and Environment */
     "target": "ES6", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
