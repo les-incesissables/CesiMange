@@ -1,18 +1,17 @@
-import { EDatabaseType } from "../enums/EDatabaseType";
+import { EDatabaseType } from '../../data-access-layer/interfaces/enums/EDatabaseType';
 
 /**
  * Configuration du repository MongoDB
  */
-export interface IRepositoryConfig
-{
+export interface IRepositoryConfig {
     /**
-     * Chaîne de connexion MongoDB
+     * Chaï¿½ne de connexion MongoDB
      * Ex: mongodb://localhost:27017
      */
     ConnectionString: string;
 
     /**
-     * Nom de la base de données
+     * Nom de la base de donnï¿½es
      */
     DbName: string;
 
@@ -22,7 +21,7 @@ export interface IRepositoryConfig
     CollectionName: string;
 
     /*
-    *
-    */
+     *
+     */
     TypeBDD: EDatabaseType;
 }

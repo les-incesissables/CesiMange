@@ -1,24 +1,18 @@
-import { IBaseMetier } from "./IBaseMetier";
-import { Repository } from "../../../data-access-layer/repositories/Repository"
-import { EDatabaseType } from "../../../data-access-layer/enums/EDatabaseType";
-
+import { IBaseMetier } from './IBaseMetier';
+import { Repository } from '../../../data-access-layer/repositories/Repository';
+import { EDatabaseType } from '../../../data-access-layer/interfaces/enums/EDatabaseType';
 
 /**
  * Contr�leur de base g�n�rique
  * @template DTO - Type de donn�es retourn�/manipul�
  * @template CritereDTO - Type des crit�res de recherche
  */
-export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO>
-{
+export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO> {
     protected Repository: Repository<DTO, CritereDTO>;
 
     //#region CTOR
-    constructor (pCollectionName: string)
-    {
-        const lRepo = new Repository<DTO, CritereDTO>(
-            pCollectionName,
-            EDatabaseType.MONGODB
-        );
+    constructor(pCollectionName: string) {
+        const lRepo = new Repository<DTO, CritereDTO>(pCollectionName, EDatabaseType.MONGODB);
         this.Repository = lRepo;
     }
 
@@ -26,12 +20,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
 
     //#region CRUD
     /**
-* Obtenir tous les �l�ments selon des crit�res
-*/
-    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
-    {
-        try
-        {
+     * Obtenir tous les �l�ments selon des crit�res
+     */
+    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]> {
+        try {
             // Validation des crit�res si n�cessaire
             this.validateCritereDTO(pCritereDTO);
 
@@ -43,9 +35,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
 
             // Appliquer des transformations ou r�gles apr�s la r�cup�ration
             return items;
-        } catch (error)
-        {
-            this.handleError(error, "getItems");
+        } catch (error) {
+            this.handleError(error, 'getItems');
             throw error;
         }
     }
@@ -53,10 +44,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Obtenir un �l�ment par crit�res
      */
-    async getItem(pCritereDTO: CritereDTO): Promise<DTO>
-    {
-        try
-        {
+    async getItem(pCritereDTO: CritereDTO): Promise<DTO> {
+        try {
             // Validation des crit�res
             this.validateCritereDTO(pCritereDTO);
 
@@ -67,9 +56,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             const item = await this.Repository.getItem(pCritereDTO);
 
             return item;
-        } catch (error)
-        {
-            this.handleError(error, "getItem");
+        } catch (error) {
+            this.handleError(error, 'getItem');
             throw error;
         }
     }
@@ -77,10 +65,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Cr�er un nouvel �l�ment
      */
-    async createItem(pDTO: DTO): Promise<DTO>
-    {
-        try
-        {
+    async createItem(pDTO: DTO): Promise<DTO> {
+        try {
             // Validation des donn�es
             this.validateDTO(pDTO);
 
@@ -91,9 +77,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             const item = await this.Repository.createItem(preparedDTO);
 
             return item;
-        } catch (error)
-        {
-            this.handleError(error, "createItem");
+        } catch (error) {
+            this.handleError(error, 'createItem');
             throw error;
         }
     }
@@ -101,10 +86,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Mettre � jour un �l�ment existant
      */
-    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
-        try
-        {
+    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
+        try {
             // Validation des donn�es et crit�res
             this.validateDTO(pDTO);
             this.validateCritereDTO(pCritereDTO);
@@ -116,9 +99,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             const item = await this.Repository.updateItem(preparedDTO, pCritereDTO);
 
             return item;
-        } catch (error)
-        {
-            this.handleError(error, "updateItem");
+        } catch (error) {
+            this.handleError(error, 'updateItem');
             throw error;
         }
     }
@@ -126,10 +108,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Supprimer un �l�ment
      */
-    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
-    {
-        try
-        {
+    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean> {
+        try {
             // Validation des crit�res
             this.validateCritereDTO(pCritereDTO);
 
@@ -140,9 +120,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
             const result = await this.Repository.deleteItem(pCritereDTO);
 
             return result;
-        } catch (error)
-        {
-            this.handleError(error, "deleteItem");
+        } catch (error) {
+            this.handleError(error, 'deleteItem');
             throw error;
         }
     }
@@ -150,21 +129,18 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * V�rifier si un �l�ment existe selon des crit�res
      */
-    async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
-    {
-        try
-        {
+    async itemExists(pCritereDTO: CritereDTO): Promise<boolean> {
+        try {
             // Validation des crit�res
             this.validateCritereDTO(pCritereDTO);
 
             // D�l�guer la v�rification au repository
             return await this.Repository.itemExists(pCritereDTO);
-        } catch (error)
-        {
-            this.handleError(error, "itemExists");
+        } catch (error) {
+            this.handleError(error, 'itemExists');
             throw error;
         }
-    } 
+    }
     //#endregion
 
     //#region Validation Errors
@@ -173,12 +149,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
      * Valider les donn�es avant cr�ation/mise � jour
      * � surcharger pour des validations sp�cifiques
      */
-    protected validateDTO(pDTO: DTO): void
-    {
+    protected validateDTO(pDTO: DTO): void {
         // Validation de base
-        if (!pDTO)
-        {
-            throw new Error("Les donn�es sont requises");
+        if (!pDTO) {
+            throw new Error('Les donn�es sont requises');
         }
     }
 
@@ -186,36 +160,31 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
      * Valider les crit�res de recherche
      * � surcharger pour des validations sp�cifiques
      */
-    protected validateCritereDTO(pCritereDTO: CritereDTO): void
-    {
+    protected validateCritereDTO(pCritereDTO: CritereDTO): void {
         // Validation de base
-        if (!pCritereDTO)
-        {
-            throw new Error("Les crit�res sont requis");
+        if (!pCritereDTO) {
+            throw new Error('Les crit�res sont requis');
         }
     }
 
     /**
      * Actions avant de r�cup�rer plusieurs �l�ments
      */
-    protected beforeGetItems(pCritereDTO: CritereDTO): void
-    {
+    protected beforeGetItems(pCritereDTO: CritereDTO): void {
         // Par d�faut ne fait rien, � surcharger si n�cessaire
     }
 
     /**
      * Actions avant de r�cup�rer un �l�ment
      */
-    protected beforeGetItem(pCritereDTO: CritereDTO): void
-    {
+    protected beforeGetItem(pCritereDTO: CritereDTO): void {
         // Par d�faut ne fait rien, � surcharger si n�cessaire
     }
 
     /**
      * Actions avant de cr�er un �l�ment
      */
-    protected async beforeCreateItem(pDTO: DTO): Promise<DTO>
-    {
+    protected async beforeCreateItem(pDTO: DTO): Promise<DTO> {
         // Par d�faut retourne les donn�es telles quelles, � surcharger si n�cessaire
         return pDTO;
     }
@@ -223,11 +192,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Actions avant de mettre � jour un �l�ment
      */
-    protected async beforeUpdateItem(
-        pDTO: DTO,
-        pCritereDTO: CritereDTO
-    ): Promise<DTO>
-    {
+    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
         // Par d�faut retourne les donn�es telles quelles, � surcharger si n�cessaire
         return pDTO;
     }
@@ -235,16 +200,14 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     /**
      * Actions avant de supprimer un �l�ment
      */
-    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // Par d�faut ne fait rien, � surcharger si n�cessaire
     }
 
     /**
      * Gestion des erreurs
      */
-    protected handleError(error: any, methodName: string): void
-    {
+    protected handleError(error: any, methodName: string): void {
         console.error(`Erreur dans ${methodName}:`, error);
         // Logique sp�cifique de gestion des erreurs
     }
