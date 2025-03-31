@@ -6,17 +6,17 @@
       "request": "launch",
       "name": "Debug Application",
       "skipFiles": [ "<node_internals>/**" ],
-      "program": "${workspaceFolder}/dist/user-service/app.js",
+      "program": "${workspaceFolder}/dist/microservices/user-service/src/app.js",
       "outFiles": [
-        "${workspaceFolder}/dist/user-service/**/*.js",
-        "${workspaceFolder}/../data-access-layer/dist/**/*.js",
-        "${workspaceFolder}/../base-classes/dist/**/*.js"
+        "${workspaceFolder}/dist/microservices/user-service/src/**/*.js",
+        "${workspaceFolder}/../../services/data-access-layer/dist/**/*.js",
+        "${workspaceFolder}/../../services/base-classes/dist/**/*.js"
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/**",
-        "${workspaceFolder}/../data-access-layer/**",
-        "${workspaceFolder}/../base-classes/**",
+        "${workspaceFolder}/../../services/data-access-layer/**",
+        "${workspaceFolder}/../../services/base-classes/**",
         "!**/node_modules/**"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
