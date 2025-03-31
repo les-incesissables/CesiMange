@@ -7,15 +7,16 @@ import { IBaseCritereDTO } from "../../interfaces/IBaseCritereDTO";
 export abstract class BaseCritereDTO implements IBaseCritereDTO
 {
     //#region Properties
-    Id?: string;
-    Ids?: string[];
-    Search?: string;
-    Page?: number;
-    PageSize?: number;
-    Sort?: string;
-    SortDirection?: "asc" | "desc";
-    IncludeDeleted?: boolean;
-    Limit?: number;
-    Skip?: number;
+    id?: string;
+    ids?: string[];
+    search?: string;
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+    sortDirection?: "asc" | "desc";
+    includeDeleted?: boolean;
+    limit?: number;
+    skip?: number;
+    populate?: string[];
     //#endregion
 }
