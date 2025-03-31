@@ -4,11 +4,22 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
+      "name": "Debug Application",
       "skipFiles": [ "<node_internals>/**" ],
       "program": "${workspaceFolder}/app.js",
-      "cwd": "${workspaceFolder}",
-      "console": "externalTerminal"
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "${workspaceFolder}/../data-access-layer/dist/**/*.js"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/../data-access-layer/**",
+        "!**/node_modules/**"
+      ],
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "console": "externalTerminal",
+      "cwd": "${workspaceFolder}"
     }
   ]
 }

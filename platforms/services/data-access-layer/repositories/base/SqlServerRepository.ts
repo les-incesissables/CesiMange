@@ -36,26 +36,17 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
             // Vérifier si la connexion existe déjà
             if (!this._sqlPool)
             {
-                //// Configurer la connexion SQL Server
-                //const sqlConfig: sql.config = {
-                //    user: this._config.User,
-                //    password: this._config.Password,
-                //    database: this._config.DbName,
-                //    server: this._config.Server || 'localhost',
-                //    pool: {
-                //        max: 10,
-                //        min: 0,
-                //        idleTimeoutMillis: 30000
-                //    },
-                //    options: {
-                //        encrypt: true, // Pour Azure
-                //        trustServerCertificate: true // À utiliser pour le développement local
-                //    }
-                //};
-
-                //// Créer le pool de connexion
-                //this._sqlPool = await new sql.ConnectionPool(sqlConfig).connect();
-                console.log("Connexion SQL Server établie");
+                // Utiliser une chaîne de connexion
+                const connectionString = process.env.SQL_CONNECTION_STRING;
+                if (connectionString)
+                {
+                    // Créer le pool de connexion
+                    this._sqlPool = await new sql.ConnectionPool(connectionString).connect();
+                    console.log("Connexion SQL Server établie");
+                }
+                else
+                    throw new Error("Le fichier env est pas setup");
+  
             }
 
             console.log(`Table '${this._tableName}' prête à l'emploi`);
@@ -88,18 +79,18 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
         {
             await this.ensureConnection();
 
-            const { query, parameters } = this.buildSqlQuery(pCritereDTO);
+            const { lQuery, lParameters } = this.buildSqlQuery(pCritereDTO);
 
-            const request = this._sqlPool!.request();
+            const lRequest = this._sqlPool!.request();
 
             // Ajout des paramètres à la requête
-            for (const [key, value] of Object.entries(parameters))
+            for (const [lKey, lValue] of Object.entries(lParameters))
             {
-                request.input(key, value);
+                lRequest.input(lKey, lValue);
             }
 
-            const result = await request.query(query);
-            return this.formatResults(result.recordset);
+            const lResult = await lRequest.query(lQuery);
+            return this.formatResults(lResult.recordset);
         } catch (error)
         {
             console.error("Erreur lors de la récupération des items:", error);
@@ -117,17 +108,17 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
         {
             await this.ensureConnection();
 
-            const { query, parameters } = this.buildSqlQuery(pCritereDTO, true);
+            const { lQuery, lParameters } = this.buildSqlQuery(pCritereDTO, true);
 
             const request = this._sqlPool!.request();
 
             // Ajout des paramètres à la requête
-            for (const [key, value] of Object.entries(parameters))
+            for (const [key, value] of Object.entries(lParameters))
             {
                 request.input(key, value);
             }
 
-            const result = await request.query(query);
+            const result = await request.query(lQuery);
 
             if (!result.recordset || result.recordset.length === 0)
             {
@@ -437,22 +428,22 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
     /**
      * Construit la requête SQL complète
      */
-    protected buildSqlQuery(pCritereDTO: CritereDTO, singleItem: boolean = false): { query: string, parameters: any }
+    protected buildSqlQuery(pCritereDTO: CritereDTO, singleItem: boolean = false): { lQuery: string, lParameters: any }
     {
-        const whereClause = this.buildSqlWhereClause(pCritereDTO);
-        let query = `SELECT * FROM ${this._tableName}`;
+        const lWhereClause = this.buildSqlWhereClause(pCritereDTO);
+        let lQuery = `SELECT * FROM ${this._tableName}`;
 
         // Ajouter la clause WHERE si nécessaire
-        if (whereClause.conditions)
+        if (lWhereClause.conditions)
         {
-            query += ` WHERE ${whereClause.conditions}`;
+            lQuery += ` WHERE ${lWhereClause.conditions}`;
         }
 
         // Ajouter le tri
         if (pCritereDTO.sort)
         {
             const direction = pCritereDTO.sortDirection ? 'DESC' : 'ASC';
-            query += ` ORDER BY ${pCritereDTO.sort} ${direction}`;
+            lQuery += ` ORDER BY ${pCritereDTO.sort} ${direction}`;
         }
 
         // Ajouter la pagination pour les requêtes qui ne demandent pas un seul élément
@@ -460,20 +451,20 @@ export class SqlServerRepository<DTO extends BaseDTO, CritereDTO extends BaseCri
         {
             if (pCritereDTO.skip && pCritereDTO.limit)
             {
-                query += ` OFFSET ${pCritereDTO.skip} ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
+                lQuery += ` OFFSET ${pCritereDTO.skip} ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
             } else if (pCritereDTO.limit)
             {
-                query += ` OFFSET 0 ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
+                lQuery += ` OFFSET 0 ROWS FETCH NEXT ${pCritereDTO.limit} ROWS ONLY`;
             }
         } else
         {
             // Pour un seul élément, limiter à 1
-            query += ' OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY';
+            lQuery += ' OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY';
         }
 
         return {
-            query,
-            parameters: whereClause.parameters
+            lQuery,
+            lParameters: lWhereClause.parameters
         };
     }
     //#endregion

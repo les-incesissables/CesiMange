@@ -1,0 +1,49 @@
+{
+	"folders": {},
+	"connections": {
+		"microsoft-195eb923c4c-6be7c8603657ea5c": {
+			"provider": "sqlserver",
+			"driver": "microsoft",
+			"name": "CesiMange",
+			"save-password": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "1433",
+				"database": "CesiMange",
+				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dCesiMange",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-all-schemas@": "true",
+					"sslTrustServerCertificate": "true"
+				},
+				"auth-model": "sqlserver_database"
+			},
+			"filters": [
+				{
+					"id": "CesiMange",
+					"type": "org.jkiss.dbeaver.ext.mssql.model.SQLServerSchema",
+					"enabled": true,
+					"include": ["dbo"]
+				}
+			]
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "0,255,64",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		}
+	}
+}

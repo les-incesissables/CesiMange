@@ -11,10 +11,12 @@ import { EDatabaseType } from "../../../data-access-layer/enums/EDatabaseType";
 export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO>
 {
     protected Repository: Repository<DTO, CritereDTO>;
+    protected CollectionName: string;
 
     //#region CTOR
     constructor (pCollectionName: string)
     {
+        this.CollectionName = pCollectionName;
         const lRepo = new Repository<DTO, CritereDTO>(
             pCollectionName,
             EDatabaseType.MONGODB
