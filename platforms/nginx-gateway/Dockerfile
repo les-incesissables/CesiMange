@@ -1,17 +1,18 @@
-# Étape 1 : Utiliser l'image stable de NGINX
+# Étape 1 : On part d'une image Nginx légère
 FROM nginx:stable-alpine
 
-# Étape 2 : Supprimer la config par défaut si elle existe
+# Étape 2 : Supprimer la config par défaut
 RUN rm -f /etc/nginx/conf.d/default.conf
 
-# Étape 3 : Copier ta configuration personnalisée nginx.conf
-COPY nginx.conf /etc/nginx/nginx.conf
+# Étape 3 : Copier ta configuration personnalisée
+COPY platforms/nginx-gateway/nginx.conf /etc/nginx/nginx.conf
 
-# Étape 4 : Ajouter un dossier pour logs (optionnel si tu veux les sortir proprement)
+# Étape 4 : (Optionnel) Créer un dossier logs (souvent géré par l'image Nginx)
 RUN mkdir -p /var/log/nginx
 
-# Étape 5 : Exposer le port utilisé par ton gateway (ici 80)
-EXPOSE 80 443
+# Étape 5 : Exposer le port 80
+EXPOSE 80
 
-# Étape 6 : CMD par défaut (inclus déjà dans l’image NGINX, mais on le laisse ici pour clarté)
+# Étape 6 : Démarrer Nginx
 CMD ["nginx", "-g", "daemon off;"]
+

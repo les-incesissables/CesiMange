@@ -1,21 +1,19 @@
 {
-    "name": "data-access-layer",
+    "name": "restaurant-service",
     "version": "1.0.0",
     "private": true,
-    "description": "Data access layer for database abstraction",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "description": "Restaurant microservice",
+    "main": "dist/app.js",
+    "types": "dist/app.d.ts",
     "scripts": {
         "build": "tsc",
         "clean": "rm -rf dist",
-        "start": "node dist/index.js",
-        "dev": "nodemon src/index.ts"
+        "start": "node dist/app.js",
+        "dev": "nodemon src/app.ts"
     },
     "author": {
         "name": ""
     },
-    "keywords": [],
-    "license": "MIT",
     "dependencies": {
         "cors": "^2.8.5",
         "debug": "^2.2.0",
@@ -23,7 +21,7 @@
         "escape-string-regexp": "^5.0.0",
         "express": "^4.14.0",
         "helmet": "^8.1.0",
-        "mongoose": "^8.12.2",
+        "mongoose": "8.12.2",
         "morgan": "^1.10.0",
         "mssql": "11.0.1"
     },

@@ -1,0 +1,19 @@
+FROM node:22.14-alpine AS builder
+WORKDIR /app
+
+# Copier l'intégralité du dépôt
+COPY . .
+
+# Se positionner dans le dossier du restaurant-service
+WORKDIR /app/platforms/microservices/restaurant-service
+RUN npm install
+RUN npm run build
+
+FROM node:22.14-alpine
+WORKDIR /app
+COPY --from=builder /app /app
+WORKDIR /app/platforms/microservices/restaurant-service
+RUN npm install
+EXPOSE 4003
+CMD ["npm", "run", "dev"]
+
