@@ -83,7 +83,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 }
 
                 // Obtenir le repository
-                this._repository = this._dataSource.getRepository(this._DTOType);
+                this._repository = this._dataSource.getRepository<DTO>(this._DTOType);
                 this._isConnected = true;
                 console.log(`Repository pour '${this._config.CollectionName}' initialisé`);
             }
