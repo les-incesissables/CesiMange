@@ -6,7 +6,7 @@ import { AbstractDbRepository } from "./AbstractDbRepository";
 import { MongoDBRepository } from "./MongoDBRepository";
 import { SqlServerRepository } from "./SqlServerRepository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
-import { BaseDTO } from "../../models/base/BaseDTO";
+import { ObjectLiteral } from "typeorm";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques
@@ -39,7 +39,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER)
             {
                 // cm - Initialise le repo SqlServer
-                this._repository = new SqlServerRepository<DTO & BaseDTO, CritereDTO & BaseCritereDTO>(pConfig);
+                this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig);
             } else
             {
                 throw new Error(

@@ -20,7 +20,7 @@ export class UserMetier extends BaseMetier<IUser, Partial<IUser>> {
             EDatabaseType.SQL_SERVER
         );
         let us = await lRepo.getItems(pCritereDTO);
-
-        return await super.getItems(pCritereDTO);
+        //await super.getItems(pCritereDTO);
+        return us;
     }   
 }

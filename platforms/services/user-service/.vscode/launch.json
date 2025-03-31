@@ -9,12 +9,14 @@
       "program": "${workspaceFolder}/app.js",
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js",
-        "${workspaceFolder}/../data-access-layer/dist/**/*.js"
+        "${workspaceFolder}/../data-access-layer/dist/**/*.js",
+        "${workspaceFolder}/../base-classes/dist/**/*.js"
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/../data-access-layer/**",
+        "${workspaceFolder}/../base-classes/**",
         "!**/node_modules/**"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",

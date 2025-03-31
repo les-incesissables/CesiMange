@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import mongoose from 'mongoose';
-import { Schema } from 'mongoose';
 require('dotenv').config();
 
 // Configuration des services et des collections associées
@@ -132,13 +131,6 @@ function collectionNameToClassName(name: string): string
         .split(/[-_]/)
         .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
         .join('');
-}
-
-// Fonction pour convertir en camelCase
-function toCamelCase(name: string): string
-{
-    const pascalCase = collectionNameToClassName(name);
-    return pascalCase.charAt(0).toLowerCase() + pascalCase.slice(1);
 }
 
 // Fonction pour déterminer le type Mongoose à partir d'une valeur
