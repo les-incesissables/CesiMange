@@ -1,22 +1,27 @@
 {
-  "name": "modelgenerator",
-  "version": "1.0.0",
-  "main": "app.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@types/node": "^22.13.10",
-    "eslint": "^9.22.0",
-    "typescript": "^5.8.2",
-    "mongodb": "6.14.2",
-    "mongoose": "8.12.1",
-    "dotenv": "^16.4.7"
-  }
+    "name": "modelgenerator",
+    "version": "1.0.0",
+    "private": true,
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist",
+        "start": "node dist/index.js",
+        "dev": "nodemon src/index.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "dotenv": "^16.4.7",
+        "mongodb": "6.14.2",
+        "mongoose": "8.12.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.10",
+        "eslint": "^9.22.0",
+        "typescript": "^5.8.2"
+    }
 }
