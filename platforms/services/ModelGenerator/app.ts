@@ -9,8 +9,8 @@ require('dotenv').config();
  */
 
 // Chemin vers les scripts de génération
-const MONGO_GENERATOR_PATH = path.join(__dirname, 'mongoGenerator.ts');
-const SQL_GENERATOR_PATH = path.join(__dirname, 'sqlGenerator.ts');
+const MONGO_GENERATOR_PATH = path.join(__dirname,'src', 'mongoGenerator.ts');
+const SQL_GENERATOR_PATH = path.join(__dirname,'src', 'sqlGenerator.ts');
 
 // Vérifier que les scripts existent
 if (!fs.existsSync(MONGO_GENERATOR_PATH))
@@ -29,9 +29,9 @@ console.log('Démarrage de la génération des DTOs...');
 
 try
 {
-    // Exécuter le script MongoDB
-    console.log('Génération depuis MongoDB...');
-    execSync(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
+    //// Exécuter le script MongoDB
+    //console.log('Génération depuis MongoDB...');
+    //execSync(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
 
     // Exécuter le script SQL Server
     console.log('Génération depuis SQL Server...');
