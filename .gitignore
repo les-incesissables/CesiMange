@@ -396,3 +396,4 @@ docs/boucles/Boucle1_IOT/WS/~$rkshop_-_IoT_-_Etudiant_v2.docx
 .env
 /apps/CesiMange/.vscode/launch.json
 dist/
+platforms/services/restaurant-service/package-lock.json

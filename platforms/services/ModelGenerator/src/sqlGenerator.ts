@@ -4,41 +4,29 @@ import { DataSource } from 'typeorm';
 require('dotenv').config();
 
 /**
- * Script de génération automatique de DTOs et CritereDTOs à partir de SQL Server
- * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Creation
+ * Script de génération automatique de DTOs et Entités à partir de SQL Server
+ * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Création
+ * @author Modifié pour ajouter la génération d'entités
  */
 
 // Configuration des services et des tables associées
 const serviceConfigs = [
     {
         serviceName: 'user-service',
-        tables: ['Users', 'Developers'],
-        outputDir: '../user-service/src/models/',
-        metierDir: '../user-service/src/metier/',
-        controllerDir: '../user-service/src/controllers/'
+        tables: ['UserRoles', 'UserToRoles', 'Orders', 'Payments', 'Reviews', 'Users'],
+        outputDir: '../user-service/src/models/'
     },
     {
         serviceName: 'restaurant-service',
-        tables: ['Restaurants', 'Components'],
-        outputDir: '../restaurant-service/src/models/',
-        metierDir: '../restaurant-service/src/metier/',
-        controllerDir: '../restaurant-service/src/controllers/'
+        tables: [],
+        outputDir: '../restaurant-service/src/models/'
     }
 ];
 
 // Configuration générale
 const config = {
-    excludedFields: ['CreatedAt', 'UpdatedAt', 'DeletedAt'],  // Champs à exclure des DTOs
-    excludedTables: ['__EFMigrationsHistory', 'sysdiagrams'], // Tables à exclure
-    sqlConnectionString: process.env.SQL_CONNECTION_STRING || 'Server=localhost;Database=CesiMange;User Id=sa;Password=YourPassword;Encrypt=false',
-    cleanOutputDir: true,                                    // Nettoyer le répertoire de sortie avant génération
-    protectedFolders: ['base']                               // Dossiers à ne pas supprimer lors du nettoyage
-};
-
-// Structure des dossiers pour les modèles
-const folders = {
-    dto: 'dto',
-    critereDto: 'critereDto'
+    excludedFields: ['CreatedAt', 'UpdatedAt', 'DeletedAt'],
+    excludedTables: ['__EFMigrationsHistory', 'sysdiagrams']
 };
 
 // Types et interfaces pour l'analyse
@@ -56,7 +44,6 @@ interface TableSchema
 {
     columns: ColumnInfo[];
     primaryKeys: string[];
-    foreignKeys: { column: string, refTable: string, refColumn: string }[];
 }
 
 // Fonction pour s'assurer qu'un répertoire existe
@@ -68,45 +55,14 @@ function ensureDirectoryExists(dirPath: string): void
     }
 }
 
-// Fonction pour nettoyer un répertoire tout en préservant certains dossiers
-function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void
-{
-    if (fs.existsSync(dirPath))
-    {
-        fs.readdirSync(dirPath).forEach(file =>
-        {
-            const currentPath = path.join(dirPath, file);
-
-            // Si c'est un dossier à préserver, on le garde
-            if (fs.lstatSync(currentPath).isDirectory() && preserveFolders.includes(file))
-            {
-                console.log(`  Dossier préservé: ${file}`);
-                return;
-            }
-
-            if (fs.lstatSync(currentPath).isDirectory())
-            {
-                cleanDirectory(currentPath, preserveFolders);
-                try
-                {
-                    fs.rmdirSync(currentPath);
-                } catch (err)
-                {
-                    console.warn(`  Impossible de supprimer le dossier ${currentPath}: ${err}`);
-                }
-            } else
-            {
-                fs.unlinkSync(currentPath);
-            }
-        });
-    }
-}
-
 // Fonction pour convertir le nom d'une table en nom de classe (PascalCase)
 function tableNameToClassName(name: string): string
 {
-    // Enlever le "s" final pour les pluriels
-    const singularName = name.endsWith('s') ? name.slice(0, -1) : name;
+    // Enlever le préfixe T_ si présent
+    const nameWithoutPrefix = name.startsWith('T_') ? name.substring(2) : name;
+
+    // Enlever le "s" final pour les pluriels si applicable
+    const singularName = nameWithoutPrefix.endsWith('s') ? nameWithoutPrefix.slice(0, -1) : nameWithoutPrefix;
 
     // Convertir en PascalCase
     return singularName
@@ -133,33 +89,51 @@ function sqlTypeToTypeScript(sqlType: string, isNullable: boolean): string
         'decimal': 'number',
         'numeric': 'number',
         'money': 'number',
-        'smallmoney': 'number',
         'float': 'number',
-        'real': 'number',
         'datetime': 'Date',
-        'datetime2': 'Date',
-        'smalldatetime': 'Date',
         'date': 'Date',
-        'time': 'string',
-        'datetimeoffset': 'Date',
         'char': 'string',
         'varchar': 'string',
         'text': 'string',
         'nchar': 'string',
         'nvarchar': 'string',
-        'ntext': 'string',
-        'binary': 'Buffer',
-        'varbinary': 'Buffer',
-        'image': 'Buffer',
-        'uniqueidentifier': 'string',
-        'xml': 'string',
-        'geography': 'any',
-        'geometry': 'any',
-        'json': 'any'
+        'uniqueidentifier': 'string'
     };
 
     const tsType = typeMap[sqlType.toLowerCase()] || 'any';
-    return isNullable ? `${tsType} | null` : tsType;
+    return tsType;
+}
+
+// Fonction pour convertir un type SQL en décorateur TypeORM
+function sqlTypeToTypeOrmDecorator(column: ColumnInfo): string 
+{
+    const { dataType, isNullable, maxLength, name, isPrimaryKey } = column;
+
+    let decorator = isPrimaryKey ? '@PrimaryColumn()' : '@Column(';
+
+    if (!isPrimaryKey)
+    {
+        const options = [];
+
+        if (dataType.toLowerCase().includes('char') && maxLength)
+        {
+            options.push(`length: ${maxLength}`);
+        }
+
+        if (!isNullable)
+        {
+            options.push('nullable: false');
+        }
+
+        if (options.length > 0)
+        {
+            decorator += `{ ${options.join(', ')} }`;
+        }
+
+        decorator += ')';
+    }
+
+    return decorator;
 }
 
 // Fonction pour analyser la structure d'une table
@@ -196,24 +170,8 @@ async function analyzeTable(tableName: string, dataSource: DataSource): Promise<
         if (!columns || columns.length === 0)
         {
             console.log(`  La table ${tableName} n'existe pas ou est vide.`);
-            return { columns: [], primaryKeys: [], foreignKeys: [] };
+            return { columns: [], primaryKeys: [] };
         }
-
-        // Récupérer les clés étrangères
-        const foreignKeys = await dataSource.query(`
-            SELECT 
-                fk.COLUMN_NAME as column,
-                pk.TABLE_NAME as refTable,
-                pk.COLUMN_NAME as refColumn
-            FROM 
-                INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
-            JOIN 
-                INFORMATION_SCHEMA.KEY_COLUMN_USAGE fk ON rc.CONSTRAINT_NAME = fk.CONSTRAINT_NAME
-            JOIN 
-                INFORMATION_SCHEMA.KEY_COLUMN_USAGE pk ON rc.UNIQUE_CONSTRAINT_NAME = pk.CONSTRAINT_NAME
-            WHERE 
-                fk.TABLE_NAME = '${tableName}'
-        `);
 
         const primaryKeys = columns
             .filter((col: ColumnInfo) => col.isPrimaryKey)
@@ -221,8 +179,7 @@ async function analyzeTable(tableName: string, dataSource: DataSource): Promise<
 
         return {
             columns,
-            primaryKeys,
-            foreignKeys: foreignKeys || []
+            primaryKeys
         };
     } catch (error)
     {
@@ -231,114 +188,124 @@ async function analyzeTable(tableName: string, dataSource: DataSource): Promise<
     }
 }
 
-// Fonction pour générer le contenu du fichier DTO
-function generateDTOContent(className: string, schema: TableSchema): string
+// NOUVELLE FONCTION : Générer une entité TypeORM
+// NOUVELLE FONCTION : Générer une entité TypeORM
+function generateEntityContent(className: string, tableName: string, schema: TableSchema): string
 {
-    let content = `import { BaseDTO } from "../base/BaseDTO";\n\n`;
+    let content = `import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } from "typeorm";\n\n`;
     content += `/**\n`;
-    content += ` * DTO pour l'entité ${className}\n`;
-    content += ` * @author DTO Generator - ${new Date().toISOString()} - Creation\n`;
+    content += ` * Entité TypeORM pour la table SQL Server ${tableName}\n`;
+    content += ` * @author Entity Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
-    content += `export class ${className}DTO extends BaseDTO {\n`;
+    content += `@Entity("${tableName}")\n`;
+    content += `export class ${className} implements ObjectLiteral\n{\n`;
 
-    // Ajouter les propriétés
+    // Ajouter les propriétés avec décorateurs TypeORM
     schema.columns.forEach(column =>
     {
         if (!config.excludedFields.includes(column.name))
         {
-            const propertyName = columnNameToCamelCase(column.name);
-            const tsType = sqlTypeToTypeScript(column.dataType, column.isNullable);
+            const camelCaseName = columnNameToCamelCase(column.name);
 
             content += `    /**\n`;
-            content += `     * ${column.name}\n`;
-            if (column.isPrimaryKey) content += `     * @primary\n`;
-            if (column.isNullable) content += `     * @nullable\n`;
+            content += `     * ${camelCaseName}\n`;
             if (column.maxLength) content += `     * @maxLength ${column.maxLength}\n`;
             content += `     */\n`;
-            content += `    ${propertyName}${column.isNullable ? '?' : ''}: ${tsType};\n\n`;
+
+            // Générer le décorateur TypeORM approprié
+            if (column.isPrimaryKey)
+            {
+                if (column.name.toLowerCase().includes('id') && column.dataType.toLowerCase().includes('int'))
+                {
+                    content += `    @PrimaryGeneratedColumn()\n`;
+                } else
+                {
+                    content += `    @PrimaryColumn()\n`;
+                }
+            } else
+            {
+                content += `    @Column(`;
+
+                // Options pour le décorateur Column
+                const options = [];
+                if (column.dataType.toLowerCase().includes('char') && column.maxLength)
+                {
+                    options.push(`length: ${column.maxLength}`);
+                }
+                if (!column.isNullable)
+                {
+                    options.push(`nullable: false`);
+                }
+
+                if (options.length > 0)
+                {
+                    content += `{ ${options.join(', ')} }`;
+                }
+
+                content += `)\n`;
+            }
+
+            // Générer la propriété avec | undefined
+            content += `    ${camelCaseName}!: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
         }
     });
 
     content += `}\n`;
-
     return content;
 }
 
 // Fonction pour générer le contenu du fichier CritereDTO
 function generateCritereDTOContent(className: string, schema: TableSchema): string
 {
-    let content = `import { BaseCritereDTO } from "../base/BaseCritereDTO";\n\n`;
+    let content = `import { ObjectLiteral } from "typeorm";\n`;
     content += `/**\n`;
-    content += ` * CritereDTO pour la recherche d'entités ${className}\n`;
+    content += ` * CritereDTO pour la recherche d'entités SQL Server ${className}\n`;
     content += ` * @author DTO Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
-    content += `export class ${className}CritereDTO extends BaseCritereDTO {\n`;
+    content += `export class ${className}CritereDTO implements ObjectLiteral\n{\n`;
 
     // Ajouter les propriétés pour la recherche
     schema.columns.forEach(column =>
     {
         if (!config.excludedFields.includes(column.name))
         {
-            const propertyName = columnNameToCamelCase(column.name);
-            const tsType = sqlTypeToTypeScript(column.dataType, true); // Toujours nullable pour un critère
+            const tsType = sqlTypeToTypeScript(column.dataType, true);
+            const camelCaseName = columnNameToCamelCase(column.name);
 
             content += `    /**\n`;
-            content += `     * Critère de recherche pour ${column.name}\n`;
+            content += `     * Critère de recherche pour ${camelCaseName}\n`;
             content += `     */\n`;
-            content += `    ${propertyName}?: ${tsType};\n\n`;
+            content += `    ${camelCaseName}?: ${tsType} | undefined;\n\n`;
 
             // Pour les chaînes, ajouter une recherche par Like
             if (column.dataType.toLowerCase().includes('char') || column.dataType.toLowerCase() === 'text')
             {
                 content += `    /**\n`;
-                content += `     * Recherche avec LIKE pour ${column.name}\n`;
+                content += `     * Recherche avec LIKE pour ${camelCaseName}\n`;
                 content += `     */\n`;
-                content += `    ${propertyName}Like?: string;\n\n`;
+                content += `    ${camelCaseName}Like?: string | undefined;\n\n`;
             }
 
             // Pour les nombres et dates, ajouter des plages
-            if (['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
-                column.dataType.toLowerCase().includes('date'))
+            if ((['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
+                column.dataType.toLowerCase().includes('date')) &&
+                !column.name.toLowerCase().includes('id'))
             {
+                content += `    /**\n`;
+                content += `     * Valeur minimale pour ${camelCaseName}\n`;
+                content += `     */\n`;
+                content += `    ${camelCaseName}Min?: ${tsType} | undefined;\n\n`;
 
                 content += `    /**\n`;
-                content += `     * Valeur minimale pour ${column.name}\n`;
+                content += `     * Valeur maximale pour ${camelCaseName}\n`;
                 content += `     */\n`;
-                content += `    ${propertyName}Min?: ${tsType};\n\n`;
-
-                content += `    /**\n`;
-                content += `     * Valeur maximale pour ${column.name}\n`;
-                content += `     */\n`;
-                content += `    ${propertyName}Max?: ${tsType};\n\n`;
+                content += `    ${camelCaseName}Max?: ${tsType} | undefined;\n\n`;
             }
         }
     });
 
     content += `}\n`;
-
     return content;
-}
-
-// Fonction pour initialiser les dossiers d'un service
-function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
-{
-    const { outputDir } = serviceConfig;
-
-    // Initialiser le dossier des modèles
-    if (config.cleanOutputDir && fs.existsSync(outputDir))
-    {
-        cleanDirectory(outputDir, config.protectedFolders);
-        console.log(`Répertoire nettoyé: ${outputDir}`);
-    }
-    ensureDirectoryExists(outputDir);
-
-    // Créer les sous-répertoires pour les DTOs
-    for (const folder of Object.values(folders))
-    {
-        ensureDirectoryExists(path.join(outputDir, folder));
-    }
-
-    console.log(`Dossiers initialisés pour ${serviceConfig.serviceName}`);
 }
 
 // Fonction principale pour générer les DTOs
@@ -348,18 +315,27 @@ async function generateDTOs(): Promise<void>
 
     try
     {
-        console.log('Démarrage de la génération des DTOs et CritereDTOs...');
+        console.log('Démarrage de la génération des DTOs et Entités pour SQL Server...');
 
         // Connexion à SQL Server avec TypeORM
         dataSource = new DataSource({
             type: "mssql",
-            url: config.sqlConnectionString,
-            synchronize: false,
-            logging: false
+            host: process.env.DB_SERVER,
+            port: parseInt(process.env.DB_PORT || "1433"),
+            database: process.env.DB_NAME,
+            username: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            options: {
+                encrypt: process.env.DB_ENCRYPT === 'true'
+            },
+            extra: {
+                trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+                connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || "30000")
+            }
         });
 
         await dataSource.initialize();
-        console.log('Connecté à SQL Server avec TypeORM');
+        console.log("Connexion SQL Server établie");
 
         // Récupérer toutes les tables disponibles
         const tables = await dataSource.query(`
@@ -377,10 +353,21 @@ async function generateDTOs(): Promise<void>
         // Pour chaque service configuré
         for (const serviceConfig of serviceConfigs)
         {
+            if (serviceConfig.tables.length === 0)
+            {
+                console.log(`\nAucune table configurée pour le service: ${serviceConfig.serviceName}, ignoré.`);
+                continue;
+            }
+
             console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
 
-            // Initialiser les dossiers pour ce service
-            initializeServiceFolders(serviceConfig);
+            // Créer le dossier models s'il n'existe pas
+            const outputDir = serviceConfig.outputDir;
+            ensureDirectoryExists(outputDir);
+
+            // Créer un dossier entities pour les entités TypeORM
+            const entitiesDir = path.join(outputDir, 'entities');
+            ensureDirectoryExists(entitiesDir);
 
             // Filtrer les tables pour ce service
             const serviceTables = allTables.filter((name: string) =>
@@ -400,29 +387,29 @@ async function generateDTOs(): Promise<void>
                 {
                     const className = tableNameToClassName(tableName);
 
-                    // Générer le fichier DTO
-                    const dtoContent = generateDTOContent(className, schema);
-                    const dtoFilePath = path.join(serviceConfig.outputDir, folders.dto, `${className}DTO.ts`);
-                    fs.writeFileSync(dtoFilePath, dtoContent);
+                    // Générer le fichier DTO directement dans le dossier models
+                    const entityContent = generateEntityContent(className, tableName, schema);
+                    const dtoFilePath = path.join(outputDir, `${className}.ts`);
+                    fs.writeFileSync(dtoFilePath, entityContent);
                     console.log(`  DTO généré: ${dtoFilePath}`);
 
-                    // Générer le fichier CritereDTO
+                    // Générer le fichier CritereDTO directement dans le dossier models
                     const critereDtoContent = generateCritereDTOContent(className, schema);
-                    const critereDtoFilePath = path.join(serviceConfig.outputDir, folders.critereDto, `${className}CritereDTO.ts`);
+                    const critereDtoFilePath = path.join(outputDir, `${className}CritereDTO.ts`);
                     fs.writeFileSync(critereDtoFilePath, critereDtoContent);
                     console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
                 } else
                 {
-                    console.log(`  Aucun DTO généré pour ${tableName} (table vide ou structure non détectée).`);
+                    console.log(`  Aucun fichier généré pour ${tableName} (table vide ou structure non détectée).`);
                 }
             }
         }
 
-        console.log('\nGénération des DTOs et CritereDTOs terminée avec succès pour tous les services!');
+        console.log('\nGénération des DTOs et Entités terminée avec succès pour tous les services!');
 
     } catch (error)
     {
-        console.error('Erreur lors de la génération des DTOs et CritereDTOs:', error);
+        console.error('Erreur lors de la génération des fichiers:', error);
     } finally
     {
         // Fermer la connexion DataSource

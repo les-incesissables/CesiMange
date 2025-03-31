@@ -1,4 +1,4 @@
-import { AbstractDbRepository } from "./AbstractDbRepository";
+ï»¿import { AbstractDbRepository } from "./AbstractDbRepository";
 import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import
@@ -12,20 +12,21 @@ import
         ILike,
         MoreThanOrEqual,
         LessThanOrEqual,
-        In
+        In,
+        EntitySchema
     } from "typeorm";
 
 /**
- * Repository pour la gestion des entités via TypeORM et SQL Server
- * @template DTO - Type de données retourné/manipulé qui étend ObjectLiteral
- * @template CritereDTO - Type des critères de recherche qui étend BaseCritereDTO
+ * Repository pour la gestion des entitÃ©s via TypeORM et SQL Server
+ * @template DTO - Type de donnÃ©es retournÃ©/manipulÃ© qui Ã©tend ObjectLiteral
+ * @template CritereDTO - Type des critÃ¨res de recherche qui Ã©tend BaseCritereDTO
  */
 export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends BaseCritereDTO> extends AbstractDbRepository<DTO, CritereDTO>
 {
     //#region Attributes
     protected _dataSource: DataSource | undefined;
     protected _repository: Repository<DTO> | undefined;
-    protected _DTOType: EntityTarget<DTO>;
+    protected _DTOType: any;
     protected _isConnected: boolean = false;
     //#endregion
 
@@ -33,18 +34,18 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
     /**
      * Constructeur du repository SQL Server
      * @param pConfig Configuration du repository
+     * @param pModel ModÃ¨le d'entitÃ©
      */
-    constructor (pConfig: IRepositoryConfig)
+    constructor (pConfig: IRepositoryConfig, pModel: any)
     {
         super(pConfig);
-        // Utiliser le nom de la collection comme cible d'entité
-        this._DTOType = pConfig.CollectionName;
+        this._DTOType = pModel; // Use pModel directly instead of CollectionName
     }
     //#endregion
 
     //#region Connection Methods
     /**
-     * Initialise la connexion à la base de données
+     * Initialise la connexion Ã  la base de donnÃ©es
      */
     public async initialize(): Promise<void>
     {
@@ -52,13 +53,24 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
         {
             if (!this._isConnected)
             {
-                // Créer et initialiser la connexion si nécessaire
+                // CrÃ©er et initialiser la connexion si nÃ©cessaire
                 if (!this._dataSource)
                 {
                     this._dataSource = new DataSource({
                         type: "mssql",
-                        url: process.env.SQL_CONNECTION_STRING,
-                        entities: ["src/entities/**/*.ts"],
+                        host: process.env.DB_SERVER,
+                        port: parseInt(process.env.DB_PORT || "1433"),
+                        database: process.env.DB_NAME,
+                        username: process.env.DB_USER,
+                        password: process.env.DB_PASSWORD,
+                        options: {
+                            encrypt: process.env.DB_ENCRYPT === 'true'
+                        },
+                        extra: {
+                            trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+                            connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || "30000")
+                        },
+                        entities: [this._DTOType],
                         synchronize: false,
                         logging: process.env.NODE_ENV === 'development'
                     });
@@ -67,13 +79,13 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 if (!this._dataSource.isInitialized)
                 {
                     await this._dataSource.initialize();
-                    console.log("Connexion TypeORM établie");
+                    console.log("Connexion TypeORM Ã©tablie");
                 }
 
                 // Obtenir le repository
                 this._repository = this._dataSource.getRepository(this._DTOType);
                 this._isConnected = true;
-                console.log(`Repository pour '${this._config.CollectionName}' initialisé`);
+                console.log(`Repository pour '${this._config.CollectionName}' initialisÃ©`);
             }
         } catch (error)
         {
@@ -83,7 +95,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
     }
 
     /**
-     * S'assure que la connexion est établie avant d'exécuter une opération
+     * S'assure que la connexion est Ã©tablie avant d'exÃ©cuter une opÃ©ration
      */
     protected async ensureConnection(): Promise<Repository<DTO>>
     {
@@ -95,7 +107,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
     }
 
     /**
-     * Déconnecte le repository de la base de données
+     * DÃ©connecte le repository de la base de donnÃ©es
      */
     async disconnect(): Promise<void>
     {
@@ -105,11 +117,11 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             {
                 await this._dataSource.destroy();
                 this._isConnected = false;
-                console.log(`Repository pour '${this._config.CollectionName}' déconnecté`);
+                console.log(`Repository pour '${this._config.CollectionName}' dÃ©connectÃ©`);
             }
         } catch (error)
         {
-            console.error("Erreur lors de la déconnexion:", error);
+            console.error("Erreur lors de la dÃ©connexion:", error);
             throw error;
         }
     }
@@ -117,9 +129,9 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
 
     //#region CRUD Operations
     /**
-     * Récupère plusieurs éléments selon les critères
-     * @param pCritereDTO - Critères de recherche
-     * @returns Liste d'éléments correspondant aux critères
+     * RÃ©cupÃ¨re plusieurs Ã©lÃ©ments selon les critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
+     * @returns Liste d'Ã©lÃ©ments correspondant aux critÃ¨res
      */
     async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
@@ -133,7 +145,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 where: filter,
             };
 
-            // Gérer la pagination
+            // GÃ©rer la pagination
             if (pCritereDTO.skip !== undefined)
             {
                 findOptions.skip = pCritereDTO.skip;
@@ -146,7 +158,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 findOptions.take = pCritereDTO.limit;
             }
 
-            // Gérer le tri
+            // GÃ©rer le tri
             if (pCritereDTO.sort)
             {
                 findOptions.order = {
@@ -154,26 +166,26 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 };
             }
 
-            // Gérer les relations (populate)
+            // GÃ©rer les relations (populate)
             if (pCritereDTO.populate && pCritereDTO.populate.length > 0)
             {
                 findOptions.relations = pCritereDTO.populate;
             }
 
-            // Exécuter la requête
+            // ExÃ©cuter la requÃªte
             const results = await repository.find(findOptions);
             return this.formatResults(results);
         } catch (error)
         {
-            console.error("Erreur lors de la récupération des éléments:", error);
+            console.error("Erreur lors de la rÃ©cupÃ©ration des Ã©lÃ©ments:", error);
             throw error;
         }
     }
 
     /**
-     * Récupère un élément spécifique selon les critères
-     * @param pCritereDTO - Critères de recherche
-     * @returns Élément correspondant aux critères
+     * RÃ©cupÃ¨re un Ã©lÃ©ment spÃ©cifique selon les critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
+     * @returns Ã‰lÃ©ment correspondant aux critÃ¨res
      */
     async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -186,7 +198,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 where: filter
             };
 
-            // Gérer les relations (populate)
+            // GÃ©rer les relations (populate)
             if (pCritereDTO.populate && pCritereDTO.populate.length > 0)
             {
                 findOptions.relations = pCritereDTO.populate;
@@ -196,21 +208,21 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
 
             if (!result)
             {
-                throw new Error(`Aucun élément trouvé pour les critères donnés dans ${this._config.CollectionName}`);
+                throw new Error(`Aucun Ã©lÃ©ment trouvÃ© pour les critÃ¨res donnÃ©s dans ${this._config.CollectionName}`);
             }
 
             return result;
         } catch (error)
         {
-            console.error("Erreur lors de la récupération de l'élément:", error);
+            console.error("Erreur lors de la rÃ©cupÃ©ration de l'Ã©lÃ©ment:", error);
             throw error;
         }
     }
 
     /**
-     * Crée un nouvel élément
-     * @param pDTO - Données pour la création
-     * @returns Élément créé
+     * CrÃ©e un nouvel Ã©lÃ©ment
+     * @param pDTO - DonnÃ©es pour la crÃ©ation
+     * @returns Ã‰lÃ©ment crÃ©Ã©
      */
     async createItem(pDTO: DTO): Promise<DTO>
     {
@@ -223,16 +235,16 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             return result;
         } catch (error)
         {
-            console.error("Erreur lors de la création de l'élément:", error);
+            console.error("Erreur lors de la crÃ©ation de l'Ã©lÃ©ment:", error);
             throw error;
         }
     }
 
     /**
-     * Met à jour un élément selon les critères
-     * @param pDTO - Données pour la mise à jour
-     * @param pCritereDTO - Critères pour identifier l'élément à mettre à jour
-     * @returns Élément mis à jour
+     * Met Ã  jour un Ã©lÃ©ment selon les critÃ¨res
+     * @param pDTO - DonnÃ©es pour la mise Ã  jour
+     * @param pCritereDTO - CritÃ¨res pour identifier l'Ã©lÃ©ment Ã  mettre Ã  jour
+     * @returns Ã‰lÃ©ment mis Ã  jour
      */
     async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
     {
@@ -241,17 +253,17 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             const repository = await this.ensureConnection();
             const filter = this.buildFilter(pCritereDTO);
 
-            // Trouver l'élément à mettre à jour
+            // Trouver l'Ã©lÃ©ment Ã  mettre Ã  jour
             const itemToUpdate = await repository.findOne({
                 where: filter
             });
 
             if (!itemToUpdate)
             {
-                throw new Error(`Aucun élément trouvé pour les critères donnés dans ${this._config.CollectionName}`);
+                throw new Error(`Aucun Ã©lÃ©ment trouvÃ© pour les critÃ¨res donnÃ©s dans ${this._config.CollectionName}`);
             }
 
-            // Fusionner les données
+            // Fusionner les donnÃ©es
             const updatedItem = repository.merge(itemToUpdate, pDTO);
 
             // Sauvegarder les modifications
@@ -259,15 +271,15 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             return result;
         } catch (error)
         {
-            console.error("Erreur lors de la mise à jour de l'élément:", error);
+            console.error("Erreur lors de la mise Ã  jour de l'Ã©lÃ©ment:", error);
             throw error;
         }
     }
 
     /**
-     * Supprime un élément selon les critères
-     * @param pCritereDTO - Critères pour identifier l'élément à supprimer
-     * @returns True si supprimé avec succès, false sinon
+     * Supprime un Ã©lÃ©ment selon les critÃ¨res
+     * @param pCritereDTO - CritÃ¨res pour identifier l'Ã©lÃ©ment Ã  supprimer
+     * @returns True si supprimÃ© avec succÃ¨s, false sinon
      */
     async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -280,15 +292,15 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             return result.affected ? result.affected > 0 : false;
         } catch (error)
         {
-            console.error("Erreur lors de la suppression de l'élément:", error);
+            console.error("Erreur lors de la suppression de l'Ã©lÃ©ment:", error);
             throw error;
         }
     }
 
     /**
-     * Vérifie si un élément existe selon les critères
-     * @param pCritereDTO - Critères de recherche
-     * @returns True si l'élément existe, false sinon
+     * VÃ©rifie si un Ã©lÃ©ment existe selon les critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
+     * @returns True si l'Ã©lÃ©ment existe, false sinon
      */
     async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
     {
@@ -304,7 +316,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             return count > 0;
         } catch (error)
         {
-            console.error("Erreur lors de la vérification de l'existence de l'élément:", error);
+            console.error("Erreur lors de la vÃ©rification de l'existence de l'Ã©lÃ©ment:", error);
             throw error;
         }
     }
@@ -312,15 +324,15 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
 
     //#region Helper Methods
     /**
-     * Construit un filtre TypeORM à partir des critères
-     * @param pCritereDTO - Critères de recherche
-     * @returns Filtre formaté pour TypeORM
+     * Construit un filtre TypeORM Ã  partir des critÃ¨res
+     * @param pCritereDTO - CritÃ¨res de recherche
+     * @returns Filtre formatÃ© pour TypeORM
      */
     buildFilter(pCritereDTO: CritereDTO): any
     {
         const filter: any = {};
 
-        // Traiter les champs spécifiques de BaseCritereDTO
+        // Traiter les champs spÃ©cifiques de BaseCritereDTO
         if (pCritereDTO.id)
         {
             filter.id = pCritereDTO.id;
@@ -333,26 +345,26 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
 
         if (pCritereDTO.search)
         {
-            // La recherche textuelle est spécifique à chaque entité
-            // Pour une implémentation générique, vous pourriez vouloir chercher dans tous les champs de type string
-            // Mais comme cela dépend de l'entité spécifique, ici nous laissons cette partie à personnaliser
-            // Exemple d'implémentation possible (à personnaliser selon vos besoins) :
-            // const searchableFields = ['name', 'description', 'email']; // À adapter selon l'entité
+            // La recherche textuelle est spÃ©cifique Ã  chaque entitÃ©
+            // Pour une implÃ©mentation gÃ©nÃ©rique, vous pourriez vouloir chercher dans tous les champs de type string
+            // Mais comme cela dÃ©pend de l'entitÃ© spÃ©cifique, ici nous laissons cette partie Ã  personnaliser
+            // Exemple d'implÃ©mentation possible (Ã  personnaliser selon vos besoins) :
+            // const searchableFields = ['name', 'description', 'email']; // Ã€ adapter selon l'entitÃ©
             // filter = [
             //    ...searchableFields.map(field => ({ [field]: ILike(`%${pCritereDTO.search}%`) }))
             // ];
         }
 
-        // Ne pas inclure les éléments supprimés sauf si demandé
+        // Ne pas inclure les Ã©lÃ©ments supprimÃ©s sauf si demandÃ©
         if (pCritereDTO.includeDeleted !== true && 'deletedAt' in filter)
         {
             filter.deletedAt = null;
         }
 
-        // Parcourir les autres critères (spécifiques à l'entité)
+        // Parcourir les autres critÃ¨res (spÃ©cifiques Ã  l'entitÃ©)
         for (const [key, value] of Object.entries(pCritereDTO))
         {
-            // Ignorer les clés déjà traitées ou les clés spéciales
+            // Ignorer les clÃ©s dÃ©jÃ  traitÃ©es ou les clÃ©s spÃ©ciales
             if (['id', 'ids', 'search', 'page', 'pageSize', 'sort', 'sortDirection',
                 'includeDeleted', 'limit', 'skip', 'populate'].includes(key))
             {
@@ -365,10 +377,10 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 continue;
             }
 
-            // Traitement spécifique selon le type de valeur
+            // Traitement spÃ©cifique selon le type de valeur
             if (typeof value === 'string')
             {
-                // Recherche insensible à la casse avec % pour les chaînes
+                // Recherche insensible Ã  la casse avec % pour les chaÃ®nes
                 if (value.includes('%'))
                 {
                     filter[key] = ILike(value);
@@ -393,7 +405,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 }
             } else
             {
-                // Pour les autres types (nombres, booléens, etc.)
+                // Pour les autres types (nombres, boolÃ©ens, etc.)
                 filter[key] = value;
             }
         }
@@ -402,31 +414,31 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
     }
 
     /**
-     * Formate les résultats bruts en DTOs
-     * @param pResults - Résultats bruts de la base de données
-     * @returns Liste de DTOs formatés
+     * Formate les rÃ©sultats bruts en DTOs
+     * @param pResults - RÃ©sultats bruts de la base de donnÃ©es
+     * @returns Liste de DTOs formatÃ©s
      */
     formatResults(pResults: any[] | any): DTO[]
     {
-        // Si c'est un tableau, formater chaque élément
+        // Si c'est un tableau, formater chaque Ã©lÃ©ment
         if (Array.isArray(pResults))
         {
             return pResults.map(item => this.formatSingleResult(item));
         }
 
-        // Si c'est un seul élément, le formater et retourner dans un tableau
+        // Si c'est un seul Ã©lÃ©ment, le formater et retourner dans un tableau
         return [this.formatSingleResult(pResults)];
     }
 
     /**
-     * Formate un résultat individuel en DTO
-     * @param pResult - Résultat brut
-     * @returns DTO formaté
+     * Formate un rÃ©sultat individuel en DTO
+     * @param pResult - RÃ©sultat brut
+     * @returns DTO formatÃ©
      */
     private formatSingleResult(pResult: any): DTO
     {
-        // TypeORM récupère généralement déjà des objets bien formatés
-        // Mais on peut ajouter des transformations spécifiques si nécessaire
+        // TypeORM rÃ©cupÃ¨re gÃ©nÃ©ralement dÃ©jÃ  des objets bien formatÃ©s
+        // Mais on peut ajouter des transformations spÃ©cifiques si nÃ©cessaire
         return pResult as DTO;
     }
     //#endregion

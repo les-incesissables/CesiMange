@@ -11,7 +11,7 @@ import { BaseRepository } from "./base/BaseRepository";
  */
 export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere>
 {
-    constructor (pCollectionName: string, pTypeBDD: EDatabaseType)
+    constructor (pCollectionName: string, pTypeBDD: EDatabaseType, pModel?: any)
     {
         const config: IRepositoryConfig = {
             CollectionName: pCollectionName, // Collection MongoDB
@@ -20,6 +20,6 @@ export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere>
             TypeBDD: pTypeBDD
         };
 
-        super(config)
+        super(config, pModel)
     }
 }

@@ -1,4 +1,5 @@
 //#region Imports
+import "reflect-metadata"
 import express from 'express';
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -9,13 +10,11 @@ import * as path from 'path';
 //import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
 //import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
 //import { OrderMetier } from './src/metier/order/OrderMetier';
-
+import { UserController } from './src/controllers/user/UserController';
+import { UserMetier } from './src/metier/user/UserMetier';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { UserController } from './src/controllers/user/UserController';
-import { UserMetier } from './src/metier/user/UserMetier';
-
 
 //#endregion
 
@@ -39,6 +38,7 @@ app.use(
     })
 );
 
+
 /**
  * Logging HTTP standard avec morgan
  * Format 'dev' ou 'combined' selon vos besoins
@@ -46,11 +46,10 @@ app.use(
 app.use(morgan('dev'));
 
 const userController = new UserController(new UserMetier());
-
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-
 app.use('/api/users', userController.getRouter());
+
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
 

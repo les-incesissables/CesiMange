@@ -6,9 +6,9 @@
       "request": "launch",
       "name": "Debug Application",
       "skipFiles": [ "<node_internals>/**" ],
-      "program": "${workspaceFolder}/app.js",
+      "program": "${workspaceFolder}/dist/user-service/app.js",
       "outFiles": [
-        "${workspaceFolder}/dist/**/*.js",
+        "${workspaceFolder}/dist/user-service/**/*.js",
         "${workspaceFolder}/../data-access-layer/dist/**/*.js",
         "${workspaceFolder}/../base-classes/dist/**/*.js"
       ],

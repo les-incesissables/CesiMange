@@ -26,7 +26,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Constructeur du BaseRepository
      * @param pConfig Config du repository
      */
-    constructor (pConfig: IRepositoryConfig)
+    constructor (pConfig: IRepositoryConfig, pModel?: any)
     {
         this._config = pConfig;
         try
@@ -36,10 +36,10 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             {
                 // cm - Initialise le repo Mongo DB
                 this._repository = new MongoDBRepository<DTO & Document, CritereDTO>(pConfig);
-            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER)
+            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER && pModel)
             {
                 // cm - Initialise le repo SqlServer
-                this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig);
+                this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig, pModel);
             } else
             {
                 throw new Error(
