@@ -24,7 +24,7 @@ export abstract class AbstractDbRepository<DTO, CritereDTO> implements IDbReposi
     abstract itemExists(pCritereDTO: CritereDTO): Promise<boolean>;
     abstract disconnect(): Promise<void>;
     abstract buildFilter(pCritereDTO: CritereDTO): any;
-    abstract formatResults(pResults: any[]): DTO[];
+    abstract formatResults(pResults: any[] | any): DTO[];
 
     /**
      * V�rifie si une valeur est une date

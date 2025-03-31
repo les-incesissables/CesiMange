@@ -1,12 +1,12 @@
-﻿import { FilterQuery, Document } from 'mongoose';
-import { EDatabaseType } from '../../interfaces/enums/EDatabaseType';
-import { IBaseRepository } from '../../interfaces/IBaseRepository';
-import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
-import { AbstractDbRepository } from './AbstractDbRepository';
-import { MongoDBRepository } from './MongoDBRepository';
-import { SqlServerRepository } from './SqlServerRepository';
-import { BaseCritereDTO } from '../../models/base/BaseCritereDTO';
-import { BaseDTO } from '../../models/base/BaseDTO';
+﻿import { FilterQuery, Document } from "mongoose";
+import { IBaseRepository } from "../../interfaces/IBaseRepository";
+import { IRepositoryConfig } from "../../interfaces/IRepositoryConfig";
+import { AbstractDbRepository } from "./AbstractDbRepository";
+import { MongoDBRepository } from "./MongoDBRepository";
+import { SqlServerRepository } from "./SqlServerRepository";
+import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
+import { ObjectLiteral } from "typeorm";
+import { EDatabaseType } from "../../enums/EDatabaseType";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques
@@ -25,18 +25,23 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Constructeur du BaseRepository
      * @param pConfig Config du repository
      */
-    constructor(pConfig: IRepositoryConfig) {
+    constructor (pConfig: IRepositoryConfig, pModel?: any)
+    {
         this._config = pConfig;
         try {
             // cm - Fabrique le repository approprié selon le type de base de données
             if (this._config.TypeBDD === EDatabaseType.MONGODB) {
                 // cm - Initialise le repo Mongo DB
                 this._repository = new MongoDBRepository<DTO & Document, CritereDTO>(pConfig);
-            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER) {
+            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER && pModel)
+            {
                 // cm - Initialise le repo SqlServer
-                this._repository = new SqlServerRepository<DTO & BaseDTO, CritereDTO & BaseCritereDTO>(pConfig);
-            } else {
-                throw new Error(`Type de base de données non supporté: ${this._config.TypeBDD}`);
+                this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig, pModel);
+            } else
+            {
+                throw new Error(
+                    `Type de base de données non supporté: ${this._config.TypeBDD}`
+                );
             }
         } catch (e: any) {
             throw new Error(e);

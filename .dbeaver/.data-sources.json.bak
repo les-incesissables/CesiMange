@@ -1,0 +1,41 @@
+{
+	"folders": {},
+	"connections": {
+		"microsoft-195eb923c4c-6be7c8603657ea5c": {
+			"provider": "sqlserver",
+			"driver": "microsoft",
+			"name": "master",
+			"save-password": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "1433",
+				"database": "master",
+				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dmaster",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-all-schemas@": "true",
+					"sslTrustServerCertificate": "true"
+				},
+				"auth-model": "sqlserver_database"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		}
+	}
+}
