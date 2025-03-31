@@ -1,4 +1,4 @@
-import { EDatabaseType } from '../interfaces/enums/EDatabaseType';
+import { EDatabaseType } from '../enums/EDatabaseType';
 
 /**
  * Configuration du repository MongoDB

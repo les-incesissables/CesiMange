@@ -10,11 +10,12 @@ import * as path from 'path';
 //import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
 //import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
 //import { OrderMetier } from './src/metier/order/OrderMetier';
-import { UserController } from './src/controllers/user/UserController';
-import { UserMetier } from './src/metier/user/UserMetier';
+
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { UserController } from "./controllers/user/UserController";
+import { UserMetier } from "./metier/user/UserMetier";
 
 //#endregion
 

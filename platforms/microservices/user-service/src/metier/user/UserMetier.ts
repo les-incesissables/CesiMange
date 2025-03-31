@@ -1,11 +1,10 @@
 import { IUser } from "../../models/interfaces/IUser";
-import { Repository } from "../../../../data-access-layer/repositories/Repository";
-import { EDatabaseType } from "../../../../data-access-layer/enums/EDatabaseType";
 import { UserCritereDTO } from "../../models/UserCritereDTO";
 import { User } from "../../models/User";
 
 
 import { BaseMetier } from '../../../../../services/base-classes/src';
+import { EDatabaseType, Repository } from "../../../../../services/data-access-layer/src";
 
 /**
  * M�tier pour l'entit� User

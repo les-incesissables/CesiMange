@@ -6,6 +6,7 @@ import { MongoDBRepository } from "./MongoDBRepository";
 import { SqlServerRepository } from "./SqlServerRepository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { ObjectLiteral } from "typeorm";
+import { EDatabaseType } from "../../enums/EDatabaseType";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques
