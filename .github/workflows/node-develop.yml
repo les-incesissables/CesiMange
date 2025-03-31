@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   # -----------------------------
-  # JOB 1 : Build des projets NPM (plateformes)
+  # JOB 1 : Build des projets NPM (plateformes et microservices)
   # -----------------------------
   build-npm:
     runs-on: ubuntu-latest
@@ -16,20 +16,23 @@ jobs:
       matrix:
         project:
           - "platforms/services/ModelGenerator"
-          - "platforms/microservices/services/user-service"
+          - "platforms/services/base-classes"
+          - "platforms/services/data-access-layer"
+          - "platforms/microservices/user-service"
+          - "platforms/microservices/restaurant-service"
         node-version: ["22.14"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node for NPM projects
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
 
-      - name: Install NPM dependencies
+      - name: Install dependencies
         run: npm ci
         working-directory: ${{ matrix.project }}
 
@@ -38,32 +41,28 @@ jobs:
         working-directory: ${{ matrix.project }}
 
   # -----------------------------
-  # JOB 2 : Build des apps Yarn (workspaces)
+  # JOB 2 : Build des apps Yarn (front-end)
   # -----------------------------
   build-yarn:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Listez ici le nom de chaque app (chaque app correspond à un dossier dans apps/)
-        app: [ "customer-final"]
+        app: [ "customer-final" ]
         node-version: ["22.14"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node for Yarn apps
+      - name: Setup Node.js for Yarn
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-          # Le cache se base sur le yarn.lock racine
           cache-dependency-path: "yarn.lock"
 
-      # Installation globale en mode Workspaces (une seule installation pour tous les workspaces)
       - name: Yarn install (monorepo)
         run: yarn install --frozen-lockfile
 
-      # Build des composants de l'app dans l'ordre voulu
       - name: Build app components
         run: |
           components=(proxy local-middleware front)
@@ -78,5 +77,3 @@ jobs:
               echo "Directory $componentDir does not exist, skipping."
             fi
           done
-
-
