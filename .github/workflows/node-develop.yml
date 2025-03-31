@@ -2,25 +2,16 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["develop"]
+    branches: [ "develop" ]
   pull_request:
-    branches: ["develop"]
+    branches: [ "develop" ]
 
 jobs:
-  # -----------------------------
-  # JOB 1 : Build des projets NPM (plateformes et microservices)
-  # -----------------------------
-  build-npm:
+  # -------------------------------------------------------------------
+  # JOB 1 : Build des projets NPM dans l'ordre requis
+  # -------------------------------------------------------------------
+  build-npm-in-order:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project:
-          - "platforms/services/ModelGenerator"
-          - "platforms/services/base-classes"
-          - "platforms/services/data-access-layer"
-          - "platforms/microservices/user-service"
-          - "platforms/microservices/restaurant-service"
-        node-version: ["22.14"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,17 +19,42 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+          node-version: "22.14"
 
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ${{ matrix.project }}
+      # 1. Build data-access-layer
+      - name: Build data-access-layer
+        run: |
+          cd platforms/services/data-access-layer
+          npm ci
+          npm run build
 
-      - name: Build NPM project
-        run: npm run build --if-present
-        working-directory: ${{ matrix.project }}
+      # 2. Build base-classes (qui dépend de data-access-layer)
+      - name: Build base-classes
+        run: |
+          cd platforms/services/base-classes
+          npm ci
+          npm run build
+
+      # 3. Build ModelGenerator (si nécessaire)
+      - name: Build ModelGenerator
+        run: |
+          cd platforms/services/ModelGenerator
+          npm ci
+          npm run build
+
+      # 4. Build user-service
+      - name: Build user-service
+        run: |
+          cd platforms/microservices/user-service
+          npm ci
+          npm run build
+
+      # 5. Build restaurant-service
+      - name: Build restaurant-service
+        run: |
+          cd platforms/microservices/restaurant-service
+          npm ci
+          npm run build
 
   # -----------------------------
   # JOB 2 : Build des apps Yarn (front-end)
