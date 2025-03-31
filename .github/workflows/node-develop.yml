@@ -15,9 +15,8 @@ jobs:
     strategy:
       matrix:
         project:
-          - "platforms/api-gateway"
           - "platforms/services/ModelGenerator"
-          - "platforms/services/user-service"
+          - "platforms/microservices/services/user-service"
         node-version: ["22.14"]
     steps:
       - name: Checkout repository
