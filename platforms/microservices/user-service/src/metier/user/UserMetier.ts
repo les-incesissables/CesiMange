@@ -1,8 +1,6 @@
 import { IUser } from "../../models/interfaces/IUser";
 import { UserCritereDTO } from "../../models/UserCritereDTO";
 import { User } from "../../models/User";
-
-
 import { BaseMetier } from '../../../../../services/base-classes/src';
 import { EDatabaseType, Repository } from "../../../../../services/data-access-layer/src";
 

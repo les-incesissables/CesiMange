@@ -6,6 +6,7 @@
 			"driver": "microsoft",
 			"name": "CesiMange",
 			"save-password": true,
+			"show-system-objects": true,
 			"configuration": {
 				"host": "localhost",
 				"port": "1433",

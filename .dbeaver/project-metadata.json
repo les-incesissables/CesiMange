@@ -1,1 +1,1 @@
-{"resources":{"Scripts/Script-1.sql":{"default-schema":"dbo","default-datasource":"microsoft-195eb923c4c-6be7c8603657ea5c","default-catalog":"CesiMange"},"Scripts/Script.sql":{"default-schema":"dbo","default-datasource":"microsoft-195eb923c4c-6be7c8603657ea5c","default-catalog":"CesiMange"}}}
+{"resources":{"Scripts/CesiMange/DDL/Script.sql":{"default-datasource":"microsoft-195eb923c4c-6be7c8603657ea5c","default-catalog":"CesiMange","default-schema":"dbo"},"Scripts/DDL/Script.sql":{"default-datasource":"microsoft-195eb923c4c-6be7c8603657ea5c","default-catalog":"CesiMange"}}}
