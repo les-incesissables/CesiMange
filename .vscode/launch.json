@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug User Service",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/platforms/microservices/user-service/dist/microservices/user-service/src/app.js",
+            "outFiles": [
+                "${workspaceFolder}/platforms/microservices/user-service/dist/microservices/user-service/**/*.js",
+                "${workspaceFolder}/platforms/data/data-access-layer/dist/services/data-access-layer/**/*.js",
+                "${workspaceFolder}/platforms/data/base-classes/dist/services/base-classes/**/*.js"
+            ],
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/platforms/microservices/user-service/**",
+                "${workspaceFolder}/platforms/data/data-access-layer/**",
+                "${workspaceFolder}/platforms/data/base-classes/**",
+                "!**/node_modules/**"
+            ],
+            "preLaunchTask": "tsc: build - platforms/microservices/user-service/tsconfig.json",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
