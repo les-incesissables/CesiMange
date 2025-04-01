@@ -4,8 +4,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Application",
+      "name": "Debug Application (Nodemon)",
       "skipFiles": [ "<node_internals>/**" ],
+      "runtimeExecutable": "nodemon",
       "program": "${workspaceFolder}/dist/microservices/user-service/src/app.js",
       "outFiles": [
         "${workspaceFolder}/dist/microservices/user-service/src/**/*.js",
@@ -19,9 +20,19 @@
         "${workspaceFolder}/../../services/base-classes/**",
         "!**/node_modules/**"
       ],
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "console": "externalTerminal",
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--watch",
+        "${workspaceFolder}/dist",
+        "--ext",
+        "js",
+        "--delay",
+        "1"
+      ]
     }
   ]
 }
