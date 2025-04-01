@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } 
 
 /**
  * Entit� TypeORM pour la table SQL Server T_TRANSACTIONS
- * @author Entity Generator - 2025-04-01T20:30:33.440Z - Creation
+ * @author Entity Generator - 2025-04-01T22:33:48.962Z - Creation
  */
 @Entity("T_TRANSACTIONS")
 export class Transactions implements ObjectLiteral

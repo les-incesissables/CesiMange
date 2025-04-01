@@ -361,7 +361,7 @@ function generateMetierContent(className: string, schema: TableSchema): string
     content += ` */\n`;
     content += `export class ${className}Metier extends BaseMetier<${className}, ${className}CritereDTO> {\n`;
     content += `    constructor() {\n`;
-    content += `        super('${className}');\n`;
+    content += `        super('${className}',${className});\n`;
     content += `    }\n`;
     content += `}\n`;
     return content;

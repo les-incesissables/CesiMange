@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Interface pour les controllers
  */
 export interface IBaseMetier<DTO, CritereDTO>

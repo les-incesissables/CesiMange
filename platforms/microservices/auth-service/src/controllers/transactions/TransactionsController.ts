@@ -4,7 +4,7 @@ import { BaseController } from "../../../../../services/base-classes/src/control
 
 /**
  * Contr�leur pour l'entit� Transactions
- * @author Controller Generator - 2025-04-01T20:30:33.442Z - Creation
+ * @author Controller Generator - 2025-04-01T22:33:48.964Z - Creation
  */
 export class TransactionsController extends BaseController<Transactions, TransactionsCritereDTO> {
 

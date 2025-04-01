@@ -2,146 +2,175 @@ import { IBaseMetier } from './IBaseMetier';
 import { Repository, EDatabaseType } from '../../../../data-access-layer/src';
 
 /**
- * Contr�leur de base g�n�rique
- * @template DTO - Type de donn�es retourn�/manipul�
- * @template CritereDTO - Type des crit�res de recherche
+ * Contrôleur de base générique
+ * @template DTO - Type de données retourné/manipulé
+ * @template CritereDTO - Type des critères de recherche
  */
-export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO> {
+export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO>
+{
     protected Repository: Repository<DTO, CritereDTO>;
     protected CollectionName: string;
 
     //#region CTOR
-    constructor (pCollectionName: string)
+    constructor (pCollectionName: string, pModel?: any)
     {
         this.CollectionName = pCollectionName;
+        let lDatabaseType: EDatabaseType = EDatabaseType.MONGODB;
+
+        if (pModel)
+            lDatabaseType = EDatabaseType.SQL_SERVER;
+
         const lRepo = new Repository<DTO, CritereDTO>(
             pCollectionName,
-            EDatabaseType.MONGODB
+            lDatabaseType,
+            pModel
         );
         this.Repository = lRepo;
     }
-
     //#endregion
 
     //#region CRUD
     /**
-     * Obtenir tous les �l�ments selon des crit�res
+     * Obtenir tous les éléments selon des critères
      */
-    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]> {
-        try {
-            // Validation des crit�res si n�cessaire
+    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
+    {
+        try
+        {
+            // Validation des critères si nécessaire
             this.validateCritereDTO(pCritereDTO);
+            this.validateGetItems(pCritereDTO);
 
-            // Appliquer des r�gles m�tier avant la r�cup�ration
+            // Appliquer des règles métier avant la récupération
             this.beforeGetItems(pCritereDTO);
 
-            // D�l�guer la r�cup�ration au repository
+            // Déléguer la récupération au repository
             const items = await this.Repository.getItems(pCritereDTO);
 
-            // Appliquer des transformations ou r�gles apr�s la r�cup�ration
+            // Appliquer des transformations ou règles après la récupération
             return items;
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'getItems');
             throw error;
         }
     }
 
     /**
-     * Obtenir un �l�ment par crit�res
+     * Obtenir un élément par critères
      */
-    async getItem(pCritereDTO: CritereDTO): Promise<DTO> {
-        try {
-            // Validation des crit�res
+    async getItem(pCritereDTO: CritereDTO): Promise<DTO>
+    {
+        try
+        {
+            // Validation des critères
             this.validateCritereDTO(pCritereDTO);
+            this.validateGetItem(pCritereDTO);
 
-            // Appliquer des r�gles m�tier avant la r�cup�ration
+            // Appliquer des règles métier avant la récupération
             this.beforeGetItem(pCritereDTO);
 
-            // D�l�guer la r�cup�ration au repository
+            // Déléguer la récupération au repository
             const item = await this.Repository.getItem(pCritereDTO);
 
             return item;
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'getItem');
             throw error;
         }
     }
 
     /**
-     * Cr�er un nouvel �l�ment
+     * Créer un nouvel élément
      */
-    async createItem(pDTO: DTO): Promise<DTO> {
-        try {
-            // Validation des donn�es
+    async createItem(pDTO: DTO): Promise<DTO>
+    {
+        try
+        {
+            // Validation des données
             this.validateDTO(pDTO);
+            await this.validateCreateItem(pDTO);
 
-            // Appliquer des r�gles m�tier avant la cr�ation
+            // Appliquer des règles métier avant la création
             const preparedDTO = await this.beforeCreateItem(pDTO);
 
-            // D�l�guer la cr�ation au repository
+            // Déléguer la création au repository
             const item = await this.Repository.createItem(preparedDTO);
 
             return item;
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'createItem');
             throw error;
         }
     }
 
     /**
-     * Mettre � jour un �l�ment existant
+     * Mettre à jour un élément existant
      */
-    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
-        try {
-            // Validation des donn�es et crit�res
+    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
+    {
+        try
+        {
+            // Validation des données et critères
             this.validateDTO(pDTO);
             this.validateCritereDTO(pCritereDTO);
+            await this.validateUpdateItem(pDTO, pCritereDTO);
 
-            // Appliquer des r�gles m�tier avant la mise � jour
+            // Appliquer des règles métier avant la mise à jour
             const preparedDTO = await this.beforeUpdateItem(pDTO, pCritereDTO);
 
-            // D�l�guer la mise � jour au repository
+            // Déléguer la mise à jour au repository
             const item = await this.Repository.updateItem(preparedDTO, pCritereDTO);
 
             return item;
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'updateItem');
             throw error;
         }
     }
 
     /**
-     * Supprimer un �l�ment
+     * Supprimer un élément
      */
-    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean> {
-        try {
-            // Validation des crit�res
+    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
+    {
+        try
+        {
+            // Validation des critères
             this.validateCritereDTO(pCritereDTO);
+            await this.validateDeleteItem(pCritereDTO);
 
-            // Appliquer des r�gles m�tier avant la suppression
+            // Appliquer des règles métier avant la suppression
             await this.beforeDeleteItem(pCritereDTO);
 
-            // D�l�guer la suppression au repository
+            // Déléguer la suppression au repository
             const result = await this.Repository.deleteItem(pCritereDTO);
 
             return result;
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'deleteItem');
             throw error;
         }
     }
 
     /**
-     * V�rifier si un �l�ment existe selon des crit�res
+     * Vérifier si un élément existe selon des critères
      */
-    async itemExists(pCritereDTO: CritereDTO): Promise<boolean> {
-        try {
-            // Validation des crit�res
+    async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
+    {
+        try
+        {
+            // Validation des critères
             this.validateCritereDTO(pCritereDTO);
 
-            // D�l�guer la v�rification au repository
+            // Déléguer la vérification au repository
             return await this.Repository.itemExists(pCritereDTO);
-        } catch (error) {
+        } catch (error)
+        {
             this.handleError(error, 'itemExists');
             throw error;
         }
@@ -151,70 +180,92 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, Cr
     //#region Validation Errors
 
     /**
-     * Valider les donn�es avant cr�ation/mise � jour
-     * � surcharger pour des validations sp�cifiques
+     * Valider les données avant création/mise à jour
+     * À surcharger pour des validations spécifiques
      */
-    protected validateDTO(pDTO: DTO): void {
+    protected validateDTO(pDTO: DTO): void
+    {
         // Validation de base
-        if (!pDTO) {
-            throw new Error('Les donn�es sont requises');
+        if (!pDTO)
+        {
+            throw new Error('Les données sont requises');
         }
     }
 
     /**
-     * Valider les crit�res de recherche
-     * � surcharger pour des validations sp�cifiques
+     * Valider les critères de recherche
+     * À surcharger pour des validations spécifiques
      */
-    protected validateCritereDTO(pCritereDTO: CritereDTO): void {
+    protected validateCritereDTO(pCritereDTO: CritereDTO): void
+    {
         // Validation de base
-        if (!pCritereDTO) {
-            throw new Error('Les crit�res sont requis');
+        if (!pCritereDTO)
+        {
+            throw new Error('Les critères sont requis');
         }
-    }
-
-    /**
-     * Actions avant de r�cup�rer plusieurs �l�ments
-     */
-    protected beforeGetItems(pCritereDTO: CritereDTO): void {
-        // Par d�faut ne fait rien, � surcharger si n�cessaire
-    }
-
-    /**
-     * Actions avant de r�cup�rer un �l�ment
-     */
-    protected beforeGetItem(pCritereDTO: CritereDTO): void {
-        // Par d�faut ne fait rien, � surcharger si n�cessaire
-    }
-
-    /**
-     * Actions avant de cr�er un �l�ment
-     */
-    protected async beforeCreateItem(pDTO: DTO): Promise<DTO> {
-        // Par d�faut retourne les donn�es telles quelles, � surcharger si n�cessaire
-        return pDTO;
-    }
-
-    /**
-     * Actions avant de mettre � jour un �l�ment
-     */
-    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
-        // Par d�faut retourne les donn�es telles quelles, � surcharger si n�cessaire
-        return pDTO;
-    }
-
-    /**
-     * Actions avant de supprimer un �l�ment
-     */
-    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
-        // Par d�faut ne fait rien, � surcharger si n�cessaire
     }
 
     /**
      * Gestion des erreurs
      */
-    protected handleError(error: any, methodName: string): void {
+    protected handleError(error: any, methodName: string): void
+    {
         console.error(`Erreur dans ${methodName}:`, error);
-        // Logique sp�cifique de gestion des erreurs
+        // Logique spécifique de gestion des erreurs
+    }
+
+    /**
+     * Méthodes de validation et prétraitement à implémenter
+     * dans les classes dérivées
+     */
+    protected validateGetItems(pCritereDTO: CritereDTO): void
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected validateGetItem(pCritereDTO: CritereDTO): void
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected async validateCreateItem(pDTO: DTO): Promise<void>
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected async validateUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<void>
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected async validateDeleteItem(pCritereDTO: CritereDTO): Promise<void>
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected beforeGetItems(pCritereDTO: CritereDTO): void
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected beforeGetItem(pCritereDTO: CritereDTO): void
+    {
+        // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected async beforeCreateItem(pDTO: DTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
+    {
+        // Méthode à implémenter dans les classes dérivées
     }
     //#endregion
 }

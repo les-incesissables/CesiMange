@@ -205,13 +205,9 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
             }
 
             const result = await repository.findOne(findOptions);
-
-            if (!result)
-            {
-                throw new Error(`Aucun élément trouvé pour les critères donnés dans ${this._config.CollectionName}`);
-            }
-
-            return result;
+            // cm - Renvoie vide sir
+            return result || {} as DTO;
+;
         } catch (error)
         {
             console.error("Erreur lors de la récupération de l'élément:", error);

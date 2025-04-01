@@ -30,10 +30,10 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
         this._config = pConfig;
         try {
             // cm - Fabrique le repository approprié selon le type de base de données
-            if (this._config.TypeBDD === EDatabaseType.MONGODB) {
+            if (this._config.TypeBDD == EDatabaseType.MONGODB) {
                 // cm - Initialise le repo Mongo DB
                 this._repository = new MongoDBRepository<DTO & Document, CritereDTO>(pConfig);
-            } else if (this._config.TypeBDD === EDatabaseType.SQL_SERVER && pModel)
+            } else if ((this._config.TypeBDD == EDatabaseType.SQL_SERVER) && pModel)
             {
                 // cm - Initialise le repo SqlServer
                 this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig, pModel);
@@ -47,7 +47,6 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             throw new Error(e);
         }
     }
-
     //#endregion
 
     //#region Methods

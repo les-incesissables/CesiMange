@@ -14,8 +14,9 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { UserController } from "./controllers/user/UserController";
-import { UserMetier } from "./metier/user/UserMetier";
+import { AuthUsersController } from "./controllers/authusers/AuthUsersController";
+import { AuthUsersMetier } from "./metier/authusers/AuthUsersMetier";
+
 
 //#endregion
 
@@ -46,10 +47,10 @@ app.use(
  */
 app.use(morgan('dev'));
 
-const userController = new UserController(new UserMetier());
+const userController = new AuthUsersController(new AuthUsersMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-app.use('/api/users', userController.getRouter());
+app.use('/auth', userController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
