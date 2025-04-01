@@ -23,6 +23,8 @@ export class UserMetier extends BaseMetier<IUser, Partial<IUser>>
 
         let us = await lRepo.getItems(pCritereDTO);
 
+        console.log(us.toString());
+
         return await super.getItems(pCritereDTO);
     }
 }

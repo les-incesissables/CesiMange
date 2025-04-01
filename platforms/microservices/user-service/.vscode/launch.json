@@ -5,7 +5,11 @@
       "type": "node",
       "request": "launch",
       "name": "Debug Application with Nodemon",
-      "skipFiles": [ "<node_internals>/**" ],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**",
+        "**/node_modules/nodemon/**"
+      ],
       "runtimeExecutable": "npm",
       "runtimeArgs": [ "run", "dev" ],
       "outFiles": [
