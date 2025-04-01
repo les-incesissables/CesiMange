@@ -2,30 +2,30 @@ import { Router, Request, Response } from 'express';
 import { BaseMetier } from '../../metier/base/BaseMetier';
 
 export class BaseController<DTO, CritereDTO> {
-    private _router: Router;
+    protected Router: Router;
     protected Metier: BaseMetier<DTO, CritereDTO>;
 
     constructor(pMetier: BaseMetier<DTO, CritereDTO>) {
-        this._router = Router();
+        this.Router = Router();
         this.Metier = pMetier;
         this.initializeRoutes();
     }
 
-    private initializeRoutes(): void {
+    protected initializeRoutes(): void {
         // GET / - R�cup�rer tous les �l�ments
-        this._router.get('/', this.getAllItems);
+        this.Router.get('/', this.getAllItems);
 
         // GET /:id - R�cup�rer un �l�ment par son ID
-        this._router.get('/:id', this.getItemById);
+        this.Router.get('/:id', this.getItem);
 
         // POST / - Cr�er un nouvel �l�ment
-        this._router.post('/', this.createItem);
+        this.Router.post('/', this.createItem);
 
         // PUT /:id - Mettre � jour un �l�ment existant
-        this._router.put('/:id', this.updateItem);
+        this.Router.put('/:id', this.updateItem);
 
         // DELETE /:id - Supprimer un �l�ment
-        this._router.delete('/:id', this.deleteItem);
+        this.Router.delete('/:id', this.deleteItem);
     }
 
     /**
@@ -45,7 +45,7 @@ export class BaseController<DTO, CritereDTO> {
         }
     };
 
-    protected getItemById = async (req: Request, res: Response): Promise<void> => {
+    protected getItem = async (req: Request, res: Response): Promise<void> => {
         try {
             const critere = { id: req.params.id } as unknown as CritereDTO; // R�cup�rer l'ID depuis les param�tres de la route
             const item = await this.Metier.getItem(critere);
@@ -95,6 +95,6 @@ export class BaseController<DTO, CritereDTO> {
     };
 
     public getRouter(): Router {
-        return this._router;
+        return this.Router;
     }
 }

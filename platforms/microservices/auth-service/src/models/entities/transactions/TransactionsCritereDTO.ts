@@ -1,14 +1,14 @@
 import { ObjectLiteral } from "typeorm";
 /**
  * CritereDTO pour la recherche d'entit�s SQL Server Transactions
- * @author DTO Generator - 2025-04-01T19:17:50.602Z - Creation
+ * @author DTO Generator - 2025-04-01T20:30:33.441Z - Creation
  */
 export class TransactionsCritereDTO implements ObjectLiteral
 {
     /**
-     * Crit�re de recherche pour id
+     * Crit�re de recherche pour transactions_id
      */
-    id?: number | undefined;
+    transactions_id?: number | undefined;
 
     /**
      * Crit�re de recherche pour order_id

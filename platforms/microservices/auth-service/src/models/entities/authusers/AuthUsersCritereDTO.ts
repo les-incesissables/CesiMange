@@ -1,14 +1,14 @@
 import { ObjectLiteral } from "typeorm";
 /**
  * CritereDTO pour la recherche d'entit�s SQL Server AuthUsers
- * @author DTO Generator - 2025-04-01T19:17:50.590Z - Creation
+ * @author DTO Generator - 2025-04-01T20:30:33.429Z - Creation
  */
 export class AuthUsersCritereDTO implements ObjectLiteral
 {
     /**
-     * Crit�re de recherche pour id
+     * Crit�re de recherche pour auth_user_id
      */
-    id?: number | undefined;
+    auth_user_id?: number | undefined;
 
     /**
      * Crit�re de recherche pour email
@@ -119,5 +119,15 @@ export class AuthUsersCritereDTO implements ObjectLiteral
      * Valeur maximale pour updated_at
      */
     updated_atMax?: Date | undefined;
+
+    /**
+     * Crit�re de recherche pour username
+     */
+    username?: string | undefined;
+
+    /**
+     * Recherche avec LIKE pour username
+     */
+    usernameLike?: string | undefined;
 
 }

@@ -7,6 +7,7 @@ require('dotenv').config();
  * Script de génération automatique de DTOs et Entités à partir de SQL Server
  * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Création
  * @author Modifié pour ajouter la génération d'entités, métiers et contrôleurs
+ * @author Modifié pour préserver les fichiers modifiés manuellement
  */
 
 // Configuration des services et des tables associées
@@ -25,7 +26,9 @@ const config = {
     excludedFields: ['CreatedAt', 'UpdatedAt', 'DeletedAt'],
     excludedTables: ['__EFMigrationsHistory', 'sysdiagrams'],
     cleanOutputDir: false,
-    protectedFolders: ['base']
+    protectedFolders: ['base'],
+    generatorSignature: '\\* @author (Entity|DTO|Metier|Controller) Generator',
+    overwriteExistingFiles: false
 };
 
 // Types et interfaces pour l'analyse
@@ -77,6 +80,53 @@ function cleanDirectory(dirPath: string, protectedFolders: string[] = []): void
             fs.unlinkSync(itemPath);
         }
     }
+}
+
+// Fonction pour vérifier si un fichier a été modifié manuellement
+function isFileModifiedManually(filePath: string): boolean
+{
+    if (!fs.existsSync(filePath)) return false;
+
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+
+    // Vérifier si le contenu contient la signature du générateur
+    const generatorRegex = /\* @author (Entity|DTO|Metier|Controller) Generator/;
+    const hasGeneratorSignature = generatorRegex.test(fileContent);
+
+    // Si le fichier contient notre signature mais a été modifié après sa génération initiale
+    if (hasGeneratorSignature)
+    {
+        const creationDateMatch = fileContent.match(/@author (?:Entity|DTO|Metier|Controller) Generator - ([0-9TZ:.+-]+) - Creation/);
+        if (creationDateMatch && creationDateMatch[1])
+        {
+            const creationDate = new Date(creationDateMatch[1]);
+            const modificationDate = fs.statSync(filePath).mtime;
+
+            // Si le fichier a été modifié après sa génération initiale d'au moins 5 minutes
+            // (pour éviter les faux positifs liés au délai entre génération et écriture sur disque)
+            const fiveMinutes = 5 * 60 * 1000;
+            return modificationDate.getTime() > creationDate.getTime() + fiveMinutes;
+        }
+    }
+
+    // Si pas de signature ou format inattendu, considérer comme modifié manuellement
+    return true;
+}
+
+// Fonction pour écrire un fichier en vérifiant s'il a été modifié manuellement
+function writeFileIfNotModified(filePath: string, content: string): boolean
+{
+    if (!config.overwriteExistingFiles && fs.existsSync(filePath))
+    {
+        if (isFileModifiedManually(filePath))
+        {
+            console.log(`  Fichier préservé (modifié manuellement): ${filePath}`);
+            return false;
+        }
+    }
+
+    fs.writeFileSync(filePath, content);
+    return true;
 }
 
 // Fonction pour convertir le nom d'une table en nom de classe (PascalCase)
@@ -327,7 +377,10 @@ function generateControllerContent(className: string, schema: TableSchema): stri
     content += ` * Contrôleur pour l'entité ${className}\n`;
     content += ` * @author Controller Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
-    content += `export class ${className}Controller extends BaseController<${className}, ${className}CritereDTO> {\n`;
+    content += `export class ${className}Controller extends BaseController<${className}, ${className}CritereDTO> {\n\n`;
+    content += `    override initializeRoutes(): void {\n`;
+    content += `        this.Router.get('/', );\n`;
+    content += `    }\n\n`;
     content += `}\n`;
     return content;
 }
@@ -443,14 +496,18 @@ async function generateDTOs(): Promise<void>
                     // Générer le fichier Entity
                     const entityContent = generateEntityContent(className, tableName, schema);
                     const entityFilePath = path.join(modelDir, `${className}.ts`);
-                    fs.writeFileSync(entityFilePath, entityContent);
-                    console.log(`  Entity généré: ${entityFilePath}`);
+                    if (writeFileIfNotModified(entityFilePath, entityContent))
+                    {
+                        console.log(`  Entity généré: ${entityFilePath}`);
+                    }
 
                     // Générer le fichier CritereDTO
                     const critereDtoContent = generateCritereDTOContent(className, schema);
                     const critereDtoFilePath = path.join(modelDir, `${className}CritereDTO.ts`);
-                    fs.writeFileSync(critereDtoFilePath, critereDtoContent);
-                    console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
+                    if (writeFileIfNotModified(critereDtoFilePath, critereDtoContent))
+                    {
+                        console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
+                    }
 
                     // === 2. Création des fichiers Metier ===
                     const metierClassDir = path.join(metierDir, className.toLowerCase());
@@ -458,8 +515,10 @@ async function generateDTOs(): Promise<void>
 
                     const metierContent = generateMetierContent(className, schema);
                     const metierFilePath = path.join(metierClassDir, `${className}Metier.ts`);
-                    fs.writeFileSync(metierFilePath, metierContent);
-                    console.log(`  Metier généré: ${metierFilePath}`);
+                    if (writeFileIfNotModified(metierFilePath, metierContent))
+                    {
+                        console.log(`  Metier généré: ${metierFilePath}`);
+                    }
 
                     // === 3. Création des fichiers Controller ===
                     const controllerClassDir = path.join(controllerDir, className.toLowerCase());
@@ -467,8 +526,10 @@ async function generateDTOs(): Promise<void>
 
                     const controllerContent = generateControllerContent(className, schema);
                     const controllerFilePath = path.join(controllerClassDir, `${className}Controller.ts`);
-                    fs.writeFileSync(controllerFilePath, controllerContent);
-                    console.log(`  Controller généré: ${controllerFilePath}`);
+                    if (writeFileIfNotModified(controllerFilePath, controllerContent))
+                    {
+                        console.log(`  Controller généré: ${controllerFilePath}`);
+                    }
 
                 } else
                 {

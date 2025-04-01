@@ -2,16 +2,16 @@ import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } 
 
 /**
  * Entit� TypeORM pour la table SQL Server T_AUTH_USERS
- * @author Entity Generator - 2025-04-01T19:17:50.588Z - Creation
+ * @author Entity Generator - 2025-04-01T20:30:33.427Z - Creation
  */
 @Entity("T_AUTH_USERS")
 export class AuthUsers implements ObjectLiteral
 {
     /**
-     * id
+     * auth_user_id
      */
     @PrimaryGeneratedColumn()
-    id!: number;
+    auth_user_id!: number;
 
     /**
      * email
@@ -83,5 +83,12 @@ export class AuthUsers implements ObjectLiteral
      */
     @Column({ nullable: false })
     updated_at!: Date;
+
+    /**
+     * username
+     * @maxLength 50
+     */
+    @Column({ length: 50 })
+    username!: string;
 
 }

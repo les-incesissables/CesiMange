@@ -4,7 +4,7 @@ import { BaseMetier } from "../../../../../services/base-classes/src/metier/base
 
 /**
  * M�tier pour l'entit� Transactions
- * @author Metier Generator - 2025-04-01T19:17:50.603Z - Creation
+ * @author Metier Generator - 2025-04-01T20:30:33.442Z - Creation
  */
 export class TransactionsMetier extends BaseMetier<Transactions, TransactionsCritereDTO> {
     constructor() {

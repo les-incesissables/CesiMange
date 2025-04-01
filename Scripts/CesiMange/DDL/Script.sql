@@ -1,178 +1,90 @@
--- Création de la base de données (si elle n'existe pas déjà)
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CesiMange')
-BEGIN
-    CREATE DATABASE CesiMange;
-END
-GO
+-- DROP SCHEMA dbo;
+-- Drop table
 
-USE CesiMange;
-GO
+-- DROP TABLE CesiMange.dbo.T_AUTH_USERS;
 
--- Table des utilisateurs authentifiés
-CREATE TABLE T_AUTH_USERS (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(20) UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('client', 'restaurant', 'driver', 'admin')),
-    email_verified BIT DEFAULT 0,
-    phone_verified BIT DEFAULT 0,
-    last_login DATETIME,
-    refresh_token VARCHAR(255),
-    active BIT DEFAULT 1,
-    created_at DATETIME NOT NULL DEFAULT GETDATE(),
-    updated_at DATETIME NOT NULL DEFAULT GETDATE()
+CREATE TABLE CesiMange.dbo.T_AUTH_USERS (
+	auth_user_id int IDENTITY(1,1) NOT NULL,
+	email nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	phone_number nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	password_hash nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	[role] nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	email_verified bit DEFAULT 0 NULL,
+	phone_verified bit DEFAULT 0 NULL,
+	last_login datetime NULL,
+	refresh_token nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	active bit DEFAULT 1 NULL,
+	created_at datetime DEFAULT getdate() NOT NULL,
+	updated_at datetime DEFAULT getdate() NOT NULL,
+	username nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	CONSTRAINT PK__T_AUTH_U__3213E83FFE7D0D59 PRIMARY KEY (auth_user_id),
+	CONSTRAINT UQ__T_AUTH_U__A1936A6B4C78CE2D UNIQUE (phone_number),
+	CONSTRAINT UQ__T_AUTH_U__AB6E6164D874DAED UNIQUE (email)
 );
-GO
+ CREATE NONCLUSTERED INDEX IDX_auth_users_email ON CesiMange.dbo.T_AUTH_USERS (  email ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ CREATE NONCLUSTERED INDEX IDX_auth_users_phone ON CesiMange.dbo.T_AUTH_USERS (  phone_number ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ALTER TABLE CesiMange.dbo.T_AUTH_USERS WITH NOCHECK ADD CONSTRAINT CK__T_AUTH_USE__role__267ABA7A CHECK (([role]='admin' OR [role]='driver' OR [role]='restaurant' OR [role]='client'));
 
--- Table des transactions de paiement
-CREATE TABLE T_TRANSACTIONS (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id VARCHAR(50) NOT NULL, -- ID de MonDB
-    payment_intent_id VARCHAR(100), -- ID du processeur de paiement (ex: Stripe)
-    amount DECIMAL(10, 2) NOT NULL,
-    currency VARCHAR(3) NOT NULL DEFAULT 'EUR', 
-    status VARCHAR(20) NOT NULL,
-    payment_method VARCHAR(30) NOT NULL,
-    payment_provider VARCHAR(30) NOT NULL, -- Stripe, PayPal, etc.
-    created_at DATETIME NOT NULL DEFAULT GETDATE(),
-    updated_at DATETIME NOT NULL DEFAULT GETDATE()
+
+-- CesiMange.dbo.T_TRANSACTIONS definition
+
+-- Drop table
+
+-- DROP TABLE CesiMange.dbo.T_TRANSACTIONS;
+
+CREATE TABLE CesiMange.dbo.T_TRANSACTIONS (
+	transactions_id int IDENTITY(1,1) NOT NULL,
+	order_id nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	payment_intent_id nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	amount decimal(10,2) NOT NULL,
+	currency nvarchar(3) COLLATE SQL_Latin1_General_CP1_CI_AS DEFAULT 'EUR' NOT NULL,
+	status nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	payment_method nvarchar(30) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	payment_provider nvarchar(30) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	created_at datetime DEFAULT getdate() NOT NULL,
+	updated_at datetime DEFAULT getdate() NOT NULL,
+	CONSTRAINT PK__T_TRANSA__3213E83F4440C892 PRIMARY KEY (transactions_id)
 );
-GO
+ CREATE NONCLUSTERED INDEX IDX_transactions_created_at ON CesiMange.dbo.T_TRANSACTIONS (  created_at ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ CREATE NONCLUSTERED INDEX IDX_transactions_order_id ON CesiMange.dbo.T_TRANSACTIONS (  order_id ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ CREATE NONCLUSTERED INDEX IDX_transactions_status ON CesiMange.dbo.T_TRANSACTIONS (  status ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
 
--- Table d'audit pour tracer les activités
-CREATE TABLE T_AUDIT_LOGS (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT,
-    action VARCHAR(50) NOT NULL,
-    entity_type VARCHAR(50) NOT NULL, -- Nom de la table/collection modifiée
-    entity_id VARCHAR(50) NOT NULL, -- ID de l'objet modifié
-    ip_address VARCHAR(45), -- Peut stocker IPv4 et IPv6
-    user_agent VARCHAR(500), -- Navigateur/app utilisé
-    changes NVARCHAR(MAX), -- Stocke le JSON des changements
-    timestamp DATETIME NOT NULL DEFAULT GETDATE(),
-    FOREIGN KEY (user_id) REFERENCES T_AUTH_USERS(id)
+
+-- CesiMange.dbo.T_AUDIT_LOGS definition
+
+-- Drop table
+
+-- DROP TABLE CesiMange.dbo.T_AUDIT_LOGS;
+
+CREATE TABLE CesiMange.dbo.T_AUDIT_LOGS (
+	audit_logs_id int IDENTITY(1,1) NOT NULL,
+	user_id int NULL,
+	[action] nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	entity_type nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	entity_id nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	ip_address nvarchar(45) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	user_agent nvarchar(500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	changes nvarchar(500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	timestamp datetime DEFAULT getdate() NOT NULL,
+	CONSTRAINT PK__T_AUDIT___3213E83FF5A2048E PRIMARY KEY (audit_logs_id),
+	CONSTRAINT FK__T_AUDIT_L__user___33D4B598 FOREIGN KEY (user_id) REFERENCES CesiMange.dbo.T_AUTH_USERS(auth_user_id)
 );
-GO
-
--- Index pour améliorer les performances
-CREATE INDEX IDX_auth_users_email ON T_AUTH_USERS(email);
-GO
-CREATE INDEX IDX_auth_users_phone ON T_AUTH_USERS(phone_number);
-GO
-CREATE INDEX IDX_transactions_order_id ON T_TRANSACTIONS(order_id);
-GO
-CREATE INDEX IDX_transactions_status ON T_TRANSACTIONS(status);
-GO
-CREATE INDEX IDX_transactions_created_at ON T_TRANSACTIONS(created_at);
-GO
-CREATE INDEX IDX_audit_logs_user_id ON T_AUDIT_LOGS(user_id);
-GO
-CREATE INDEX IDX_audit_logs_entity ON T_AUDIT_LOGS(entity_type, entity_id);
-GO
-CREATE INDEX IDX_audit_logs_timestamp ON T_AUDIT_LOGS(timestamp);
-GO
-
--- Procédure stockée pour l'audit automatique
-CREATE PROCEDURE PS_ADD_AUDIT_LOG
-    @user_id INT,
-    @action VARCHAR(50),
-    @entity_type VARCHAR(50),
-    @entity_id VARCHAR(50),
-    @ip_address VARCHAR(45),
-    @user_agent VARCHAR(500),
-    @changes NVARCHAR(MAX)
-AS
-BEGIN
-    INSERT INTO T_AUDIT_LOGS (user_id, action, entity_type, entity_id, ip_address, user_agent, changes)
-    VALUES (@user_id, @action, @entity_type, @entity_id, @ip_address, @user_agent, @changes);
-END;
-GO
-
--- Trigger pour mettre à jour le champ updated_at sur les modifications
-CREATE TRIGGER TRG_AUTH_USERS_UPDATE
-ON T_AUTH_USERS
-AFTER UPDATE
-AS
-BEGIN
-    UPDATE T_AUTH_USERS
-    SET updated_at = GETDATE()
-    FROM T_AUTH_USERS u
-    INNER JOIN inserted i ON u.id = i.id;
-END;
-GO
-
-CREATE TRIGGER TRG_TRANSACTIONS_UPDATE
-ON T_TRANSACTIONS
-AFTER UPDATE
-AS
-BEGIN
-    UPDATE T_TRANSACTIONS
-    SET updated_at = GETDATE()
-    FROM T_TRANSACTIONS t
-    INNER JOIN inserted i ON t.id = i.id;
-END;
-GO
-
--- Procédure stockée pour créer un nouvel utilisateur
-CREATE PROCEDURE PS_CREATE_USER
-    @email VARCHAR(255),
-    @phone_number VARCHAR(20),
-    @password_hash VARCHAR(255),
-    @role VARCHAR(20),
-    @user_id INT OUTPUT
-AS
-BEGIN
-    INSERT INTO T_AUTH_USERS (email, phone_number, password_hash, role, created_at, updated_at)
-    VALUES (@email, @phone_number, @password_hash, @role, GETDATE(), GETDATE());
-    
-    SET @user_id = SCOPE_IDENTITY();
-END;
-GO
-
--- Procédure stockée pour l'authentification
-CREATE PROCEDURE PS_AUTHENTICATE_USER
-    @email VARCHAR(255),
-    @success BIT OUTPUT,
-    @user_id INT OUTPUT,
-    @role VARCHAR(20) OUTPUT
-AS
-BEGIN
-    SELECT @user_id = id, @role = role, @success = 1
-    FROM T_AUTH_USERS
-    WHERE email = @email AND active = 1;
-    
-    IF @user_id IS NULL
-    BEGIN
-        SET @success = 0;
-        SET @role = NULL;
-    END
-    ELSE
-    BEGIN
-        UPDATE T_AUTH_USERS
-        SET last_login = GETDATE()
-        WHERE id = @user_id;
-    END
-END;
-GO
-
--- Procédure stockée pour enregistrer une transaction
-CREATE PROCEDURE PS_RECORD_TRANSACTION
-    @order_id VARCHAR(50),
-    @payment_intent_id VARCHAR(100),
-    @amount DECIMAL(10, 2),
-    @currency VARCHAR(3),
-    @status VARCHAR(20),
-    @payment_method VARCHAR(30),
-    @payment_provider VARCHAR(30),
-    @transaction_id INT OUTPUT
-AS
-BEGIN
-    INSERT INTO T_TRANSACTIONS (order_id, payment_intent_id, amount, currency, status, 
-                              payment_method, payment_provider, created_at, updated_at)
-    VALUES (@order_id, @payment_intent_id, @amount, @currency, @status, 
-            @payment_method, @payment_provider, GETDATE(), GETDATE());
-    
-    SET @transaction_id = SCOPE_IDENTITY();
-END;
-GO
+ CREATE NONCLUSTERED INDEX IDX_audit_logs_entity ON CesiMange.dbo.T_AUDIT_LOGS (  entity_type ASC  , entity_id ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ CREATE NONCLUSTERED INDEX IDX_audit_logs_timestamp ON CesiMange.dbo.T_AUDIT_LOGS (  timestamp ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+ CREATE NONCLUSTERED INDEX IDX_audit_logs_user_id ON CesiMange.dbo.T_AUDIT_LOGS (  user_id ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;

@@ -4,7 +4,7 @@ import { BaseController } from "../../../../../services/base-classes/src/control
 
 /**
  * Contr�leur pour l'entit� Restaurant
- * @Author ModelGenerator - 2025-04-01T19:17:47.636Z - Cr�ation
+ * @Author ModelGenerator - 2025-04-01T20:30:30.151Z - Cr�ation
  */
 export class RestaurantController extends BaseController<IRestaurant, Partial<IRestaurant>> {
 }

@@ -2,16 +2,16 @@ import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } 
 
 /**
  * Entit� TypeORM pour la table SQL Server T_TRANSACTIONS
- * @author Entity Generator - 2025-04-01T19:17:50.601Z - Creation
+ * @author Entity Generator - 2025-04-01T20:30:33.440Z - Creation
  */
 @Entity("T_TRANSACTIONS")
 export class Transactions implements ObjectLiteral
 {
     /**
-     * id
+     * transactions_id
      */
     @PrimaryGeneratedColumn()
-    id!: number;
+    transactions_id!: number;
 
     /**
      * order_id
