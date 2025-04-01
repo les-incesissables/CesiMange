@@ -2,12 +2,12 @@
     "name": "user-service",
     "version": "0.0.0",
     "private": true,
-    "scripts": {
-        "build": "tsc --build",
-        "clean": "tsc --build --clean",
-        "start": "node dist\\user-service\\app.js",
-        "dev": "nodemon src/app.ts"
-    },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "start": "node dist\\user-service\\app.js",
+    "dev": "nodemon --exec ts-node src/app.ts --watch src"
+  },
     "description": "user-service",
     "author": {
         "name": ""
