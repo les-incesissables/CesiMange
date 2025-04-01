@@ -6,27 +6,26 @@ require('dotenv').config();
 /**
  * Script de génération automatique de DTOs et Entités à partir de SQL Server
  * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Création
- * @author Modifié pour ajouter la génération d'entités
+ * @author Modifié pour ajouter la génération d'entités, métiers et contrôleurs
  */
 
 // Configuration des services et des tables associées
 const serviceConfigs = [
     {
-        serviceName: 'user-service',
+        serviceName: 'auth-service',
         tables: ['T_AUTH_USERS', 'T_TRANSACTIONS'],
-        outputDir: '../../microservices/user-service/src/models/'
-    }, 
-    {
-        serviceName: 'restaurant-service',
-        tables: [],
-        outputDir: '../../microservices/restaurant-service/src/models/'
+        outputDir: '../../microservices/auth-service/src/models/',
+        metierDir: '../../microservices/auth-service/src/metier/',
+        controllerDir: '../../microservices/auth-service/src/controllers/'
     }
 ];
 
 // Configuration générale
 const config = {
     excludedFields: ['CreatedAt', 'UpdatedAt', 'DeletedAt'],
-    excludedTables: ['__EFMigrationsHistory', 'sysdiagrams']
+    excludedTables: ['__EFMigrationsHistory', 'sysdiagrams'],
+    cleanOutputDir: false,
+    protectedFolders: ['base']
 };
 
 // Types et interfaces pour l'analyse
@@ -52,6 +51,31 @@ function ensureDirectoryExists(dirPath: string): void
     if (!fs.existsSync(dirPath))
     {
         fs.mkdirSync(dirPath, { recursive: true });
+    }
+}
+
+// Fonction pour nettoyer un répertoire tout en préservant certains dossiers
+function cleanDirectory(dirPath: string, protectedFolders: string[] = []): void
+{
+    if (!fs.existsSync(dirPath)) return;
+
+    const items = fs.readdirSync(dirPath);
+
+    for (const item of items)
+    {
+        const itemPath = path.join(dirPath, item);
+        const isDirectory = fs.statSync(itemPath).isDirectory();
+
+        if (isDirectory)
+        {
+            if (!protectedFolders.includes(item))
+            {
+                fs.rmSync(itemPath, { recursive: true, force: true });
+            }
+        } else
+        {
+            fs.unlinkSync(itemPath);
+        }
     }
 }
 
@@ -102,38 +126,6 @@ function sqlTypeToTypeScript(sqlType: string, isNullable: boolean): string
 
     const tsType = typeMap[sqlType.toLowerCase()] || 'any';
     return tsType;
-}
-
-// Fonction pour convertir un type SQL en décorateur TypeORM
-function sqlTypeToTypeOrmDecorator(column: ColumnInfo): string 
-{
-    const { dataType, isNullable, maxLength, name, isPrimaryKey } = column;
-
-    let decorator = isPrimaryKey ? '@PrimaryColumn()' : '@Column(';
-
-    if (!isPrimaryKey)
-    {
-        const options = [];
-
-        if (dataType.toLowerCase().includes('char') && maxLength)
-        {
-            options.push(`length: ${maxLength}`);
-        }
-
-        if (!isNullable)
-        {
-            options.push('nullable: false');
-        }
-
-        if (options.length > 0)
-        {
-            decorator += `{ ${options.join(', ')} }`;
-        }
-
-        decorator += ')';
-    }
-
-    return decorator;
 }
 
 // Fonction pour analyser la structure d'une table
@@ -188,8 +180,7 @@ async function analyzeTable(tableName: string, dataSource: DataSource): Promise<
     }
 }
 
-// NOUVELLE FONCTION : Générer une entité TypeORM
-// NOUVELLE FONCTION : Générer une entité TypeORM
+// Fonction pour générer une entité TypeORM
 function generateEntityContent(className: string, tableName: string, schema: TableSchema): string
 {
     let content = `import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } from "typeorm";\n\n`;
@@ -308,14 +299,47 @@ function generateCritereDTOContent(className: string, schema: TableSchema): stri
     return content;
 }
 
-// Fonction principale pour générer les DTOs
+// Fonction pour générer le contenu du fichier métier
+function generateMetierContent(className: string, schema: TableSchema): string
+{
+    let content = `import { ${className} } from "../../models/entities/${className.toLowerCase()}/${className}";\n`;
+    content += `import { ${className}CritereDTO } from "../../models/entities/${className.toLowerCase()}/${className}CritereDTO";\n`;
+    content += `import { BaseMetier } from "../../../../../services/base-classes/src/metier/base/BaseMetier";\n\n`;
+    content += `/**\n`;
+    content += ` * Métier pour l'entité ${className}\n`;
+    content += ` * @author Metier Generator - ${new Date().toISOString()} - Creation\n`;
+    content += ` */\n`;
+    content += `export class ${className}Metier extends BaseMetier<${className}, ${className}CritereDTO> {\n`;
+    content += `    constructor() {\n`;
+    content += `        super('${className}');\n`;
+    content += `    }\n`;
+    content += `}\n`;
+    return content;
+}
+
+// Fonction pour générer le contenu du fichier contrôleur
+function generateControllerContent(className: string, schema: TableSchema): string
+{
+    let content = `import { ${className} } from "../../models/entities/${className.toLowerCase()}/${className}";\n`;
+    content += `import { ${className}CritereDTO } from "../../models/entities/${className.toLowerCase()}/${className}CritereDTO";\n`;
+    content += `import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";\n\n`;
+    content += `/**\n`;
+    content += ` * Contrôleur pour l'entité ${className}\n`;
+    content += ` * @author Controller Generator - ${new Date().toISOString()} - Creation\n`;
+    content += ` */\n`;
+    content += `export class ${className}Controller extends BaseController<${className}, ${className}CritereDTO> {\n`;
+    content += `}\n`;
+    return content;
+}
+
+// Fonction principale pour générer les DTOs, entités, métiers et contrôleurs
 async function generateDTOs(): Promise<void>
 {
     let dataSource: DataSource | null = null;
 
     try
     {
-        console.log('Démarrage de la génération des DTOs et Entités pour SQL Server...');
+        console.log('Démarrage de la génération des DTOs, Entités, Métiers et Contrôleurs pour SQL Server...');
 
         // Connexion à SQL Server avec TypeORM
         dataSource = new DataSource({
@@ -361,13 +385,37 @@ async function generateDTOs(): Promise<void>
 
             console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
 
-            // Créer le dossier principal du service s'il n'existe pas
-            const outputDir = serviceConfig.outputDir;
+            // Nettoyer les dossiers si nécessaire et créer la structure
+            const { outputDir, metierDir, controllerDir } = serviceConfig;
+
+            if (config.cleanOutputDir)
+            {
+                if (fs.existsSync(outputDir))
+                {
+                    cleanDirectory(outputDir, config.protectedFolders);
+                }
+                if (fs.existsSync(metierDir))
+                {
+                    cleanDirectory(metierDir, config.protectedFolders);
+                }
+                if (fs.existsSync(controllerDir))
+                {
+                    cleanDirectory(controllerDir, config.protectedFolders);
+                }
+            }
+
+            // Créer les répertoires principaux
             ensureDirectoryExists(outputDir);
+            ensureDirectoryExists(metierDir);
+            ensureDirectoryExists(controllerDir);
 
             // Créer un dossier entities pour les DTOs et critères
             const entitiesDir = path.join(outputDir, 'entities');
             ensureDirectoryExists(entitiesDir);
+
+            // Créer les dossiers base pour les classes de base
+            ensureDirectoryExists(path.join(metierDir, 'base'));
+            ensureDirectoryExists(path.join(controllerDir, 'base'));
 
             // Filtrer les tables pour ce service
             const serviceTables = allTables.filter((name: string) =>
@@ -387,21 +435,41 @@ async function generateDTOs(): Promise<void>
                 {
                     const className = tableNameToClassName(tableName);
 
+                    // === 1. Création des fichiers Entity et CritereDTO ===
                     // Créer un sous-dossier pour chaque modèle dans entities
                     const modelDir = path.join(entitiesDir, className.toLowerCase());
                     ensureDirectoryExists(modelDir);
 
-                    // Générer le fichier DTO dans le dossier du modèle
+                    // Générer le fichier Entity
                     const entityContent = generateEntityContent(className, tableName, schema);
-                    const dtoFilePath = path.join(modelDir, `${className}.ts`);
-                    fs.writeFileSync(dtoFilePath, entityContent);
-                    console.log(`  DTO généré: ${dtoFilePath}`);
+                    const entityFilePath = path.join(modelDir, `${className}.ts`);
+                    fs.writeFileSync(entityFilePath, entityContent);
+                    console.log(`  Entity généré: ${entityFilePath}`);
 
-                    // Générer le fichier CritereDTO dans le dossier du modèle
+                    // Générer le fichier CritereDTO
                     const critereDtoContent = generateCritereDTOContent(className, schema);
                     const critereDtoFilePath = path.join(modelDir, `${className}CritereDTO.ts`);
                     fs.writeFileSync(critereDtoFilePath, critereDtoContent);
                     console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
+
+                    // === 2. Création des fichiers Metier ===
+                    const metierClassDir = path.join(metierDir, className.toLowerCase());
+                    ensureDirectoryExists(metierClassDir);
+
+                    const metierContent = generateMetierContent(className, schema);
+                    const metierFilePath = path.join(metierClassDir, `${className}Metier.ts`);
+                    fs.writeFileSync(metierFilePath, metierContent);
+                    console.log(`  Metier généré: ${metierFilePath}`);
+
+                    // === 3. Création des fichiers Controller ===
+                    const controllerClassDir = path.join(controllerDir, className.toLowerCase());
+                    ensureDirectoryExists(controllerClassDir);
+
+                    const controllerContent = generateControllerContent(className, schema);
+                    const controllerFilePath = path.join(controllerClassDir, `${className}Controller.ts`);
+                    fs.writeFileSync(controllerFilePath, controllerContent);
+                    console.log(`  Controller généré: ${controllerFilePath}`);
+
                 } else
                 {
                     console.log(`  Aucun fichier généré pour ${tableName} (table vide ou structure non détectée).`);
@@ -409,7 +477,7 @@ async function generateDTOs(): Promise<void>
             }
         }
 
-        console.log('\nGénération des DTOs et Entités terminée avec succès pour tous les services!');
+        console.log('\nGénération des DTOs, Entités, Métiers et Contrôleurs terminée avec succès pour tous les services!');
 
     } catch (error)
     {

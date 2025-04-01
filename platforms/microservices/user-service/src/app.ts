@@ -14,8 +14,8 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { UserController } from "./controllers/user/UserController";
-import { UserMetier } from "./metier/user/UserMetier";
+import { CustomerProfileController } from "./controllers/customer_profiles/CustomerProfileController";
+import { CustomerProfileMetier } from "./metier/customer_profiles/CustomerProfileMetier";
 
 //#endregion
 
@@ -46,10 +46,10 @@ app.use(
  */
 app.use(morgan('dev'));
 
-const userController = new UserController(new UserMetier());
+const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-app.use('/api/users', userController.getRouter());
+app.use('/api/user-profile', customerProfileController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());

@@ -30,8 +30,8 @@ console.log('Démarrage de la génération des DTOs...');
 try
 {
     //// Exécuter le script MongoDB
-    //console.log('Génération depuis MongoDB...');
-    //execSync(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
+    console.log('Génération depuis MongoDB...');
+    execSync(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
 
     // Exécuter le script SQL Server
     console.log('Génération depuis SQL Server...');
