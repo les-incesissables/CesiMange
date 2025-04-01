@@ -8,16 +8,16 @@ const serviceConfigs = [
     {
         serviceName: 'user-service',
         collections: ['user', 'developer'],
-        outputDir: '../user-service/src/models/',
-        metierDir: '../user-service/src/metier/',
-        controllerDir: '../user-service/src/controllers/'
+        outputDir: '../../microservices/user-service/src/models/',
+        metierDir: '../../microservices/user-service/src/metier/',
+        controllerDir: '../../microservices/user-service/src/controllers/'
     },
     {
         serviceName: 'restaurant-service',
         collections: ['restaurant', 'component'],
-        outputDir: '../restaurant-service/src/models/',
-        metierDir: '../restaurant-service/src/metier/',
-        controllerDir: '../restaurant-service/src/controllers/'
+        outputDir: '../../microservices/restaurant-service/src/models/',
+        metierDir: '../../microservices/restaurant-service/src/metier/',
+        controllerDir: '../../microservices/restaurant-service/src/controllers/'
     }
     //{
     //    serviceName: 'order-service',

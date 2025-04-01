@@ -13,13 +13,13 @@ require('dotenv').config();
 const serviceConfigs = [
     {
         serviceName: 'user-service',
-        tables: ['UserRoles', 'UserToRoles', 'Orders', 'Payments', 'Reviews', 'Users'],
-        outputDir: '../user-service/src/models/'
-    },
+        tables: ['T_AUTH_USERS', 'T_TRANSACTIONS'],
+        outputDir: '../../microservices/user-service/src/models/'
+    }, 
     {
         serviceName: 'restaurant-service',
         tables: [],
-        outputDir: '../restaurant-service/src/models/'
+        outputDir: '../../microservices/restaurant-service/src/models/'
     }
 ];
 
@@ -361,11 +361,11 @@ async function generateDTOs(): Promise<void>
 
             console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
 
-            // Créer le dossier models s'il n'existe pas
+            // Créer le dossier principal du service s'il n'existe pas
             const outputDir = serviceConfig.outputDir;
             ensureDirectoryExists(outputDir);
 
-            // Créer un dossier entities pour les entités TypeORM
+            // Créer un dossier entities pour les DTOs et critères
             const entitiesDir = path.join(outputDir, 'entities');
             ensureDirectoryExists(entitiesDir);
 
@@ -387,15 +387,19 @@ async function generateDTOs(): Promise<void>
                 {
                     const className = tableNameToClassName(tableName);
 
-                    // Générer le fichier DTO directement dans le dossier models
+                    // Créer un sous-dossier pour chaque modèle dans entities
+                    const modelDir = path.join(entitiesDir, className.toLowerCase());
+                    ensureDirectoryExists(modelDir);
+
+                    // Générer le fichier DTO dans le dossier du modèle
                     const entityContent = generateEntityContent(className, tableName, schema);
-                    const dtoFilePath = path.join(outputDir, `${className}.ts`);
+                    const dtoFilePath = path.join(modelDir, `${className}.ts`);
                     fs.writeFileSync(dtoFilePath, entityContent);
                     console.log(`  DTO généré: ${dtoFilePath}`);
 
-                    // Générer le fichier CritereDTO directement dans le dossier models
+                    // Générer le fichier CritereDTO dans le dossier du modèle
                     const critereDtoContent = generateCritereDTOContent(className, schema);
-                    const critereDtoFilePath = path.join(outputDir, `${className}CritereDTO.ts`);
+                    const critereDtoFilePath = path.join(modelDir, `${className}CritereDTO.ts`);
                     fs.writeFileSync(critereDtoFilePath, critereDtoContent);
                     console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
                 } else
