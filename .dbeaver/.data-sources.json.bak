@@ -4,13 +4,14 @@
 		"microsoft-195eb923c4c-6be7c8603657ea5c": {
 			"provider": "sqlserver",
 			"driver": "microsoft",
-			"name": "master",
+			"name": "CesiMange",
 			"save-password": true,
+			"show-system-objects": true,
 			"configuration": {
 				"host": "localhost",
 				"port": "1433",
-				"database": "master",
-				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dmaster",
+				"database": "CesiMange",
+				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dCesiMange",
 				"configurationType": "MANUAL",
 				"type": "dev",
 				"closeIdleConnection": true,
@@ -19,13 +20,21 @@
 					"sslTrustServerCertificate": "true"
 				},
 				"auth-model": "sqlserver_database"
-			}
+			},
+			"filters": [
+				{
+					"id": "CesiMange",
+					"type": "org.jkiss.dbeaver.ext.mssql.model.SQLServerSchema",
+					"enabled": true,
+					"include": ["dbo"]
+				}
+			]
 		}
 	},
 	"connection-types": {
 		"dev": {
 			"name": "Development",
-			"color": "255,255,255",
+			"color": "0,255,64",
 			"description": "Regular development database",
 			"auto-commit": true,
 			"confirm-execute": false,
