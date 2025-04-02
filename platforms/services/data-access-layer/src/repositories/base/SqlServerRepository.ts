@@ -204,9 +204,9 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 findOptions.relations = pCritereDTO.populate;
             }
 
-            const result = await repository.findOne(findOptions);
+            const result : DTO | null = await repository.findOne(findOptions);
             // cm - Renvoie vide sir
-            return result || {} as DTO;
+            return result && result.email ? result : {} as DTO;
 ;
         } catch (error)
         {

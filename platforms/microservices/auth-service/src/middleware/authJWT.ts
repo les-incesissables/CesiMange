@@ -62,16 +62,16 @@ export class AuthJWT
             return res.status(401).json({ message: 'Token d\'authentification manquant' });
         }
 
-        const token = lAuthHeader.split(' ')[1]; // Format: "Bearer TOKEN"
+        const lToken = lAuthHeader.split(' ')[1]; // Format: "Bearer TOKEN"
 
-        const decoded = this.verifyToken(token);
-        if (!decoded)
+        const lDecoded = this.verifyToken(lToken);
+        if (!lDecoded)
         {
             return res.status(403).json({ message: 'Token invalide ou expiré' });
         }
 
         // Ajouter l'utilisateur décodé à l'objet de requête
-        req.user = decoded;
+        req.user = lDecoded;
         next();
     };
 

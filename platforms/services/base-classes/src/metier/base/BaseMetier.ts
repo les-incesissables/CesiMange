@@ -1,12 +1,11 @@
-import { IBaseMetier } from './IBaseMetier';
-import { Repository, EDatabaseType } from '../../../../data-access-layer/src';
+import { Repository, EDatabaseType, IBaseRepository } from '../../../../data-access-layer/src';
 
 /**
  * Contrôleur de base générique
  * @template DTO - Type de données retourné/manipulé
  * @template CritereDTO - Type des critères de recherche
  */
-export abstract class BaseMetier<DTO, CritereDTO> implements IBaseMetier<DTO, CritereDTO>
+export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO, CritereDTO>
 {
     protected Repository: Repository<DTO, CritereDTO>;
     protected CollectionName: string;

@@ -40,13 +40,13 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            const critere = req.body as CritereDTO;
+            let lCritere = req.body as CritereDTO;
 
             // Validation des données
             try
             {
-                this.validateGetItems(critere);
-                this.beforeGetItems(critere);
+                this.validateGetItems(lCritere);
+                lCritere = this.beforeGetItems(lCritere);
             } catch (validationError)
             {
                 res.status(400).json({
@@ -55,7 +55,7 @@ export class BaseController<DTO, CritereDTO>
                 return;
             }
 
-            const items = await this.Metier.getItems(critere);
+            const items = await this.Metier.getItems(lCritere);
             res.status(200).json(items);
         } catch (error)
         {
@@ -70,13 +70,13 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            const lCritere = { id: pReq.params.id } as unknown as CritereDTO;
+            let lCritere = pReq.body as CritereDTO;
 
-            // Validation des données
+            // cm - Validation des données
             try
             {
                 this.validateGetItem(lCritere);
-                this.beforeGetItem(lCritere);
+                lCritere = this.beforeGetItem(lCritere);
             } catch (validationError)
             {
                 pRes.status(400).json({
@@ -85,8 +85,18 @@ export class BaseController<DTO, CritereDTO>
                 return;
             }
 
-            const lItem = await this.Metier.getItem(lCritere);
-            lItem ? pRes.status(200).json(lItem) : pRes.status(404).json({ error: 'Élément non trouvé' });
+            let lItem: DTO = await this.Metier.getItem(lCritere);
+            if (lItem && lItem != {} as DTO)
+            {
+                // cm - Action apres la recuperation de l'item
+                lItem = this.afterGetItem(lItem);
+                pRes.status(200).json(lItem)
+            }
+            else
+                pRes.status(404).json({ error: 'Élément non trouvé' });
+
+
+
         } catch (pError)
         {
             this.handleError(pError, 'getItem');
@@ -166,13 +176,13 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            const critere = { id: req.params.id } as unknown as CritereDTO;
+            const lCritere = req.body as CritereDTO;
 
             // Validation des données
             try
             {
-                await this.validateDeleteItem(critere);
-                await this.beforeDeleteItem(critere);
+                await this.validateDeleteItem(lCritere);
+                await this.beforeDeleteItem(lCritere);
             } catch (validationError)
             {
                 res.status(400).json({
@@ -181,7 +191,7 @@ export class BaseController<DTO, CritereDTO>
                 return;
             }
 
-            const success = await this.Metier.deleteItem(critere);
+            const success = await this.Metier.deleteItem(lCritere);
             success ? res.status(204).send() : res.status(404).json({ error: 'Élément non trouvé' });
         } catch (error)
         {
@@ -231,14 +241,14 @@ export class BaseController<DTO, CritereDTO>
         // À implémenter dans les classes dérivées
     }
 
-    protected beforeGetItems(pCritereDTO: CritereDTO): void
+    protected beforeGetItems(pCritereDTO: CritereDTO): CritereDTO
     {
-        // À implémenter dans les classes dérivées
+        return pCritereDTO;
     }
 
-    protected beforeGetItem(pCritereDTO: CritereDTO): void
+    protected beforeGetItem(pCritereDTO: CritereDTO): CritereDTO
     {
-        // À implémenter dans les classes dérivées
+        return pCritereDTO;
     }
 
     protected async beforeCreateItem(pDTO: DTO): Promise<DTO>
@@ -252,6 +262,31 @@ export class BaseController<DTO, CritereDTO>
     }
 
     protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
+    {
+        // À implémenter dans les classes dérivées
+    }
+
+    protected afterGetItems(pDTOs: DTO[]): DTO[]
+    {
+        return pDTOs;
+    }
+
+    protected afterGetItem(pDTO: DTO): DTO
+    {
+        return pDTO;
+    }
+
+    protected async afterCreateItem(pDTO: DTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void>
     {
         // À implémenter dans les classes dérivées
     }

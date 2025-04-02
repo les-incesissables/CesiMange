@@ -51,9 +51,8 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             AuthJWT.isResourceOwnerOrAdmin((req) => parseInt(req.params.id)),
             this.updateItem);
 
-        this.Router.delete('/:id',
+        this.Router.delete('/',
             AuthJWT.authenticateJWT,
-            AuthJWT.isResourceOwnerOrAdmin((req) => parseInt(req.params.id)),
             this.deleteItem);
     }
 
@@ -110,13 +109,13 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
     //#region GetItem
     /**
-    * Surchage de la validation du register/GetItem
+    * Surchage de la validation du login/GetItem
     * @param pAuthUsers
     */
     public override async validateGetItem(pAuthUsers: AuthUsers): Promise<void>
     {
         // cm - Validation des champs
-        if (!pAuthUsers.email || pAuthUsers.password_hash)
+        if (!pAuthUsers.email || !pAuthUsers.password_hash)
         {
             throw new Error('Email et mot de passe requis');
         }
@@ -140,31 +139,39 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             throw new Error('Identifiants invalides');
         }
     }
+
     /**
-     * Surchage de le beforeGetItem du register/GetItem
+     * Surchage de le beforeGetItem du login/GetItem
      * @param pAuthUsers
      */
-    public override async beforeGetItem(pAuthUsers: AuthUsers): Promise<AuthUsers> 
+    public override beforeGetItem(pAuthUsers: AuthUsersCritereDTO): AuthUsersCritereDTO
     {
         // cm - Genere le token JWT
-        const token = jwt.sign(
-            {
-                id: pAuthUsers.auth_user_id,
-                username: pAuthUsers.email,
-                roles: pAuthUsers.role
-            },
+        let lCritere: AuthUsersCritereDTO = new AuthUsersCritereDTO();
+        lCritere.email = pAuthUsers.email;
+
+        return lCritere;
+    }
+
+    /**
+     * Surchage de le afterGetItem du login/GetItem
+     * @param pAuthUsers
+     */
+    public override afterGetItem(pAuthUsers: AuthUsers): AuthUsers
+    {
+        // cm - Genere le token JWT
+        const lToken = jwt.sign({
+            id: pAuthUsers.auth_user_id,
+            username: pAuthUsers.email,
+            roles: pAuthUsers.role
+        },
             this.JWT_SECRET,
             { expiresIn: this.TOKEN_EXPIRATION }
         );
 
-        // cm - Cree un nouvel utilisateur
-        const lNewUser = new AuthUsers();
-        lNewUser.username = pAuthUsers.username;
-        lNewUser.email = pAuthUsers.email;
-        lNewUser.role = 'user';
-        lNewUser.refresh_token = token
+        pAuthUsers.refresh_token = lToken;
 
-        return lNewUser;
+        return pAuthUsers;
     }
     //#endregion
 
