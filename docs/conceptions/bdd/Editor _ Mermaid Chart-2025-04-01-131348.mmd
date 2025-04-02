@@ -1,0 +1,203 @@
+erDiagram
+    %% MONGODB (NoSQL) - Optimisé pour les bonnes pratiques
+    MONGODB {
+        string note "BASE NOSQL - DONNÉES ORIENTÉES DOCUMENT"
+    }
+    
+    USERS {
+        string _id PK
+        int auth_id FK "Référence SQL Server"
+        string first_name
+        string last_name
+        string email
+        string phone
+        array addresses
+        string profile_picture
+        object preferences
+        string user_type "client/restaurant_owner/driver"
+        int loyalty_points
+        datetime last_login
+        array payment_methods
+        datetime created_at
+        datetime updated_at
+    }
+    
+    RESTAURANTS {
+        string _id PK
+        int auth_id FK "Référence SQL Server"
+        string name
+        string description
+        object location "adresse + coordonnées GeoJSON"
+        array categories
+        number rating
+        number order_count
+        object schedule "Horaires formatés par jour"
+        array payment_methods
+        object delivery_settings "Frais, minimum, zones"
+        array photos
+        datetime created_at
+        datetime updated_at
+        boolean active
+    }
+    
+    MENU_ITEMS {
+        string _id PK
+        string restaurant_id FK
+        string name
+        string description
+        number price
+        string category
+        array options "Personnalisations possibles"
+        array allergens
+        string photo
+        boolean available
+        number preparation_time
+        datetime created_at
+        datetime updated_at
+    }
+    
+    ORDERS {
+        string _id PK
+        string customer_id FK
+        string restaurant_id FK
+        string driver_id FK
+        object delivery_location "adresse + coordonnées GeoJSON"
+        array items "Produits avec quantités et options"
+        string status
+        number subtotal
+        number delivery_fee
+        number service_fee
+        number tax
+        number total
+        string payment_id
+        string payment_method
+        object timeline "Suivi des étapes avec timestamps"
+        string special_instructions
+        datetime created_at
+        datetime updated_at
+    }
+    
+    DELIVERIES {
+        string _id PK
+        string order_id FK
+        string driver_id FK
+        string status
+        object current_location "GeoJSON Point"
+        array route "Array de positions avec timestamps"
+        datetime estimated_arrival
+        datetime actual_pickup
+        datetime actual_delivery
+        object delivery_proof
+        datetime created_at
+        datetime updated_at
+    }
+    
+    RATINGS {
+        string _id PK
+        string order_id FK
+        string user_id FK
+        string target_type "restaurant/driver/app"
+        string target_id
+        number rating
+        string comment
+        array photos
+        boolean flagged
+        datetime created_at
+    }
+    
+    PROMOTIONS {
+        string _id PK
+        string code
+        string description
+        number value
+        string type "percentage/fixed/free_item"
+        array applicable_items
+        array applicable_restaurants
+        number usage_limit
+        number usage_count
+        datetime start_date
+        datetime end_date
+        object conditions
+        datetime created_at
+        datetime updated_at
+    }
+    
+    NOTIFICATIONS {
+        string _id PK
+        string recipient_id FK
+        string type
+        string title
+        string body
+        object data
+        boolean read
+        datetime created_at
+        datetime read_at
+    }
+    
+    %% SQL SERVER (Relationnel) - Optimisé pour les bonnes pratiques
+    SQLSERVER {
+        string note "BASE SQL - AUTHENTIFICATION ET TRANSACTIONS"
+    }
+    
+    AUTH_USERS {
+        int id PK
+        string email
+        string phone_number
+        string password_hash
+        string role "client/restaurant/driver/admin"
+        boolean email_verified
+        boolean phone_verified
+        datetime last_login
+        string refresh_token
+        boolean active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    TRANSACTIONS {
+        int id PK
+        string order_id FK
+        string payment_intent_id "ID externe du processeur de paiement"
+        decimal amount
+        string currency
+        string status
+        string payment_method
+        string payment_provider "Stripe/PayPal/etc."
+        datetime created_at
+        datetime updated_at
+    }
+    
+    AUDIT_LOGS {
+        int id PK
+        int user_id FK
+        string action
+        string entity_type
+        string entity_id
+        string ip_address
+        string user_agent
+        json changes
+        datetime timestamp
+    }
+    
+    %% Relations principales
+    MONGODB ||--|{ USERS : contient
+    MONGODB ||--|{ RESTAURANTS : contient
+    MONGODB ||--|{ MENU_ITEMS : contient
+    MONGODB ||--|{ ORDERS : contient
+    MONGODB ||--|{ DELIVERIES : contient
+    MONGODB ||--|{ RATINGS : contient
+    MONGODB ||--|{ PROMOTIONS : contient
+    MONGODB ||--|{ NOTIFICATIONS : contient
+    
+    SQLSERVER ||--|{ AUTH_USERS : contient
+    SQLSERVER ||--|{ TRANSACTIONS : contient
+    SQLSERVER ||--|{ AUDIT_LOGS : contient
+
+    %% Relations entre les entités
+    AUTH_USERS ||--|| USERS : authentifie
+    RESTAURANTS ||--o{ MENU_ITEMS : propose
+    USERS ||--o{ ORDERS : passe
+    RESTAURANTS ||--o{ ORDERS : reçoit
+    ORDERS ||--|| DELIVERIES : génère
+    ORDERS ||--o{ RATINGS : reçoit
+    ORDERS ||--|| TRANSACTIONS : entraîne

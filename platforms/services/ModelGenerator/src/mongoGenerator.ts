@@ -7,17 +7,17 @@ require('dotenv').config();
 const serviceConfigs = [
     {
         serviceName: 'user-service',
-        collections: ['user', 'developer'],
-        outputDir: '../user-service/src/models/',
-        metierDir: '../user-service/src/metier/',
-        controllerDir: '../user-service/src/controllers/'
-    },
+        collections: ['customer_profiles'],
+        outputDir: '../../microservices/user-service/src/models/',
+        metierDir: '../../microservices/user-service/src/metier/',
+        controllerDir: '../../microservices/user-service/src/controllers/'
+    }, 
     {
         serviceName: 'restaurant-service',
-        collections: ['restaurant', 'component'],
-        outputDir: '../restaurant-service/src/models/',
-        metierDir: '../restaurant-service/src/metier/',
-        controllerDir: '../restaurant-service/src/controllers/'
+        collections: ['restaurants'],
+        outputDir: '../../microservices/restaurant-service/src/models/',
+        metierDir: '../../microservices/restaurant-service/src/metier/',
+        controllerDir: '../../microservices/restaurant-service/src/controllers/'
     }
     //{
     //    serviceName: 'order-service',
@@ -58,7 +58,6 @@ const config = {
 // Structure des dossiers pour les modèles
 const folders = {
     interfaces: 'interfaces',
-    schemas: 'schemas',
     models: 'models',
 };
 
@@ -317,7 +316,7 @@ function generateControllerContent(className: string, collectionName: string): s
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
-    content += `import { BaseController } from "../../../../base-classes/controllers/base/BaseController";\n\n\n`;
+    content += `import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";\n\n\n`;
     content += `/**\n`;
     content += ` * Contrôleur pour l'entité ${className}\n`;
     content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;
@@ -334,7 +333,7 @@ function generateMetierContent(className: string, collectionName: string): strin
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
-    content += `import { BaseMetier } from "../../../../base-classes/metier/base/BaseMetier";\n\n\n`;
+    content += `import { BaseMetier } from "../../../../../services/base-classes/src/metier/base/BaseMetier";\n\n\n`;
     content += `/**\n`;
     content += ` * Métier pour l'entité ${className}\n`;
     content += ` * @Author ModelGenerator - ${new Date().toISOString()} - Création\n`;

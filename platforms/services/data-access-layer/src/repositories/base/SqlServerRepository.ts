@@ -1,4 +1,4 @@
-﻿import { AbstractDbRepository } from './AbstractDbRepository';
+﻿﻿import { AbstractDbRepository } from './AbstractDbRepository';
 import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
 import { BaseCritereDTO } from '../../models/base/BaseCritereDTO';
 import {
@@ -178,13 +178,9 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 findOptions.relations = pCritereDTO.populate;
             }
 
-            const result = await repository.findOne(findOptions);
-
-            if (!result) {
-                throw new Error(`Aucun élément trouvé pour les critères donnés dans ${this._config.CollectionName}`);
-            }
-
-            return result;
+            const result: DTO | null = await repository.findOne(findOptions);
+            // cm - Renvoie vide sir
+            return result && result.email ? result : ({} as DTO);
         } catch (error) {
             console.error("Erreur lors de la récupération de l'élément:", error);
             throw error;

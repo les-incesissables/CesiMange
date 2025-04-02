@@ -6,6 +6,7 @@
 			"driver": "microsoft",
 			"name": "CesiMange",
 			"save-password": true,
+			"show-system-objects": true,
 			"configuration": {
 				"host": "localhost",
 				"port": "1433",
@@ -30,6 +31,7 @@
 			]
 		}
 	},
+	"virtual-models": {"microsoft-195eb923c4c-6be7c8603657ea5c":{"CesiMange":{"dbo":{":T_AUTH_USERS":{"properties":{"erd.diagram.state":{"serialized":"\u003cdiagram version\u003d\"1\" name\u003d\"empty\" time\u003d\"202504020032\"\u003e\u003centities\u003e\u003cdata-source id\u003d\"microsoft-195eb923c4c-6be7c8603657ea5c\"\u003e\u003centity id\u003d\"1\" name\u003d\"T_AUTH_USERS\" fq-name\u003d\"CesiMange.dbo.T_AUTH_USERS\" order\u003d\"0\" color-bg\u003d\"128,64,32\" x\u003d\"225\" y\u003d\"40\"\u003e\u003cpath name\u003d\"dbo\"/\u003e\u003cpath name\u003d\"CesiMange\"/\u003e\u003c/entity\u003e\u003centity id\u003d\"2\" name\u003d\"T_AUDIT_LOGS\" fq-name\u003d\"CesiMange.dbo.T_AUDIT_LOGS\" order\u003d\"1\" x\u003d\"40\" y\u003d\"80\"\u003e\u003cpath name\u003d\"dbo\"/\u003e\u003cpath name\u003d\"CesiMange\"/\u003e\u003c/entity\u003e\u003c/data-source\u003e\u003c/entities\u003e\u003crelations/\u003e\u003c/diagram\u003e"}}}}}}},
 	"connection-types": {
 		"dev": {
 			"name": "Development",

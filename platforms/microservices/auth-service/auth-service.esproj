@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1738743">
+  <ItemGroup>
+    <Folder Include="src\controllers\" />
+    <Folder Include="src\metier\" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+FROM node:22.14-alpine AS builder
+WORKDIR /app
+
+# Copier l'intégralité du dépôt (contexte = racine)
+COPY . .
+
+# On se positionne dans le dossier du auth-service
+WORKDIR /app/platforms/microservices/auth-service
+
+# Installer toutes les dépendances (dev incluses)
+RUN npm install
+
+# Copier (optionnel) et compiler si nécessaire
+RUN npm run build
+
+# Image finale pour le développement
+FROM node:22.14-alpine
+WORKDIR /app
+
+# Copier tout le code du dépôt (on souhaite que les volumes montés écrasent ce contenu)
+COPY --from=builder /app /app
+
+# Réinstaller toutes les dépendances (pour s'assurer que nodemon et ts-node sont là)
+WORKDIR /app/platforms/microservices/auth-service
+RUN npm install
+
+EXPOSE 4001
+CMD ["npm", "run", "dev"]
