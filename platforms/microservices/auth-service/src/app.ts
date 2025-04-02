@@ -2,6 +2,8 @@
 import "reflect-metadata"
 import express from 'express';
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
 import * as path from 'path';
@@ -27,6 +29,8 @@ const app = express();
 access the body of your request.
 */
 app.use(bodyParser.json({ extended: true }));
+// cm - Utilisation du cookieParser
+app.use(cookieParser());
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));

@@ -25,7 +25,8 @@
     "morgan": "^1.10.0",
     "mssql": "7.3.0",
     "reflect-metadata": "0.2.2",
-    "typeorm": "0.4.0-alpha.1"
+    "typeorm": "0.4.0-alpha.1",
+    "cookie-parser": "1.4.7"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -89,7 +89,7 @@ export class BaseController<DTO, CritereDTO>
             if (lItem && lItem != {} as DTO)
             {
                 // cm - Action apres la recuperation de l'item
-                lItem = this.afterGetItem(lItem, pRes);
+                lItem = await this.afterGetItem(lItem, pRes);
                 pRes.status(200).json(lItem)
             }
             else
@@ -271,7 +271,7 @@ export class BaseController<DTO, CritereDTO>
         return pDTOs;
     }
 
-    protected afterGetItem(pDTO: DTO, pRes?: Response): DTO
+    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO>
     {
         return pDTO;
     }
