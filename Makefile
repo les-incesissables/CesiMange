@@ -1,32 +1,45 @@
-.PHONY: up-prod up-dev up-staging down start stop restart
 
-# Lancer l'environnement de Production : microservices et API gateway
-up-prod:
-	docker-compose -f docker-compose.prod.yml up -d --build
 
-# Lancer l'environnement de Développement : microservices et API gateway
-up-dev:
+.PHONY: prepare-sqlserver-volumes up-dev up-prod up-staging down start stop restart
+
+
+
+up-dev: prepare-sqlserver-volumes
+	@echo "🔧 Lancement de l'environnement de Développement..."
 	docker-compose -f docker-compose.dev.yml up -d --build
 
-# Lancer l'environnement de Staging : microservices et API gateway
-up-staging:
+up-prod: prepare-sqlserver-volumes
+	@echo "🚀 Lancement de l'environnement de Production..."
+	docker-compose -f docker-compose.prod.yml up -d --build
+
+up-staging: prepare-sqlserver-volumes
+	@echo "🔬 Lancement de l'environnement de Staging..."
 	docker-compose -f docker-compose.staging.yml up -d --build
 
-# Arrêter et supprimer tous les containers, réseaux et volumes pour tous les environnements
 down:
-	@echo "Arrêt et suppression des environnements..."
-	docker-compose -f docker-compose.prod.yml down -v --remove-orphans
+	@echo "🛑 Arrêt et suppression de Dev, Prod et Staging..."
 	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
+	docker-compose -f docker-compose.prod.yml down -v --remove-orphans
 	docker-compose -f docker-compose.staging.yml down -v --remove-orphans
 
-# Démarrer les containers si arrêtés (en Production)
 start:
+	@echo "▶️  Start containers (prod)..."
 	docker-compose -f docker-compose.prod.yml start
 
-# Arrêter les containers sans les supprimer (en Production)
 stop:
+	@echo "⏸  Stop containers (prod)..."
 	docker-compose -f docker-compose.prod.yml stop
 
-# Redémarrer tous les containers (en Production)
 restart:
+	@echo "🔄 Restart containers (prod)..."
 	docker-compose -f docker-compose.prod.yml restart
+
+rebuild-sqlserver:
+	docker-compose -f docker-compose.dev.yml stop sqlserver-db
+	docker-compose -f docker-compose.dev.yml rm -f sqlserver-db
+	docker-compose -f docker-compose.dev.yml up -d sqlserver-db
+
+rebuild-user-service:
+	docker-compose -f docker-compose.dev.yml stop user-service
+	docker-compose -f docker-compose.dev.yml rm -f user-service
+	docker-compose -f docker-compose.dev.yml up -d user-service
