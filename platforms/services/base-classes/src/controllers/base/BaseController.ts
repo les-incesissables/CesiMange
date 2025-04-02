@@ -75,7 +75,7 @@ export class BaseController<DTO, CritereDTO>
             // cm - Validation des données
             try
             {
-                this.validateGetItem(lCritere);
+                await this.validateGetItem(lCritere);
                 lCritere = this.beforeGetItem(lCritere);
             } catch (validationError)
             {
@@ -89,7 +89,7 @@ export class BaseController<DTO, CritereDTO>
             if (lItem && lItem != {} as DTO)
             {
                 // cm - Action apres la recuperation de l'item
-                lItem = this.afterGetItem(lItem);
+                lItem = this.afterGetItem(lItem, pRes);
                 pRes.status(200).json(lItem)
             }
             else
@@ -221,7 +221,7 @@ export class BaseController<DTO, CritereDTO>
         // À implémenter dans les classes dérivées
     }
 
-    protected validateGetItem(pCritereDTO: CritereDTO): void
+    protected async validateGetItem(pCritereDTO: CritereDTO): Promise<void>
     {
         // À implémenter dans les classes dérivées
     }
@@ -271,7 +271,7 @@ export class BaseController<DTO, CritereDTO>
         return pDTOs;
     }
 
-    protected afterGetItem(pDTO: DTO): DTO
+    protected afterGetItem(pDTO: DTO, pRes?: Response): DTO
     {
         return pDTO;
     }

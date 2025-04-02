@@ -4,6 +4,7 @@ import { BaseController } from "../../../../../services/base-classes/src/control
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 import { AuthJWT } from "../../middleware/authJWT";
 import { AuthUsersMetier } from "../../metier/authusers/AuthUsersMetier";
@@ -18,6 +19,8 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     // Clé secrète pour signer les tokens JWT
     private readonly JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
     private readonly TOKEN_EXPIRATION = "8h";
+    private readonly TOKEN_EXPIRATION_MS = 8 * 60 * 60 * 1000; // 8 heures en millisecondes
+    private readonly REFRESH_TOKEN_EXPIRATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours en 
 
     //#endregion
 
@@ -124,9 +127,9 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         lAuthUsers.email = pAuthUsers.email;
 
         // Rechercher l'utilisateur dans la base de données
-        const lUser = await this.Metier.getItem(lAuthUsers);
+        const lUser: AuthUsers = await this.Metier.getItem(lAuthUsers);
 
-        if (!lUser)
+        if (!lUser || !lUser.password_hash)
         {
             throw new Error('Identifiants invalides');
         }
@@ -154,24 +157,67 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     }
 
     /**
-     * Surchage de le afterGetItem du login/GetItem
+     * Surchage de le afterGetItem du login/GetItem qui implémente la sécurité JWT+CSRF
      * @param pAuthUsers
      */
-    public override afterGetItem(pAuthUsers: AuthUsers): AuthUsers
+    public override afterGetItem(pAuthUsers: AuthUsers, res?: Response): any
     {
-        // cm - Genere le token JWT
-        const lToken = jwt.sign({
+        let lResponse = {};
+        // Générer un token CSRF
+        const xsrfToken = crypto.randomBytes(64).toString('hex');
+
+        // Générer le JWT incluant le token CSRF dans les claims
+        const accessToken = jwt.sign({
             id: pAuthUsers.auth_user_id,
             username: pAuthUsers.email,
-            roles: pAuthUsers.role
+            roles: pAuthUsers.role,
+            xsrfToken // Inclure le token CSRF dans le JWT
         },
             this.JWT_SECRET,
             { expiresIn: this.TOKEN_EXPIRATION }
         );
 
-        pAuthUsers.refresh_token = lToken;
+        // Générer le refresh token
+        const refreshToken = crypto.randomBytes(128).toString('base64');
 
-        return pAuthUsers;
+        // Stocker le refresh token dans l'entité (pour la base de données)
+        pAuthUsers.refresh_token = refreshToken;
+
+        let lCritere: AuthUsersCritereDTO = new AuthUsersCritereDTO();
+        lCritere.auth_user_id = pAuthUsers.auth_user_id;
+
+        this.Metier.updateItem(pAuthUsers, lCritere);
+
+        // Si la réponse HTTP est disponible, définir les cookies sécurisés
+        if (res)
+        {
+            // Configurer le cookie JWT HttpOnly+Secure
+            res.cookie('access_token', accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: this.TOKEN_EXPIRATION_MS
+            });
+
+            // Configurer le cookie refresh token HttpOnly+Secure
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: this.REFRESH_TOKEN_EXPIRATION_MS,
+                path: '/refresh-token' // Limiter le cookie à cette route
+            });
+
+            pAuthUsers.refresh_token = "";
+            pAuthUsers.password_hash = "";
+
+            lResponse = {
+                ...pAuthUsers,
+                "xsrfToken": xsrfToken,
+                "TOKEN_EXPIRATION_MS": this.TOKEN_EXPIRATION_MS,
+                "REFRESH_TOKEN_EXPIRATION_MS": this.REFRESH_TOKEN_EXPIRATION_MS
+            }
+        }
+
+        return lResponse;
     }
     //#endregion
 
