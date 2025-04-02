@@ -29,6 +29,10 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "restaurant-service", "platf
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "auth-service", "platforms\microservices\auth-service\auth-service.esproj", "{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "broker", "broker", "{617C0370-DD11-4C9C-9519-EB41DAFC9598}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "message-broker-service", "platforms\microservices\message-broker\message-broker-service.esproj", "{DF966857-98C2-62A2-25A8-9667A4388F3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +81,12 @@ Global
 		{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF966857-98C2-62A2-25A8-9667A4388F3C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +103,8 @@ Global
 		{EEED47AD-76CD-AE2F-F060-E1B95298D78A} = {53732903-5B3C-4A3C-9F59-538B5EA7846F}
 		{424A94BB-25A0-E5A5-C73B-0EB2A13C13ED} = {53732903-5B3C-4A3C-9F59-538B5EA7846F}
 		{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3} = {53732903-5B3C-4A3C-9F59-538B5EA7846F}
+		{617C0370-DD11-4C9C-9519-EB41DAFC9598} = {DDDE42CE-7268-48D2-935D-7F842B65BC2F}
+		{DF966857-98C2-62A2-25A8-9667A4388F3C} = {617C0370-DD11-4C9C-9519-EB41DAFC9598}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6369AA69-4B65-4AD3-B1DB-1562BD8A064E}
