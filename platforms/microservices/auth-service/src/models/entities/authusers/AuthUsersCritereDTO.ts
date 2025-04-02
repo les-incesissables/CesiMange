@@ -1,7 +1,7 @@
 import { ObjectLiteral } from "typeorm";
 /**
  * CritereDTO pour la recherche d'entit�s SQL Server AuthUsers
- * @author DTO Generator - 2025-04-01T22:33:48.952Z - Creation
+ * @author DTO Generator - 2025-04-02T16:35:50.228Z - Creation
  */
 export class AuthUsersCritereDTO implements ObjectLiteral
 {

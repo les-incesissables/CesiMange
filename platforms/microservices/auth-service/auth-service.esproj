@@ -2,5 +2,6 @@
   <ItemGroup>
     <Folder Include="src\controllers\" />
     <Folder Include="src\metier\" />
+    <Folder Include="src\models\entities\" />
   </ItemGroup>
 </Project>

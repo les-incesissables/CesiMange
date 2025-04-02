@@ -287,7 +287,7 @@ function generateEntityContent(className: string, tableName: string, schema: Tab
             }
 
             // Générer la propriété avec | undefined
-            content += `    ${camelCaseName}!: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
+            content += `    ${camelCaseName}?: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
         }
     });
 
@@ -361,7 +361,7 @@ function generateMetierContent(className: string, schema: TableSchema): string
     content += ` */\n`;
     content += `export class ${className}Metier extends BaseMetier<${className}, ${className}CritereDTO> {\n`;
     content += `    constructor() {\n`;
-    content += `        super('${className}',${className});\n`;
+    content += `        super('${className}', ${className});\n`;
     content += `    }\n`;
     content += `}\n`;
     return content;

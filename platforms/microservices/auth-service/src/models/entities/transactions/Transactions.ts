@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } 
 
 /**
  * Entit� TypeORM pour la table SQL Server T_TRANSACTIONS
- * @author Entity Generator - 2025-04-01T22:33:48.962Z - Creation
+ * @author Entity Generator - 2025-04-02T16:35:50.238Z - Creation
  */
 @Entity("T_TRANSACTIONS")
 export class Transactions implements ObjectLiteral
@@ -11,66 +11,66 @@ export class Transactions implements ObjectLiteral
      * transactions_id
      */
     @PrimaryGeneratedColumn()
-    transactions_id!: number;
+    transactions_id?: number;
 
     /**
      * order_id
      * @maxLength 50
      */
     @Column({ length: 50, nullable: false })
-    order_id!: string;
+    order_id?: string;
 
     /**
      * payment_intent_id
      * @maxLength 100
      */
     @Column({ length: 100 })
-    payment_intent_id!: string;
+    payment_intent_id?: string;
 
     /**
      * amount
      */
     @Column({ nullable: false })
-    amount!: number;
+    amount?: number;
 
     /**
      * currency
      * @maxLength 3
      */
     @Column({ length: 3, nullable: false })
-    currency!: string;
+    currency?: string;
 
     /**
      * status
      * @maxLength 20
      */
     @Column({ length: 20, nullable: false })
-    status!: string;
+    status?: string;
 
     /**
      * payment_method
      * @maxLength 30
      */
     @Column({ length: 30, nullable: false })
-    payment_method!: string;
+    payment_method?: string;
 
     /**
      * payment_provider
      * @maxLength 30
      */
     @Column({ length: 30, nullable: false })
-    payment_provider!: string;
+    payment_provider?: string;
 
     /**
      * created_at
      */
     @Column({ nullable: false })
-    created_at!: Date;
+    created_at?: Date;
 
     /**
      * updated_at
      */
     @Column({ nullable: false })
-    updated_at!: Date;
+    updated_at?: Date;
 
 }

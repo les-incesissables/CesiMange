@@ -41,6 +41,11 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             AuthJWT.hasRole('admin'),
             this.adminEndpoint);
 
+        // Routes protégées pour admin uniquement
+        this.Router.get('/user',
+            AuthJWT.authenticateJWT,
+            this.adminEndpoint);
+
         // Routes protégées par propriété de ressource
         this.Router.get('/:id',
             AuthJWT.authenticateJWT,
@@ -93,47 +98,46 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Méthode commune pour générer des tokens et configurer les cookies
      * Utilisée à la fois par le login (afterGetItem) et le rafraîchissement de token
      * 
-     * @param user L'utilisateur pour lequel générer les tokens
+     * @param pUser L'utilisateur pour lequel générer les tokens
      * @param res L'objet Response pour configurer les cookies
      * @param message Message à inclure dans la réponse (optionnel)
      * @returns Un objet contenant les informations à renvoyer au client
      */
-    private async generateTokensAndSetCookies(user: AuthUsers, res: Response, message?: string): Promise<any>
+    private async generateTokensAndSetCookies(pUser: AuthUsers, res: Response, message?: string): Promise<any>
     {
         // 1. Générer un nouveau CSRF token
-        const xsrfToken = AuthJWT.generateCSRFToken();
+        const lXsrfToken = AuthJWT.generateCSRFToken();
 
         // 2. Créer le payload pour le JWT
-        const payload = {
-            id: user.auth_user_id,
-            username: user.email,
-            roles: user.role,
-            xsrfToken: xsrfToken
+        const lPayload = {
+            id: pUser.auth_user_id,
+            username: pUser.email,
+            roles: pUser.role,
+            xsrfToken: lXsrfToken
         };
 
         // 3. Générer un nouveau JWT
-        const accessToken = AuthJWT.generateToken(payload, { expiresIn: this.TOKEN_EXPIRATION });
+        const lAccessToken = AuthJWT.generateToken(lPayload, { expiresIn: this.TOKEN_EXPIRATION });
 
         // 4. Générer un nouveau refresh token
-        const refreshToken = AuthJWT.generateRefreshToken();
+        const lRefreshToken = AuthJWT.generateRefreshToken();
 
-        // 5. Mettre à jour le refresh token en base de données
-        const userToUpdate = { ...user, refresh_token: refreshToken };
+        pUser.refresh_token = lRefreshToken;
 
-        const updateCriteria = new AuthUsersCritereDTO();
-        updateCriteria.auth_user_id = user.auth_user_id;
+        const lUpdateCriteria = new AuthUsersCritereDTO();
+        lUpdateCriteria.auth_user_id = pUser.auth_user_id;
 
-        await this.Metier.updateItem(userToUpdate, updateCriteria);
+        await this.Metier.updateItem(pUser, lUpdateCriteria);
 
         // 6. Configurer les cookies
-        res.cookie('access_token', accessToken, {
+        res.cookie('access_token', lAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
             maxAge: this.TOKEN_EXPIRATION_MS
         });
 
-        res.cookie('refresh_token', refreshToken, {
+        res.cookie('refresh_token', lRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -141,16 +145,14 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             path: '/refresh-token'
         });
 
-        // 7. Préparer la réponse
-        // Créer une copie de l'utilisateur sans les données sensibles
-        const safeUser = { ...user };
-        safeUser.refresh_token = "";
-        safeUser.password_hash = "";
+        // cm - Delete les colonne sensible
+        delete pUser.refresh_token;
+        delete pUser.password_hash;
 
         return {
             ...(message ? { message } : {}),
-            ...safeUser,
-            xsrfToken: xsrfToken,
+            ...pUser,
+            xsrfToken: lXsrfToken,
             TOKEN_EXPIRATION_MS: this.TOKEN_EXPIRATION_MS,
             REFRESH_TOKEN_EXPIRATION_MS: this.REFRESH_TOKEN_EXPIRATION_MS
         };
@@ -229,15 +231,23 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      */
     public override async beforeCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers>
     {
-        // Hashe le mot de passe
-        const lHashedPassword = await bcrypt.hash(pAuthUsers.password_hash, 10);
+        let lNewUser: AuthUsers;
+        if (pAuthUsers.password_hash)
+        {
+            // Hashe le mot de passe
+            const lHashedPassword = await bcrypt.hash(pAuthUsers.password_hash, 10);
 
-        // Cree un nouvel utilisateur
-        const lNewUser = new AuthUsers();
-        lNewUser.username = pAuthUsers.username;
-        lNewUser.password_hash = lHashedPassword;
-        lNewUser.email = pAuthUsers.email;
-        lNewUser.role = 'user';
+            // Cree un nouvel utilisateur
+            lNewUser = new AuthUsers();
+            lNewUser.username = pAuthUsers.username;
+            lNewUser.password_hash = lHashedPassword;
+            lNewUser.email = pAuthUsers.email;
+            lNewUser.role = 'user';
+        }
+        else
+        {
+            throw new Error("No Password");
+        }
 
         return lNewUser;
     }
@@ -287,6 +297,11 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         lCritere.email = pAuthUsers.email;
 
         return lCritere;
+    }
+
+    public override async afterGetItem(pAuthUsers: AuthUsers, pRes: Response): Promise<AuthUsers>
+    {
+        return await this.generateTokensAndSetCookies(pAuthUsers, pRes);
     }
 
     //#endregion
