@@ -21,12 +21,16 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
     //#endregion
 
-    //#region Methods
+    //#region CTOR
     constructor (pMetier: AuthUsersMetier)
     {
-
         super(pMetier);
     }
+
+    //#endregion
+
+    //#region Methods
+
 
     override initializeRoutes(): void
     {
