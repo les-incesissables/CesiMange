@@ -10,4 +10,9 @@ export class AuthUsersMetier extends BaseMetier<AuthUsers, AuthUsersCritereDTO> 
     constructor() {
         super('AuthUsers', AuthUsers);
     }
+
+    override async afterDeleteItem(): Promise<void>
+    {
+
+    }
 }

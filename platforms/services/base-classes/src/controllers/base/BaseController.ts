@@ -192,6 +192,9 @@ export class BaseController<DTO, CritereDTO>
             }
 
             const success = await this.Metier.deleteItem(lCritere);
+
+            await this.afterDeleteItem(lCritere);
+
             success ? res.status(204).send() : res.status(404).json({ error: 'Élément non trouvé' });
         } catch (error)
         {

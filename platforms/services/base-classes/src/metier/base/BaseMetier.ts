@@ -11,7 +11,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     protected CollectionName: string;
 
     //#region CTOR
-    constructor (pCollectionName: string, pModel?: any, pTopic?: string[], pBaseUrl?: string)
+    constructor (pCollectionName: string, pModel?: any, pTopic?: string[])
     {
         this.CollectionName = pCollectionName;
         let lDatabaseType: EDatabaseType = EDatabaseType.MONGODB;
@@ -24,17 +24,11 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             lDatabaseType = EDatabaseType.KAFKA;
         }
 
-        if (pBaseUrl)
-        {
-            lDatabaseType = EDatabaseType.AXIOS;
-        }
-
         const lRepo = new Repository<DTO, CritereDTO>(
             pCollectionName,
             lDatabaseType,
             pModel,
-            pTopic,
-            pBaseUrl
+            pTopic
         );
         this.Repository = lRepo;
     }
@@ -160,6 +154,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             // Déléguer la suppression au repository
             const result = await this.Repository.deleteItem(pCritereDTO);
 
+            await this.afterDeleteItem(pCritereDTO);
+
             return result;
         } catch (error)
         {
@@ -277,6 +273,31 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
     {
         // Méthode à implémenter dans les classes dérivées
+    }
+
+    protected afterGetItems(pDTOs: DTO[]): DTO[]
+    {
+        return pDTOs;
+    }
+
+    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO>
+    {
+        return pDTO;
+    }
+
+    protected async afterCreateItem(pDTO: DTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
+    {
+        return pDTO; // Par défaut, retourne l'objet non modifié
+    }
+
+    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void>
+    {
+        // À implémenter dans les classes dérivées
     }
     //#endregion
 }

@@ -38,9 +38,4 @@ export interface IRepositoryConfig {
         password: string;
     };
     fromBeginning?: boolean;
-
-    // axios
-    baseURL: string;
-    timeout?: number;
-    headers?: Record<string, string>;
 }

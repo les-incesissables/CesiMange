@@ -11,7 +11,7 @@ import { BaseRepository } from "./base/BaseRepository";
  */
 export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere>
 {
-    constructor (pCollectionName: string, pTypeBDD: EDatabaseType, pModel?: any, pTopic?: string[], pBaseUrl?: string)
+    constructor (pCollectionName: string, pTypeBDD: EDatabaseType, pModel?: any, pTopic?: string[])
     {
         const config: IRepositoryConfig = {
             CollectionName: pCollectionName, // Collection MongoDB
@@ -21,8 +21,7 @@ export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere>
             clientId: 'cesi-mange',
             topics: pTopic || [],
             brokers: [process.env.brokers || "localhost:9092"],
-            groupId: pCollectionName,
-            baseURL: pBaseUrl || "localhost:4002"
+            groupId: pCollectionName
         };
 
         super(config, pModel)
