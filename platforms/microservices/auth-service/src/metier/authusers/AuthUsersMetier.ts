@@ -36,9 +36,9 @@ export class AuthUsersMetier extends BaseMetier<AuthUsers, AuthUsersCritereDTO>
         try
         {
             // Publier l'événement via le ServiceBroker
-            await this._ServiceBroker.publishEvent<number | undefined>(EEventType.USER_DELETED, item.auth_user_id);
+            await this._ServiceBroker.publishEvent<number | undefined>(EEventType.USER_DELETED, item.id);
 
-            console.log(`Événement ${EEventType.USER_DELETED} publié pour userId: ${item.auth_user_id}`);
+            console.log(`Événement ${EEventType.USER_DELETED} publié pour userId: ${item.id}`);
         } catch (error)
         {
             console.error('Échec de la publication de l\'événement de suppression utilisateur:', error);

@@ -42,6 +42,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         // Routes protégées pour admin uniquement
         this.Router.get('/admin',
             AuthJWT.authenticateJWT,
+
             AuthJWT.hasRole('admin'),
             this.adminEndpoint);
 
@@ -57,11 +58,11 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
         this.Router.put('/:id',
             AuthJWT.authenticateJWT,
-            AuthJWT.isResourceOwnerOrAdmin((req) => parseInt(req.params.id)),
             this.updateItem);
 
-        this.Router.delete('/',
+        this.Router.delete('/:id',
             AuthJWT.authenticateJWT,
+            AuthJWT.checkId,
             this.deleteItem);
 
         // Route pour la déconnexion
@@ -114,7 +115,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
         // 2. Créer le payload pour le JWT
         const lPayload = {
-            id: pUser.auth_user_id,
+            id: pUser.id,
             username: pUser.email,
             roles: pUser.role,
             xsrfToken: lXsrfToken
@@ -129,7 +130,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         pUser.refresh_token = lRefreshToken;
 
         const lUpdateCriteria = new AuthUsersCritereDTO();
-        lUpdateCriteria.auth_user_id = pUser.auth_user_id;
+        lUpdateCriteria.id = pUser.id;
 
         await this.Metier.updateItem(pUser, lUpdateCriteria);
 
@@ -184,7 +185,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
             const user = await this.Metier.getItem(userCriteria);
 
-            if (!user || !user.auth_user_id)
+            if (!user || !user.id)
             {
                 res.status(403).json({ message: 'Refresh token invalide ou expiré' });
                 return;
@@ -306,6 +307,14 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     public override async afterGetItem(pAuthUsers: AuthUsers, pRes: Response): Promise<AuthUsers>
     {
         return await this.generateTokensAndSetCookies(pAuthUsers, pRes);
+    }
+
+    public override async beforeDeleteItem(pCritere: AuthUsers) : Promise<AuthUsers>
+    {
+        const lCritere = new AuthUsersCritereDTO();
+        lCritere.id = pCritere.id;
+
+        return lCritere;
     }
 
     //#endregion

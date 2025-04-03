@@ -176,13 +176,13 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            const lCritere = req.body as CritereDTO;
+            let lCritere = req.body as CritereDTO;
 
             // Validation des données
             try
             {
                 await this.validateDeleteItem(lCritere);
-                await this.beforeDeleteItem(lCritere);
+                lCritere = await this.beforeDeleteItem(lCritere);
             } catch (validationError)
             {
                 res.status(400).json({
@@ -193,7 +193,8 @@ export class BaseController<DTO, CritereDTO>
 
             const success = await this.Metier.deleteItem(lCritere);
 
-            await this.afterDeleteItem(lCritere);
+            if (success)
+                await this.afterDeleteItem(lCritere);
 
             success ? res.status(204).send() : res.status(404).json({ error: 'Élément non trouvé' });
         } catch (error)
@@ -264,9 +265,9 @@ export class BaseController<DTO, CritereDTO>
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
+    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<CritereDTO>
     {
-        // À implémenter dans les classes dérivées
+        return pCritereDTO;
     }
 
     protected afterGetItems(pDTOs: DTO[]): DTO[]
