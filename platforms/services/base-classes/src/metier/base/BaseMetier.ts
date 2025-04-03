@@ -9,9 +9,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
 {
     protected Repository: Repository<DTO, CritereDTO>;
     protected CollectionName: string;
+    protected ServiceName?: string;
 
     //#region CTOR
-    constructor (pCollectionName: string, pModel?: any, pTopic?: string[])
+    constructor (pCollectionName: string, pModel?: any)
     {
         this.CollectionName = pCollectionName;
         let lDatabaseType: EDatabaseType = EDatabaseType.MONGODB;
@@ -19,16 +20,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
         if (pModel)
             lDatabaseType = EDatabaseType.SQL_SERVER;
 
-        if (pTopic)
-        {
-            lDatabaseType = EDatabaseType.KAFKA;
-        }
-
         const lRepo = new Repository<DTO, CritereDTO>(
             pCollectionName,
             lDatabaseType,
-            pModel,
-            pTopic
+            pModel
         );
         this.Repository = lRepo;
     }

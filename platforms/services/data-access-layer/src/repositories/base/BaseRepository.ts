@@ -7,8 +7,6 @@ import { SqlServerRepository } from "./SqlServerRepository";
 import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { ObjectLiteral } from "typeorm";
 import { EDatabaseType } from "../../enums/EDatabaseType";
-import { KafkaRepository } from "./KafkaRepository";
-
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques
  * @template DTO - Type de données retourné/manipulé qui étend BaseDTO
@@ -41,10 +39,6 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             {
                 // cm - Initialise le repo SqlServer
                 this._repository = new SqlServerRepository<DTO & ObjectLiteral, CritereDTO & BaseCritereDTO>(pConfig, pModel);
-            } else if (this._config.TypeBDD == EDatabaseType.KAFKA)
-            {
-                // cm - Initialise le repo Kafka
-                this._repository = new KafkaRepository<DTO, CritereDTO>(pConfig, () => { });
             }
             else
             {

@@ -10,8 +10,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { RestaurantController } from './controllers/restaurants/RestaurantController';
 import { RestaurantMetier } from './metier/restaurants/RestaurantMetier';
-import { UserEventConsumer } from './consumers/UserEventConsumer';
-
 
 //#endregion
 
