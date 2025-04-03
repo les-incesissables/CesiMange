@@ -154,7 +154,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             // Déléguer la suppression au repository
             const result = await this.Repository.deleteItem(pCritereDTO);
 
-            await this.afterDeleteItem(pCritereDTO);
+            //if (result)
+                await this.afterDeleteItem(pCritereDTO);
 
             return result;
         } catch (error)

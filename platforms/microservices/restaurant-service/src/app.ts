@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { RestaurantController } from './controllers/restaurants/RestaurantController';
 import { RestaurantMetier } from './metier/restaurants/RestaurantMetier';
+import { UserEventConsumer } from './consumers/UserEventConsumer';
 
 
 //#endregion
@@ -39,8 +40,8 @@ app.use(
  * Format 'dev' ou 'combined' selon vos besoins
  */
 app.use(morgan('dev'));
-
-const restaurantController = new RestaurantController(new RestaurantMetier());
+const lRestaurantMetier: RestaurantMetier = new RestaurantMetier();
+const restaurantController = new RestaurantController(lRestaurantMetier);
 
 app.use('/api/restaurant', restaurantController.getRouter());
 

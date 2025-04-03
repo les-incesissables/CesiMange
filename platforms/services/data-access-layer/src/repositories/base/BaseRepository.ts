@@ -8,7 +8,6 @@ import { BaseCritereDTO } from "../../models/base/BaseCritereDTO";
 import { ObjectLiteral } from "typeorm";
 import { EDatabaseType } from "../../enums/EDatabaseType";
 import { KafkaRepository } from "./KafkaRepository";
-import { AxiosRepository } from "./AxiosRepository";
 
 /**
  * Repository de base générique qui sert de factory pour les implémentations spécifiques
@@ -45,12 +44,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             } else if (this._config.TypeBDD == EDatabaseType.KAFKA)
             {
                 // cm - Initialise le repo Kafka
-                this._repository = new KafkaRepository<DTO, CritereDTO>(pConfig);
-            }
-            else if (this._config.TypeBDD == EDatabaseType.AXIOS)
-            {
-                // cm - Initialise le repo Kafka
-                this._repository = new AxiosRepository<DTO, CritereDTO & BaseCritereDTO>(pConfig);
+                this._repository = new KafkaRepository<DTO, CritereDTO>(pConfig, () => { });
             }
             else
             {

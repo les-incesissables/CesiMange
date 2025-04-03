@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-
+    "kafkajs": "2.3.0-beta.3",
     "dotenv": "^16.4.7",
     "express": "^4.14.0",
     "helmet": "^8.1.0",

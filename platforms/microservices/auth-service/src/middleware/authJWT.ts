@@ -94,7 +94,7 @@ export class AuthJWT {
             // 3. Récupérer le token CSRF de l'en-tête
             const csrfToken = req.headers['x-xsrf-token'] as string;
 
-            if (!csrfToken) {
+             if (!csrfToken) {
                 return res.status(403).json({ message: 'Token CSRF manquant dans les en-têtes' });
             }
 

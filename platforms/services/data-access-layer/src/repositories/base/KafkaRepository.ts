@@ -1,6 +1,7 @@
 import { Kafka, Consumer, Producer, EachMessagePayload, KafkaConfig } from 'kafkajs';
 import { AbstractDbRepository } from './AbstractDbRepository';
 import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
+import { IMessage } from "../../../../../services/base-classes/src/interfaces/IMessage";
 
 
 /**
@@ -11,30 +12,40 @@ import { IRepositoryConfig } from '../../interfaces/IRepositoryConfig';
  */
 export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Critere>
 {
+    //#region Attributes
     private kafka: Kafka | undefined;
-    private consumer: Consumer | undefined;
-    private producer: Producer | undefined;
     private kafkaTopics: string[];
     private cachedMessages: Map<string, DTO[]> = new Map();
     private isConnected: boolean = false;
+    private _ProcessMessage: Function;
+    //#endregion
 
+    //#region Properties
+
+    public Consumer: Consumer | undefined;
+    public Producer: Producer | undefined;
+
+    //#endregion
+
+    //#region CTOR
     /**
-     * Constructeur du repository Kafka
-     * @param pKafkaConfig Configuration Kafka
-     */
-    constructor (pKafkaConfig: IRepositoryConfig)
+    * Constructeur du repository Kafka
+    * @param pKafkaConfig Configuration Kafka
+    */
+    constructor (pKafkaConfig: IRepositoryConfig, pProcessMessage: Function)
     {
         super(pKafkaConfig);
-
+        this._ProcessMessage = pProcessMessage;
         this.kafkaTopics = pKafkaConfig.topics;
     }
+    //#endregion
 
     /**
      * Initialise le repository Kafka
      */
     public async initialize(): Promise<void>
     {
-        await this.initializeKafka();
+        await this.initializeKafka(this._ProcessMessage);
     }
 
     /**
@@ -46,35 +57,9 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
     }
 
     /**
-     * Construit un filtre à partir des critères
-     * @param pCritereDTO Critères de filtrage
-     * @returns Filtre formaté (non utilisé pour Kafka)
-     */
-    buildFilter(pCritereDTO: Critere): any
-    {
-        // Non utilisé pour Kafka, mais requis par l'interface
-        return pCritereDTO;
-    }
-
-    /**
-     * Formate les résultats
-     * @param pResults Résultats à formater
-     * @returns Résultats formatés
-     */
-    formatResults(pResults: any[] | any): DTO[]
-    {
-        // Pour Kafka, les résultats sont déjà formatés
-        if (Array.isArray(pResults))
-        {
-            return pResults as DTO[];
-        }
-        return pResults ? [pResults as DTO] : [];
-    }
-
-    /**
      * Initialise la connexion Kafka et commence à consommer les messages
      */
-    private async initializeKafka(): Promise<void>
+    private async initializeKafka(pProcessMessage: Function): Promise<void>
     {
         try
         {
@@ -84,55 +69,94 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
             }
 
             this.kafka = new Kafka(this._config as KafkaConfig);
+            this.Consumer = this.kafka.consumer({ groupId: this._config.groupId });
+            this.Producer = this.kafka.producer();
 
-            this.consumer = this.kafka.consumer({ groupId: this._config.groupId });
+            await this.CreateTopics(this.kafka);
 
-            this.producer = this.kafka.producer();
+            await this.ConnectKafka(pProcessMessage);
 
-            // Connexion à Kafka
-            if (this.consumer && this.producer)
-            {
-                await this.consumer.connect();
-                await this.producer.connect();
-
-                // S'abonner aux topics
-                for (const topic of this.kafkaTopics)
-                {
-                    await this.consumer.subscribe({
-                        topic,
-                        fromBeginning: this._config.fromBeginning || false
-                    });
-                }
-
-                // Démarrer la consommation des messages
-                await this.startConsumingMessages();
-
-                this.isConnected = true;
-            } else
-            {
-                throw new Error('Échec de l\'initialisation du consumer ou producer Kafka');
-            }
         } catch (error: any)
         {
             this.isConnected = false;
+            console.error(`Erreur détaillée lors de l'initialisation de Kafka:`, error);
             throw new Error(`Erreur lors de l'initialisation de Kafka: ${error.message}`);
+        }
+    }
+
+    private async CreateTopics(pKafka: Kafka)
+    {
+        // Créer l'admin client pour gérer les topics
+        const admin = pKafka.admin();
+        await admin.connect();
+
+        // Récupérer la liste des topics existants
+        const existingTopics = await admin.listTopics();
+
+        // Vérifier et créer les topics manquants
+        const topicsToCreate = this.kafkaTopics.filter(topic => !existingTopics.includes(topic));
+
+        if (topicsToCreate.length > 0)
+        {
+            console.log(`Création des topics manquants: ${topicsToCreate.join(', ')}`);
+
+            await admin.createTopics({
+                topics: topicsToCreate.map(topic => ({
+                    topic,
+                    numPartitions: 3,      // Nombre de partitions
+                    replicationFactor: 1   // Facteur de réplication (1 pour un environnement local/dev)
+                })),
+                timeout: 10000             // 10 secondes de timeout
+            });
+
+            console.log(`Topics créés avec succès: ${topicsToCreate.join(', ')}`);
+        }
+
+        // Déconnexion de l'admin après création des topics
+        await admin.disconnect();
+    }
+
+    private async ConnectKafka(pProcessMessage: Function)
+    {
+        // Connexion à Kafka
+        if (this.Consumer && this.Producer)
+        {
+            await this.Consumer.connect();
+            await this.Producer.connect();
+
+            // S'abonner aux topics
+            for (const topic of this.kafkaTopics)
+            {
+                await this.Consumer.subscribe({
+                    topic,
+                    fromBeginning: this._config.fromBeginning || false
+                });
+            }
+
+            // Démarrer la consommation des messages
+            await this.startConsumingMessages(pProcessMessage);
+            this.isConnected = true;
+            console.log(`Connexion Kafka établie et abonnement aux topics: ${this.kafkaTopics.join(', ')}`);
+        } else
+        {
+            throw new Error('Échec de l\'initialisation du consumer ou producer Kafka');
         }
     }
 
     /**
      * Configure le consommateur pour traiter les messages entrants
      */
-    private async startConsumingMessages(): Promise<void>
+    private async startConsumingMessages(pProcessMessage: Function): Promise<void>
     {
-        if (!this.consumer)
+        if (!this.Consumer)
         {
             throw new Error('Consumer Kafka non initialisé');
         }
 
-        await this.consumer.run({
+        await this.Consumer.run({
             eachMessage: async (payload: EachMessagePayload) =>
             {
-                await this.handleMessage(payload);
+                await this.handleMessage(payload, pProcessMessage);
             }
         });
     }
@@ -141,63 +165,21 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
      * Traite un message Kafka entrant
      * @param payload Payload du message
      */
-    private async handleMessage({ topic, partition, message }: EachMessagePayload): Promise<void>
+    private async handleMessage({ topic, partition, message }: EachMessagePayload, pProcessMessage: Function): Promise<void>
     {
         try
         {
             if (!message.value) return;
 
-            const messageData = JSON.parse(message.value.toString()) as DTO;
+            const lMessageData = JSON.parse(message.value.toString()) as IMessage;
 
-            // Ajouter le message au cache par topic
-            if (!this.cachedMessages.has(topic))
-            {
-                this.cachedMessages.set(topic, []);
-            }
+            // cm - Execute une action avec le message reçu
+            await pProcessMessage(lMessageData);
 
-            const messages = this.cachedMessages.get(topic);
-            if (!messages)
-            {
-                this.cachedMessages.set(topic, [messageData]);
-                return;
-            }
-
-            // Vérifier si le message existe déjà (basé sur un identifiant)
-            const messageId = this.getMessageIdentifier(messageData);
-            const existingIndex = messages.findIndex(m => this.getMessageIdentifier(m) === messageId);
-
-            if (existingIndex >= 0)
-            {
-                // Mettre à jour le message existant
-                messages[existingIndex] = messageData;
-            } else
-            {
-                // Ajouter le nouveau message
-                messages.push(messageData);
-            }
-
-            // Limiter la taille du cache (optionnel)
-            if (messages.length > 1000)
-            {
-                messages.shift(); // Supprimer le plus ancien message
-            }
-
-            this.cachedMessages.set(topic, messages);
         } catch (error: any)
         {
             console.error(`Erreur lors du traitement du message Kafka (topic ${topic}):`, error);
         }
-    }
-
-    /**
-     * Extrait un identifiant unique du message
-     * @param message Message à identifier
-     * @returns Identifiant unique du message
-     */
-    private getMessageIdentifier(message: DTO): string
-    {
-        // Hypothèse: l'objet a une propriété 'id'
-        return (message as any).id || JSON.stringify(message);
     }
 
     /**
@@ -218,28 +200,6 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
      */
     private determineTopicForMessage(pDTO: DTO): string
     {
-        // Vérifier que des topics sont configurés
-        if (this.kafkaTopics.length === 0)
-        {
-            throw new Error('Aucun topic configuré pour KafkaRepository');
-        }
-
-        // Détermination du topic selon le type de message
-        const messageType = (pDTO as any).messageType;
-
-        if (messageType === 'commande' && this.kafkaTopics.includes('commandes'))
-        {
-            return 'commandes';
-        }
-        if (messageType === 'preparation' && this.kafkaTopics.includes('preparation'))
-        {
-            return 'preparation';
-        }
-        if (messageType === 'livraison' && this.kafkaTopics.includes('livraison'))
-        {
-            return 'livraison';
-        }
-
         // Topic par défaut
         return this.kafkaTopics[0];
     }
@@ -318,7 +278,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
             // Déterminer quels topics utiliser
@@ -352,7 +312,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
             const items = await this.getItems(pCritere);
@@ -375,10 +335,10 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
-            if (!this.producer)
+            if (!this.Producer)
             {
                 throw new Error('Producer Kafka non initialisé');
             }
@@ -387,7 +347,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
             const topic = this.determineTopicForMessage(pDTO);
 
             // Publier le message
-            await this.producer.send({
+            await this.Producer.send({
                 topic,
                 messages: [
                     {
@@ -417,7 +377,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
             // Pour Kafka, une mise à jour est simplement une nouvelle publication
@@ -444,7 +404,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
             // Obtenir l'élément à "supprimer"
@@ -478,7 +438,7 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             if (!this.isConnected)
             {
-                await this.initializeKafka();
+                await this.initializeKafka(this._ProcessMessage);
             }
 
             const items = await this.getItems(pCritere);
@@ -502,14 +462,14 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
                 return; // Déjà déconnecté
             }
 
-            if (this.consumer)
+            if (this.Consumer)
             {
-                await this.consumer.disconnect();
+                await this.Consumer.disconnect();
             }
 
-            if (this.producer)
+            if (this.Producer)
             {
-                await this.producer.disconnect();
+                await this.Producer.disconnect();
             }
 
             this.isConnected = false;
@@ -518,6 +478,32 @@ export class KafkaRepository<DTO, Critere> extends AbstractDbRepository<DTO, Cri
         {
             console.error('Erreur lors de la fermeture des connexions Kafka:', error);
         }
+    }
+
+    /**
+     * Construit un filtre à partir des critères
+     * @param pCritereDTO Critères de filtrage
+     * @returns Filtre formaté (non utilisé pour Kafka)
+     */
+    buildFilter(pCritereDTO: Critere): any
+    {
+        // Non utilisé pour Kafka, mais requis par l'interface
+        return pCritereDTO;
+    }
+
+    /**
+     * Formate les résultats
+     * @param pResults Résultats à formater
+     * @returns Résultats formatés
+     */
+    formatResults(pResults: any[] | any): DTO[]
+    {
+        // Pour Kafka, les résultats sont déjà formatés
+        if (Array.isArray(pResults))
+        {
+            return pResults as DTO[];
+        }
+        return pResults ? [pResults as DTO] : [];
     }
     //#endregion
 }
