@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "broker", "broker", "{617C03
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "message-broker-service", "platforms\microservices\message-broker\message-broker-service.esproj", "{DF966857-98C2-62A2-25A8-9667A4388F3C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "facade", "facade", "{CB4E294C-94E2-4179-8D48-769B7D970DDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,7 @@ Global
 		{0D87B30D-3859-DF82-14F1-7FD27C3BDAA3} = {53732903-5B3C-4A3C-9F59-538B5EA7846F}
 		{617C0370-DD11-4C9C-9519-EB41DAFC9598} = {DDDE42CE-7268-48D2-935D-7F842B65BC2F}
 		{DF966857-98C2-62A2-25A8-9667A4388F3C} = {617C0370-DD11-4C9C-9519-EB41DAFC9598}
+		{CB4E294C-94E2-4179-8D48-769B7D970DDE} = {DDDE42CE-7268-48D2-935D-7F842B65BC2F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6369AA69-4B65-4AD3-B1DB-1562BD8A064E}

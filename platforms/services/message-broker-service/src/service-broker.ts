@@ -1,15 +1,8 @@
 import { KafkaConfig } from "kafkajs";
 import { IKafkaMessage } from "./interfaces/IKafkaMessage";
 import { KafkaClient} from "./kafka-client";
+import { IRequestHandler } from "./interfaces/IRequestHandler";
 
-
-/**
- * Interface pour les handlers de requêtes
- */
-export interface IRequestHandler
-{
-    (data: any, headers: Record<string, string>): Promise<any>;
-}
 
 /**
  * Service Broker pour la communication entre microservices
