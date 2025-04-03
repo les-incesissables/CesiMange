@@ -4,5 +4,7 @@
 export enum EDatabaseType
 {
     SQL_SERVER = "SQL_SERVER",
-    MONGODB = "MONGODB"
+    MONGODB = "MONGODB",
+    KAFKA = "KAFKA",
+    AXIOS = "AXIOS"
 }

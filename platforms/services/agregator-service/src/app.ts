@@ -1,15 +1,23 @@
-﻿//#region Imports
+//#region Imports
+import "reflect-metadata"
 import express from 'express';
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
 import * as path from 'path';
 
+//import { OrderController } from './src/controllers/order/OrderController';
+//import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
+//import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
+//import { OrderMetier } from './src/metier/order/OrderMetier';
+
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { RestaurantController } from './controllers/restaurants/RestaurantController';
-import { RestaurantMetier } from './metier/restaurants/RestaurantMetier';
+import { AuthUsersController } from "./controllers/authusers/AuthUsersController";
+import { AuthUsersMetier } from "./metier/authusers/AuthUsersMetier";
 
 
 //#endregion
@@ -21,6 +29,8 @@ const app = express();
 access the body of your request.
 */
 app.use(bodyParser.json({ extended: true }));
+// cm - Utilisation du cookieParser
+app.use(cookieParser());
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -34,18 +44,23 @@ app.use(
     }),
 );
 
+
 /**
  * Logging HTTP standard avec morgan
  * Format 'dev' ou 'combined' selon vos besoins
  */
 app.use(morgan('dev'));
 
-const restaurantController = new RestaurantController(new RestaurantMetier());
+const userController = new AuthUsersController(new AuthUsersMetier());
+//const restaurantController = new RestaurantController(new RestaurantMetier());
+//const orderMetier = new OrderController(new OrderMetier());
+app.use('/auth', userController.getRouter());
 
-app.use('/api/restaurant', restaurantController.getRouter());
+//app.use('/api/resto', restaurantController.getRouter());
+//app.use('/api/order', orderMetier.getRouter());
 
 // We assign the port number 8080.
-const port = 4003;
+const port = 4010;
 
 // We can see that the app is listening on which port.
 app.listen(port, () => {

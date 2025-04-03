@@ -13,7 +13,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [ "run", "dev" ],
       "outFiles": [
-        "${workspaceFolder}/dist/microservices/restaurant-service/src/**/*.js",
+        "${workspaceFolder}/dist/microservices/agregator-service/src/**/*.js",
         "${workspaceFolder}/../../services/data-access-layer/dist/**/*.js",
         "${workspaceFolder}/../../services/base-classes/dist/**/*.js"
       ],
