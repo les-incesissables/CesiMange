@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '.';
+import Button from '.';
 
 const meta: Meta<typeof Button> = {
     title: 'Components/Button',
@@ -16,30 +16,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        children: 'Click me',
-        variant: 'solid',
-        size: 'md',
-        colosrsheme: 'primary',
+        text: 'Valider',
+        selected: false,
     },
 };
 
-export const Solid: Story = {
+export const Selected: Story = {
     args: {
-        variant: 'solid',
-        children: 'Button',
-    },
-};
-
-export const Outline: Story = {
-    args: {
-        variant: 'outline',
-        children: 'Button',
-    },
-};
-
-export const Ghost: Story = {
-    args: {
-        variant: 'ghost',
-        children: 'Button',
+        text: 'Sélectionné',
+        selected: true,
     },
 };

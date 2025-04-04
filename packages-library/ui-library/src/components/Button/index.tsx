@@ -1,49 +1,34 @@
-import { cn } from '@/utils';
-import { cva, VariantProps } from 'class-variance-authority';
-import { ComponentProps, forwardRef } from 'react';
+'use client';
+import React from 'react';
 
-const buttonStyles = cva(['w-full', 'rounded-md', 'font-semibold', 'focus:outline-none', 'disabled:cursor-not-allowed'], {
-    variants: {
-        variant: {
-            solid: '',
-            outline: 'border-2',
-            ghost: 'transition-colors duration-300',
-        },
-        size: {
-            sm: 'px-4 py-2 text-sm',
-            md: 'px-4 py-2 text-base',
-            lg: 'px-6 py-3 text-lg',
-        },
-        colorscheme: {
-            primary: 'text-white',
-        },
-    },
-    compoundVariants: [
-        {
-            variant: 'solid',
-            colorscheme: 'primary',
-            className: 'bg-midnight hover:bg-tahiti',
-        },
-        {
-            variant: 'outline',
-            colorscheme: 'primary',
-            className: 'text-primary-600 border-primary-500 bg-transparent hover:bg-primary-100',
-        },
-        {
-            variant: 'ghost',
-            colorscheme: 'primary',
-            className: 'text-primary-600 bg-transparent hover:bg-primary-100',
-        },
-    ],
-    defaultVariants: {
-        variant: 'solid',
-        size: 'md',
-        colorscheme: 'primary',
-    },
-});
+export interface ButtonProps {
+    text?: string;
+    selected?: boolean;
+    onClick?: () => void;
+    className?: string; // utile pour Storybook + personnalisation
+}
 
-type ButtonProps = ComponentProps<'button'> & VariantProps<typeof buttonStyles>;
+const Button: React.FC<ButtonProps> = ({ text = 'button', selected = false, onClick, className = '' }) => {
+    const baseClasses = 'group h-9 px-4 py-4 rounded-[20px] inline-flex justify-center items-center gap-2.5 transition-all duration-300 w-full';
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ variant, size, colorscheme, className, ...props }, ref) => {
-    return <button ref={ref} className={cn(buttonStyles({ variant, size, colorscheme, className }))} {...props} />;
-});
+    const defaultBg = 'bg-black';
+    const defaultText = 'text-white';
+    const hoverBg = 'hover:bg-yellow-400';
+
+    const selectedBg = 'bg-yellow-400'; // Assurez-vous que cette classe existe dans Tailwind config
+    const selectedText = 'text-black';
+
+    const bgClass = selected ? selectedBg : defaultBg;
+    const textClass = selected ? selectedText : defaultText;
+    const hoverClass = selected ? '' : hoverBg;
+
+    return (
+        <button onClick={onClick} className={`${baseClasses} ${bgClass} ${hoverClass} ${className}`}>
+            <span className={`flex w-full justify-center font-['Inter'] text-base font-bold ${textClass} transition-all duration-300 group-hover:text-black`}>
+                {text}
+            </span>
+        </button>
+    );
+};
+
+export default Button;
