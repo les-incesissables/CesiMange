@@ -1,0 +1,27 @@
+# Dockerfile.mssql
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+# Définir les variables d'environnement
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=??CesiMange123
+ENV MSSQL_PID=Developer
+
+# Passage en root pour copier les fichiers
+USER root
+
+# Créer un dossier pour les scripts d'initialisation
+RUN mkdir -p /init-sql
+
+# Copier le script de seed dans le container
+COPY seed/init-mssql-auth.sql /init-sql/
+
+# Copier le script d'entrée
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Revenir à l'utilisateur mssql
+USER mssql
+
+EXPOSE 1433
+
+ENTRYPOINT ["/entrypoint.sh"]

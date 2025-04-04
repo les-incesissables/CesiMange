@@ -1,43 +1,48 @@
 services:
+    auth-service:
+        build:
+            context: .
+            dockerfile: platforms/microservices/auth-service/Dockerfile.prod
+        container_name: auth-service-prod
+        ports:
+            - '4001:4001'
+        env_file:
+            - ./platforms/microservices/auth-service/.env.production
+        networks:
+            - api_network
+        command: ['npm', 'start']
+
     user-service:
         build:
             context: .
-            dockerfile: platforms/microservices/user-service/Dockerfile
-        container_name: user-service-staging
+            dockerfile: platforms/microservices/user-service/Dockerfile.prod
+        container_name: user-service-prod
         ports:
-            - '5002:4002'
+            - '4002:4002'
         env_file:
-            - ./platforms/microservices/user-service/.env.staging
-        volumes:
-            - ./platforms/services/base-classes:/app/platforms/services/base-classes
-            - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+            - ./platforms/microservices/user-service/.env.production
         networks:
             - api_network
-        depends_on:
-            - db-mongodb-user
+        command: ['npm', 'start']
 
     restaurant-service:
         build:
             context: .
-            dockerfile: platforms/microservices/restaurant-service/Dockerfile
-        container_name: restaurant-service-staging
+            dockerfile: platforms/microservices/restaurant-service/Dockerfile.prod
+        container_name: restaurant-service-prod
         ports:
-            - '5003:4003'
+            - '4003:4003'
         env_file:
-            - ./platforms/microservices/restaurant-service/.env.staging
-        volumes:
-            - ./platforms/services/base-classes:/app/platforms/services/base-classes
-            - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+            - ./platforms/microservices/restaurant-service/.env.production
         networks:
             - api_network
-        depends_on:
-            - db-mongodb-restaurant
+        command: ['npm', 'start']
 
-    db-mongodb-user:
+    mongodb-user:
         image: mongo:latest
-        container_name: db-mongodb-user-staging
+        container_name: db-mongodb-user-prod
         ports:
-            - '37019:27017'
+            - '27019:27017'
         volumes:
             - type: bind
               source: ./platforms/data/mongodb/user-service
@@ -45,11 +50,11 @@ services:
         networks:
             - api_network
 
-    db-mongodb-restaurant:
+    mongodb-restaurant:
         image: mongo:latest
-        container_name: db-mongodb-restaurant-staging
+        container_name: db-mongodb-restaurant-prod
         ports:
-            - '37018:27017'
+            - '27018:27017'
         volumes:
             - type: bind
               source: ./platforms/data/mongodb/restaurant-service
@@ -57,17 +62,18 @@ services:
         networks:
             - api_network
 
-    db-mssql-auth:
+    mssql-auth-service:
         image: mcr.microsoft.com/mssql/server:2019-latest
-        container_name: db-mssql-auth-staging
+        container_name: db-mssql-auth-prod
         ports:
-            - '1435:1433'
+            - '1433:1433'
         volumes:
             - ./platforms/data/sqlserver/auth-service/data:/var/opt/mssql/data
             - ./platforms/data/sqlserver/auth-service/log:/var/opt/mssql/log
             - ./platforms/data/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
-        # env_file:
-        #    - ./platforms/microservices/auth-service/.env.staging
+        environment:
+            SA_PASSWORD: 'ProdPassword123!'
+            ACCEPT_EULA: 'Y'
         networks:
             - api_network
 
@@ -75,9 +81,13 @@ services:
         build:
             context: .
             dockerfile: platforms/nginx-gateway/Dockerfile
-        container_name: nginx-gateway-staging
+        container_name: nginx-gateway-prod
         ports:
-            - '8081:80'
+            - '80:80'
+        env_file:
+            - ./platforms/nginx-gateway/.env.production
+        environment:
+            - ENV=production
         networks:
             - api_network
 

@@ -1,4 +1,24 @@
 services:
+    auth-service:
+        build:
+            context: .
+            dockerfile: platforms/microservices/auth-service/Dockerfile.dev
+        container_name: auth-service-dev
+        ports:
+            - '4001:4001'
+        environment:
+            - NODE_ENV=development
+            - DOCKER_ENV=true
+        env_file:
+            - ./platforms/microservices/auth-service/.env.development
+        volumes:
+            - ./platforms/microservices/auth-service:/app/platforms/microservices/auth-service
+            - ./platforms/services/base-classes:/app/platforms/services/base-classes
+            - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+        networks:
+            - api_network
+        command: ['npm', 'run', 'dev']
+
     user-service:
         build:
             context: .
@@ -6,8 +26,11 @@ services:
         container_name: user-service-dev
         ports:
             - '4002:4002'
+        environment:
+            - NODE_ENV=development
+            - DOCKER_ENV=true
         env_file:
-            - ./platforms/microservices/user-service/.env.dev
+            - ./platforms/microservices/user-service/.env.development
         volumes:
             - ./platforms/microservices/user-service:/app/platforms/microservices/user-service
             - ./platforms/services/base-classes:/app/platforms/services/base-classes
@@ -20,11 +43,14 @@ services:
         build:
             context: .
             dockerfile: platforms/microservices/restaurant-service/Dockerfile.dev
-        container_name: restaurant-service-dev
+        container_name: restaurant-service
         ports:
             - '4003:4003'
+        environment:
+            - NODE_ENV=development
+            - DOCKER_ENV=true
         env_file:
-            - ./platforms/microservices/restaurant-service/.env.dev
+            - ./platforms/microservices/restaurant-service/.env.development
         volumes:
             - ./platforms/microservices/restaurant-service:/app/platforms/microservices/restaurant-service
             - ./platforms/services/base-classes:/app/platforms/services/base-classes
@@ -34,40 +60,42 @@ services:
         command: ['npm', 'run', 'dev']
 
     mongodb-user:
-        image: mongo:latest
+        build:
+            context: ./platforms/databases/mongodb/user-service
+            dockerfile: Dockerfile.mongodb
         container_name: db-mongodb-user-dev
         ports:
-            - '27019:27017'
+            - '27018:27017'
         volumes:
-            - type: bind
-              source: ./platforms/data/mongodb/user-service
-              target: /data/db
+            - ./platforms/databases/mongodb/user-service/data:/data/db
+            - ./platforms/databases/mongodb/user-service/seed:/docker-entrypoint-initdb.d
         networks:
             - api_network
 
     mongodb-restaurant:
-        image: mongo:latest
+        build:
+            context: ./platforms/databases/mongodb/restaurant-service
+            dockerfile: Dockerfile.mongodb
         container_name: db-mongodb-restaurant-dev
         ports:
-            - '27018:27017'
+            - '27019:27017'
         volumes:
-            - type: bind
-              source: ./platforms/data/mongodb/restaurant-service
-              target: /data/db
+            - ./platforms/databases/mongodb/restaurant-service/data:/data/db
+            - ./platforms/databases/mongodb/restaurant-service/seed:/docker-entrypoint-initdb.d
         networks:
             - api_network
 
-    mssql-auth-service:
-        image: mcr.microsoft.com/mssql/server:2019-latest
+    mssql-auth:
+        build:
+            context: ./platforms/databases/sqlserver/auth-service
+            dockerfile: Dockerfile.mssql
         container_name: db-mssql-auth-dev
         ports:
             - '1433:1433'
-        # env_file:
-        #    - ./platforms/microservices/auth-service/.env.dev
         volumes:
-            - ./platforms/data/sqlserver/auth-service/data:/var/opt/mssql/data
-            - ./platforms/data/sqlserver/auth-service/log:/var/opt/mssql/log
-            - ./platforms/data/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
+            - ./platforms/databases/sqlserver/auth-service/data:/var/opt/mssql/data
+            - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
+            - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
         networks:
             - api_network
 
@@ -78,6 +106,8 @@ services:
         container_name: nginx-gateway-dev
         ports:
             - '8080:80'
+        environment:
+            - ENV=development
         networks:
             - api_network
 

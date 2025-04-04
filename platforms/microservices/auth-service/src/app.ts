@@ -1,5 +1,5 @@
 //#region Imports
-import "reflect-metadata"
+import 'reflect-metadata';
 import express from 'express';
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -14,9 +14,22 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { AuthUsersController } from "./controllers/authusers/AuthUsersController";
-import { AuthUsersMetier } from "./metier/authusers/AuthUsersMetier";
+import { AuthUsersController } from './controllers/authusers/AuthUsersController';
+import { AuthUsersMetier } from './metier/authusers/AuthUsersMetier';
 
+import * as dotenv from 'dotenv';
+
+const isDocker = process.env.DOCKER_ENV === 'true';
+
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
+    dotenv.config({ path: '.env.development' });
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+    dotenv.config({ path: '.env.localhost' });
+} else if (process.env.NODE_ENV === 'staging') {
+    dotenv.config({ path: '.env.staging' });
+} else if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+}
 
 //#endregion
 
@@ -39,7 +52,6 @@ app.use(
         allowedHeaders: ['Content-Type', 'Authorization'],
     }),
 );
-
 
 /**
  * Logging HTTP standard avec morgan
