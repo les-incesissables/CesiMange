@@ -7,6 +7,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import { securityMiddleware } from "./middlewares/security.middleware";
+import { requestLogger } from "./middlewares/requestLogger.middleware";
 
 dotenv.config();
 
@@ -24,6 +26,12 @@ app.use(cors({
 }));
 
 app.use(morgan('dev'));
+
+// Middleware personnalisé pour afficher la provenance
+app.use(requestLogger);
+
+// Middlewares de sécurité (Helmet, CORS, etc.)
+app.use(...securityMiddleware());
 
 // Configuration des proxys
 setupProxies(app, config);

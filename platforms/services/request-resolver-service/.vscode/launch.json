@@ -13,11 +13,15 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [ "run", "dev" ],
       "outFiles": [
-        "${workspaceFolder}/dist/microservices/request-resolver-service/src/**/*.js"
+        "${workspaceFolder}/dist/microservices/request-resolver-service/src/**/*.js",
+        "${workspaceFolder}/../../services/data-access-layer/dist/**/*.js",
+        "${workspaceFolder}/../../services/base-classes/dist/**/*.js"
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/**",
+        "${workspaceFolder}/../../services/data-access-layer/**",
+        "${workspaceFolder}/../../services/base-classes/**",
         "!**/node_modules/**"
       ],
       "restart": true,
