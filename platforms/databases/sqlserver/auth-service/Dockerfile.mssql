@@ -1,6 +1,10 @@
 # Dockerfile.mssql
 FROM mcr.microsoft.com/mssql/server:2019-latest
 
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=MyPass123!
+ENV MSSQL_PID=Developer
+
 # Passage en root pour installer les outils nécessaires
 USER root
 
@@ -14,7 +18,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     apt-get update
 
 # Installer mssql-tools et unixodbc-dev (nécessaires pour sqlcmd)
-RUN ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+RUN apt-get install -y mssql-tools unixodbc-dev
 
 # Ajouter mssql-tools au PATH pour tous les utilisateurs
 ENV PATH="$PATH:/opt/mssql-tools/bin"
@@ -23,10 +27,7 @@ ENV PATH="$PATH:/opt/mssql-tools/bin"
 RUN apt-get install -y dos2unix
 
 # Définir les variables d'environnement MSSQL
-ENV ACCEPT_EULA=Y
-ENV SA_PASSWORD="MyPass123!"
-ENV MSSQL_PID=Developer
-
+ENV MSSQL_PID=Express
 # Créer un dossier pour les scripts d'initialisation
 RUN mkdir -p /init-sql
 

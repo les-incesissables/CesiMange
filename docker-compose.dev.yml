@@ -94,8 +94,6 @@ services:
         container_name: db-mssql-auth
         ports:
             - '1433:1433'
-        environment:
-            - SA_PASSWORD="MyPass123!"
         volumes:
             - ./platforms/databases/sqlserver/auth-service/data:/var/opt/mssql/data
             - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
