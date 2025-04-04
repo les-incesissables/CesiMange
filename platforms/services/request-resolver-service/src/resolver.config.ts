@@ -9,7 +9,7 @@ export function loadGatewayConfig(): IGatewayConfig
         services: [
             {
                 apiName: 'auth',
-                url: process.env.AUTH_SERVICE_URL || 'http://localhost:4001/auth',
+                url: process.env.AUTH_SERVICE_URL || 'http://localhost:4001',
                 enabled: true,
                 publicRoutes: [
                     {

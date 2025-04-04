@@ -1,12 +1,8 @@
-// request-resolver-service/src/proxySetup.ts
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
 import { Router } from 'express';
 import { IGatewayConfig } from './interfaces/IGatewayConfig';
 import { IServiceDefinition } from './interfaces/IServiceDefinition';
 
-/**
- * Configuration type-safe pour le proxy middleware
- */
 interface ProxyOptions extends Options
 {
     pathRewrite: {
@@ -14,50 +10,36 @@ interface ProxyOptions extends Options
     };
 }
 
-/**
- * Configure dynamiquement des proxys pour chaque service activé
- * avec gestion d'erreur et logging amélioré
- */
 export function setupProxies(router: Router, config: IGatewayConfig): void
 {
     if (!config?.services)
     {
-        console.error('Configuration invalide : aucun service défini');
         throw new Error('Configuration des services invalide');
     }
 
     config.services.forEach((service: IServiceDefinition) =>
     {
-        if (!service.enabled)
-        {
-            console.debug(`Service [${service.apiName}] est désactivé - ignoré`);
-            return;
-        }
+        if (!service.enabled || !service.url) return;
 
-        if (!service.url)
-        {
-            console.warn(`URL non définie pour le service [${service.apiName}] - ignoré`);
-            return;
-        }
-
-        const lRoutePath = `/${service.apiName}`;
-        const lProxyOptions: ProxyOptions = {
+        const proxyOptions: ProxyOptions = {
             target: service.url,
             changeOrigin: true,
-            pathRewrite: {}, // Désactive la réécriture d'URL
-            timeout: 5000
+            pathRewrite: {
+                [`^/${service.apiName}`]: '/' // Réécriture spécifique au service
+            },
+            timeout: 10000
         };
 
-        try
-        {
-            router.use(
-                lRoutePath,
-                createProxyMiddleware(lProxyOptions)
-            );
-            console.info(`Proxy configuré: [${lRoutePath}] -> [${service.url}]`);
-        } catch (error)
-        {
-            console.error(`Échec de configuration du proxy pour ${service.apiName}: ${error}`);
-        }
+        // Configuration spécifique pour chaque service
+        router.use(`/${service.apiName}`, createProxyMiddleware(proxyOptions));
+
+        console.log(`Proxy configuré: /${service.apiName}/* -> ${service.url}`);
+    });
+
+    // Middleware pour les routes non trouvées
+    router.use((req, res) =>
+    {
+        console.warn(`Route non trouvée: ${req.method} ${req.url}`);
+        res.status(404).json({ error: 'Service non trouvé' });
     });
 }

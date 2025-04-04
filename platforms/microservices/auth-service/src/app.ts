@@ -59,6 +59,17 @@ app.use('/auth', userController.getRouter());
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
 
+// Gestion des erreurs
+app.use((req, res) =>
+{
+    res.status(404).json({
+        code: 404,
+        status: "Error",
+        message: "Route not found.",
+        data: null,
+    });
+});
+
 // We assign the port number 8080.
 const port = 4001;
 
@@ -66,3 +77,4 @@ const port = 4001;
 app.listen(port, () => {
     console.log(`App is listening on port ${port}`);
 });
+
