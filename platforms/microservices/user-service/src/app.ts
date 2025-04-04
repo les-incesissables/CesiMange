@@ -1,5 +1,5 @@
 //#region Imports
-import "reflect-metadata"
+import 'reflect-metadata';
 import express from 'express';
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -14,14 +14,29 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { CustomerProfileController } from "./controllers/customer_profiles/CustomerProfileController";
-import { CustomerProfileMetier } from "./metier/customer_profiles/CustomerProfileMetier";
+import { CustomerProfileController } from './controllers/customer_profiles/CustomerProfileController';
+import { CustomerProfileMetier } from './metier/customer_profiles/CustomerProfileMetier';
+
+import * as dotenv from 'dotenv';
+
+const isDocker = process.env.DOCKER_ENV === 'true';
+
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
+    dotenv.config({ path: '.env.development' });
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+    dotenv.config({ path: '.env.localhost' });
+} else if (process.env.NODE_ENV === 'staging') {
+    dotenv.config({ path: '.env.staging' });
+} else if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+}
 
 //#endregion
 
 // Cr�ation de l'application Express
 const app = express();
 
+console.log('test');
 /* app should use bodyParser. For this example we'll use json. bodyParser allows you to
 access the body of your request.
 */
@@ -39,17 +54,17 @@ app.use(
     }),
 );
 
-
 /**
  * Logging HTTP standard avec morgan
  * Format 'dev' ou 'combined' selon vos besoins
  */
 app.use(morgan('dev'));
 
+//const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
 const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-app.use('/api/user-profile', customerProfileController.getRouter());
+app.use('/api/user-profiles', customerProfileController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
