@@ -11,6 +11,20 @@ import morgan from 'morgan';
 import { RestaurantController } from './controllers/restaurants/RestaurantController';
 import { RestaurantMetier } from './metier/restaurants/RestaurantMetier';
 
+import * as dotenv from 'dotenv';
+
+const isDocker = process.env.DOCKER_ENV === 'true';
+
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
+    dotenv.config({ path: '.env.development' });
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+    dotenv.config({ path: '.env.localhost' });
+} else if (process.env.NODE_ENV === 'staging') {
+    dotenv.config({ path: '.env.staging' });
+} else if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+}
+
 //#endregion
 
 // Cr�ation de l'application Express
@@ -38,10 +52,14 @@ app.use(
  * Format 'dev' ou 'combined' selon vos besoins
  */
 app.use(morgan('dev'));
-const lRestaurantMetier: RestaurantMetier = new RestaurantMetier();
-const restaurantController = new RestaurantController(lRestaurantMetier);
 
-app.use('/api/restaurant', restaurantController.getRouter());
+console.log('Connecting to', process.env.CONNECTION_STRING);
+console.log('DB name is', process.env.MONGO_DB_NAME);
+console.log('Docker use : ', isDocker);
+
+const restaurantController = new RestaurantController(new RestaurantMetier());
+
+app.use('/api/restaurants', restaurantController.getRouter());
 
 // We assign the port number 8080.
 const port = 4003;
