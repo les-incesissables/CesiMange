@@ -9,10 +9,11 @@ interface HeaderProps {
     onLoginClick?: () => void;
     onCartClick?: () => void;
     onBellClick?: () => void;
+    OnClickableTextClick?: () => void;
     to: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ variant, onLoginClick, onCartClick, onBellClick, to }) => {
+const Header: React.FC<HeaderProps> = ({ variant, onLoginClick, onCartClick, onBellClick, OnClickableTextClick, to }) => {
     const [showPopup, setShowPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ variant, onLoginClick, onCartClick, onB
                     </a>
                     {/* Menu à droite */}
                     <div className="flex items-center gap-20">
-                        <ClickableText text="Devenir partenaire" />
+                        <ClickableText text="Devenir partenaire" onClick={OnClickableTextClick} />
                         <Button text="Se connecter" onClick={onLoginClick} />
                     </div>
                 </div>
@@ -47,12 +48,12 @@ const Header: React.FC<HeaderProps> = ({ variant, onLoginClick, onCartClick, onB
         );
     } else if (variant === 'client') {
         return (
-            <header className="sticky top-0 z-50 border-b border-black bg-yellow-400 px-4 py-2.5 sm:px-24">
+            <header className="sticky top-0 z-20 border-b border-black bg-yellow-400 px-4 py-2.5 sm:px-2">
                 <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between sm:flex-nowrap">
                     {/* Logo à gauche */}
                     <a href={to}>
                         <div className="relative w-24 flex-shrink-0 overflow-hidden sm:w-32">
-                            <img src="/CesiMange_transparant.png" alt="Logo" className="h-auto w-full object-contain" />
+                            <img src="/images/CesiMange_transparant.png" alt="Logo" className="h-auto w-full object-contain" />
                         </div>
                     </a>
 
@@ -62,24 +63,25 @@ const Header: React.FC<HeaderProps> = ({ variant, onLoginClick, onCartClick, onB
                     </div>
 
                     {/* Section droite */}
-                    <div className="mt-2 flex w-full items-center justify-between px-[5px] sm:mt-0 sm:w-52">
-                        <div className="flex items-end gap-2">
-                            <img src="/images/shopping-cart.svg" onClick={onCartClick} />
-                            <div data-size="Large" className="bg-Schemes-Error flex min-w-[1rem] items-center justify-center overflow-hidden rounded-full px-1">
-                                <div className="text-Schemes-On-Error text-center font-['Roboto'] text-xs leading-none font-medium tracking-wide">3</div>
-                            </div>
+                    <div className="mt-4 flex w-full items-center justify-center gap-4 sm:mt-0 sm:w-auto sm:justify-end">
+                        {/* Cart */}
+                        <div className="relative flex items-center gap-1">
+                            <img src="/images/shopping-cart.svg" onClick={onCartClick} className="h-6 w-6 cursor-pointer" />
+                            <div className="absolute -top-1 -right-2 rounded-full bg-red-500 px-1 text-xs text-white">5</div>
                         </div>
-                        <div className="flex items-end gap-2">
-                            <img src="/images/archive.svg" onClick={onBellClick} />
-                            <div data-size="Large" className="bg-Schemes-Error flex min-w-[1rem] items-center justify-center overflow-hidden rounded-full px-1">
-                                <div className="text-Schemes-On-Error text-center font-['Roboto'] text-xs leading-none font-medium tracking-wide">3</div>
-                            </div>
+
+                        {/* Bell */}
+                        <div className="relative flex items-center gap-1">
+                            <img src="/images/bell.svg" onClick={onBellClick} className="h-6 w-6 cursor-pointer" />
+                            <div className="absolute -top-1 -right-2 rounded-full bg-red-500 px-1 text-xs text-white">3</div>
                         </div>
-                        <div className="relative" ref={popupRef}>
+
+                        {/* Avatar */}
+                        <div className="relative">
                             <img
                                 src="https://placehold.co/69x73"
                                 alt="avatar"
-                                className="h-12 w-12 cursor-pointer rounded-full border border-black bg-zinc-300"
+                                className="h-10 w-10 cursor-pointer rounded-full border border-black"
                                 onClick={onLoginClick}
                             />
                         </div>

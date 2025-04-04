@@ -12,20 +12,22 @@ const SearchBar: React.FC<onClick> = ({ onClick, textButton, textInput }) => {
     const [searchText, setSearchText] = useState('');
 
     return (
-        <div className="mx-auto inline-flex h-12 w-full max-w-[700px] items-center justify-between rounded-[20px] bg-white p-2.5 outline outline-1 outline-offset-[-1px] outline-black/50">
-            <div className="flex flex-1 items-center justify-start gap-5">
-                <div data-size="48" className="relative h-7 w-7 overflow-hidden">
-                    <img src="/images/loupe.svg" />
+        <div className="mx-auto w-full max-w-[700px] px-4">
+            <div className="flex flex-col items-stretch gap-2 rounded-[20px] bg-white p-2.5 outline outline-1 outline-offset-[-1px] outline-black/50 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex w-full items-center gap-3">
+                    <img src="/images/loupe.svg" className="h-5 w-5 shrink-0" />
+                    <input
+                        type="text"
+                        placeholder={textInput}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        className="w-full bg-transparent font-['Inter'] text-xl text-black/50 outline-none"
+                    />
                 </div>
-                <input
-                    type="text"
-                    placeholder={textInput}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="flex-1 bg-transparent font-['Inter'] text-xl font-normal text-black/50 outline-none"
-                />
+                <div className="w-full sm:w-auto">
+                    <Button text={textButton} onClick={onClick} />
+                </div>
             </div>
-            <Button text={textButton} onClick={onClick} />
         </div>
     );
 };
