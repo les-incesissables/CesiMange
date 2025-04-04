@@ -1698,7 +1698,7 @@ csstype@^3.0.10, csstype@^3.0.2, csstype@^3.1.0:
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
-"customer-final-app@file:C:\\CesiMange\\apps\\customer-final\\front":
+"customer-final-app@file:C:\\Users\\yanni\\Documents\\2-Cesi\\Semestre 8\\Project\\CesiMange\\apps\\customer-final\\front":
   version "0.0.0"
   resolved "file:apps/customer-final/front"
   dependencies:
@@ -1711,13 +1711,13 @@ csstype@^3.0.10, csstype@^3.0.2, csstype@^3.1.0:
     react "^19.0.0"
     react-dom "^19.0.0"
 
-customer-final-middleware@*, "customer-final-middleware@file:C:\\CesiMange\\apps\\customer-final\\local-middleware":
+customer-final-middleware@*, "customer-final-middleware@file:C:\\Users\\yanni\\Documents\\2-Cesi\\Semestre 8\\Project\\CesiMange\\apps\\customer-final\\local-middleware":
   version "1.0.0"
   resolved "file:apps/customer-final/local-middleware"
   dependencies:
     customer-final-proxy "*"
 
-customer-final-proxy@*, "customer-final-proxy@file:C:\\CesiMange\\apps\\customer-final\\proxy":
+customer-final-proxy@*, "customer-final-proxy@file:C:\\Users\\yanni\\Documents\\2-Cesi\\Semestre 8\\Project\\CesiMange\\apps\\customer-final\\proxy":
   version "1.0.0"
   resolved "file:apps/customer-final/proxy"
   dependencies:
