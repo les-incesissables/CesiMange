@@ -3,7 +3,7 @@ services:
         build:
             context: .
             dockerfile: platforms/microservices/auth-service/Dockerfile.dev
-        container_name: auth-service-dev
+        container_name: auth-service
         ports:
             - '4001:4001'
         environment:
@@ -25,7 +25,7 @@ services:
         build:
             context: .
             dockerfile: platforms/microservices/user-service/Dockerfile.dev
-        container_name: user-service-dev
+        container_name: user-service
         ports:
             - '4002:4002'
         environment:
@@ -65,7 +65,7 @@ services:
         build:
             context: ./platforms/databases/mongodb/user-service
             dockerfile: Dockerfile.mongodb
-        container_name: db-mongodb-user-dev
+        container_name: db-mongodb-user
         ports:
             - '27018:27017'
         volumes:
@@ -78,7 +78,7 @@ services:
         build:
             context: ./platforms/databases/mongodb/restaurant-service
             dockerfile: Dockerfile.mongodb
-        container_name: db-mongodb-restaurant-dev
+        container_name: db-mongodb-restaurant
         ports:
             - '27019:27017'
         volumes:
@@ -91,15 +91,18 @@ services:
         build:
             context: ./platforms/databases/sqlserver/auth-service
             dockerfile: Dockerfile.mssql
-        container_name: db-mssql-auth-dev
+        container_name: db-mssql-auth
         ports:
             - '1433:1433'
+        environment:
+            - SA_PASSWORD="MyPass123!"
         volumes:
             - ./platforms/databases/sqlserver/auth-service/data:/var/opt/mssql/data
             - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
             - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
-            - ./platforms/databases/sqlserver/auth-service/seed:/init-sql # Montre le dossier seed
-            - ./platforms/databases/sqlserver/auth-service/entrypoint.sh:/entrypoint.sh # Optionnel si vous voulez toujours utiliser la dernière version
+            - ./platforms/databases/sqlserver/auth-service/seed:/init-sql
+            #- ./platforms/databases/sqlserver/auth-service/seed:/init-sql # Montre le dossier seed
+
         networks:
             - api_network
 

@@ -36,7 +36,6 @@ if (process.env.NODE_ENV === 'development' && isDocker === true) {
 // Cr�ation de l'application Express
 const app = express();
 
-console.log('test');
 /* app should use bodyParser. For this example we'll use json. bodyParser allows you to
 access the body of your request.
 */
@@ -59,6 +58,10 @@ app.use(
  * Format 'dev' ou 'combined' selon vos besoins
  */
 app.use(morgan('dev'));
+
+console.log('Connecting to', process.env.CONNECTION_STRING);
+console.log('DB name is', process.env.MONGO_DB_NAME);
+console.log('Docker use : ', isDocker);
 
 //const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
 const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
