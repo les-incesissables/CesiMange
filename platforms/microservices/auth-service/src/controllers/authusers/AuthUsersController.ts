@@ -38,6 +38,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         this.Router.post('/login', this.getItem);
         this.Router.post('/register', this.createItem);
         this.Router.post('/refresh-token', this.refreshToken);
+        this.Router.post('/verify-token', this.refreshToken);
 
         // Routes protégées pour admin uniquement
         this.Router.get('/admin',
@@ -68,6 +69,15 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         // Route pour la déconnexion
         this.Router.post('/logout', this.logout);
     }
+
+    /**
+     * Endpoint réservé aux administrateurs
+     */
+    private validateToken(req: Request, res: Response): void
+    {
+        res.status(200).json({ message: 'Accès admin accordé', user: req.user });
+    }
+
 
     /**
      * Endpoint réservé aux administrateurs

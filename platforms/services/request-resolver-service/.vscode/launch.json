@@ -4,11 +4,27 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": [ "<node_internals>/**" ],
-      "program": "${workspaceFolder}/app.js",
-      "cwd": "${workspaceFolder}",
-      "console": "externalTerminal"
+      "name": "Debug Application with Nodemon",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**",
+        "**/node_modules/nodemon/**"
+      ],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [ "run", "dev" ],
+      "outFiles": [
+        "${workspaceFolder}/dist/microservices/request-resolver-service/src/**/*.js"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "restart": true,
+      "console": "externalTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
