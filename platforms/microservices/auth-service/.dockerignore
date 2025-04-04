@@ -1,6 +1,6 @@
 # Exclure le dossier node_modules (les dépendances seront installées dans l'image)
 node_modules
-
+./node_modules
 # Exclure les fichiers de log
 *.log
 

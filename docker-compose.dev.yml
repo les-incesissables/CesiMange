@@ -15,6 +15,8 @@ services:
             - ./platforms/microservices/auth-service:/app/platforms/microservices/auth-service
             - ./platforms/services/base-classes:/app/platforms/services/base-classes
             - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+            # Volume anonyme pour préserver les node_modules du container
+            - /app/platforms/microservices/auth-service/node_modules
         networks:
             - api_network
         command: ['npm', 'run', 'dev']
@@ -96,6 +98,8 @@ services:
             - ./platforms/databases/sqlserver/auth-service/data:/var/opt/mssql/data
             - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
             - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
+            - ./platforms/databases/sqlserver/auth-service/seed:/init-sql # Montre le dossier seed
+            - ./platforms/databases/sqlserver/auth-service/entrypoint.sh:/entrypoint.sh # Optionnel si vous voulez toujours utiliser la dernière version
         networks:
             - api_network
 
