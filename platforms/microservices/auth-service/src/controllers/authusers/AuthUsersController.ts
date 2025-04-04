@@ -73,15 +73,6 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     /**
      * Endpoint réservé aux administrateurs
      */
-    private validateToken(req: Request, res: Response): void
-    {
-        res.status(200).json({ message: 'Accès admin accordé', user: req.user });
-    }
-
-
-    /**
-     * Endpoint réservé aux administrateurs
-     */
     private adminEndpoint(req: Request, res: Response): void
     {
         res.status(200).json({ message: 'Accès admin accordé', user: req.user });
