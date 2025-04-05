@@ -1,4 +1,4 @@
- // request-resolver-service/src/gateway.config.ts
+// request-resolver-service/src/gateway.config.ts
 
 import { IGatewayConfig } from "./interfaces/IGatewayConfig";
 
@@ -9,7 +9,7 @@ export function loadGatewayConfig(): IGatewayConfig
         services: [
             {
                 routeName: 'auth',
-                BaseUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:4001/auth',
+                BaseUrl: (process.env.AUTH_SERVICE_URL || 'http://localhost:4001') + '/auth',
                 enabled: true,
                 publicRoutes: [
                     {
@@ -43,7 +43,7 @@ export function loadGatewayConfig(): IGatewayConfig
             },
             {
                 routeName: 'user-profiles',
-                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/user-profiles',
+                BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4002') + '/user-profiles',
                 enabled: true,
                 publicRoutes: [
                     {
@@ -53,6 +53,10 @@ export function loadGatewayConfig(): IGatewayConfig
                     {
                         path: '/:id',
                         methods: ['GET']
+                    },
+                    {
+                        path: '/',
+                        methods: ['POST']
                     }
                 ],
                 protectedRoutes: [
@@ -68,7 +72,7 @@ export function loadGatewayConfig(): IGatewayConfig
             },
             {
                 routeName: 'restaurants',
-                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4003/restaurants',
+                BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4003') + '/restaurants',
                 enabled: true,
                 publicRoutes: [
                     {
