@@ -1,23 +1,13 @@
 //#region Imports
-import 'reflect-metadata';
-import express from 'express';
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-
 require('dotenv').config();
-
+import 'reflect-metadata';
+import express from 'express';
 import * as path from 'path';
-
-//import { OrderController } from './src/controllers/order/OrderController';
-//import { RestaurantController } from './src/controllers/restaurant/RestaurantController';
-//import { RestaurantMetier } from './src/metier/restaurant/RestaurantMetier';
-//import { OrderMetier } from './src/metier/order/OrderMetier';
-
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { AuthUsersController } from './controllers/authusers/AuthUsersController';
-import { AuthUsersMetier } from './metier/authusers/AuthUsersMetier';
 
 import * as dotenv from 'dotenv';
 
@@ -32,6 +22,9 @@ if (process.env.NODE_ENV === 'development' && isDocker === true) {
 } else if (process.env.NODE_ENV === 'production') {
     dotenv.config({ path: '.env.production' });
 }
+
+import { AuthUsersController } from './controllers/authusers/AuthUsersController';
+import { AuthUsersMetier } from './metier/authusers/AuthUsersMetier';
 
 //#endregion
 
@@ -49,13 +42,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
-app.use(
-    cors({
-        origin: '*', // ou liste d'origines autorisées, ex: ['http://localhost:3000']
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-    }),
-);
 
 /**
  * Logging HTTP standard avec morgan

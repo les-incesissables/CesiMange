@@ -1,4 +1,4 @@
-// request-resolver-service/src/gateway.config.ts
+ // request-resolver-service/src/gateway.config.ts
 
 import { IGatewayConfig } from "./interfaces/IGatewayConfig";
 
@@ -9,25 +9,25 @@ export function loadGatewayConfig(): IGatewayConfig
         services: [
             {
                 apiName: 'auth',
-                url: process.env.AUTH_SERVICE_URL || 'http://localhost:4001',
+                BaseUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:4001/auth',
                 enabled: true,
                 publicRoutes: [
                     {
-                        path: '/auth/login',
+                        path: '/login',
                         methods: ['POST']
                     },
                     {
-                        path: 'auth/register',
+                        path: '/register',
                         methods: ['POST']
                     },
                     {
-                        path: '/auth/refresh-token',
+                        path: '/refresh-token',
                         methods: ['POST']
                     }
                 ],
                 protectedRoutes: [
                     {
-                        path: '/auth/users/:userId',
+                        path: '/users/:userId',
                         methods: ['DELETE', 'PATCH'],
                         requiredPermissions: ['user:write'],
                         ownershipCheck: {
@@ -36,7 +36,7 @@ export function loadGatewayConfig(): IGatewayConfig
                         }
                     },
                     {
-                        path: '/auth/admin',
+                        path: '/admin',
                         methods: ['GET'],
                         allowedRoles: ['admin']
                     }
@@ -44,7 +44,7 @@ export function loadGatewayConfig(): IGatewayConfig
             },
             {
                 apiName: 'restaurant',
-                url: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/restaurant',
+                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/restaurant',
                 enabled: true
             }
         ]

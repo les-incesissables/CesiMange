@@ -1,15 +1,7 @@
-import { createProxyMiddleware, Options } from 'http-proxy-middleware';
+import { createProxyMiddleware, Options, fixRequestBody } from 'http-proxy-middleware';
 import { Router, Request, Response, NextFunction } from 'express';
 import { IGatewayConfig } from './interfaces/IGatewayConfig';
 import { IServiceDefinition } from './interfaces/IServiceDefinition';
-
-interface ProxyOptions extends Options
-{
-    pathRewrite: {
-        [key: string]: string;
-    };
-}
-
 export function setupProxies(router: Router, config: IGatewayConfig): void
 {
     if (!config?.services)
@@ -19,31 +11,29 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
 
     config.services.forEach((service: IServiceDefinition) =>
     {
-        if (!service.enabled || !service.url) return;
+        if (!service.enabled || !service.BaseUrl) return;
 
-        // Dans la fonction setupProxies
-        const lPathRewrite : any = {};
-        lPathRewrite[`^/${service.apiName}`] = service.url.endsWith(service.apiName) ? '' : '/';
-
-        const proxyOptions: ProxyOptions = {
-            target: service.url,
+        const proxyOptions: Options = {
+            target: service.BaseUrl,
             changeOrigin: true,
-            pathRewrite: {},
-            timeout: 30000 // Augmenter le timeout
+            pathRewrite: {
+                [`^/${service.apiName}`]: `/${service.apiName}` // Garde le préfixe
+            },
+            timeout: 10000,
+            on: {
+                proxyReq: fixRequestBody,
+            }
         };
 
-        // Configuration du proxy
         const proxy = createProxyMiddleware(proxyOptions);
 
-        // Ajouter des logs avant l'utilisation du middleware
+        // Middleware unique pour le logging et le proxy
         router.use(`/${service.apiName}`, (req: Request, res: Response, next: NextFunction) =>
         {
-            console.log(`[Proxy] Requête entrante: ${req.method} ${req.originalUrl} -> ${service.url}`);
+            console.log(`[Proxy] Requête entrante: ${req.method} ${req.originalUrl} -> ${service.BaseUrl}${req.path}`);
 
-            // Sauvegarder le temps de début pour calculer la durée
             const startTime = Date.now();
 
-            // Intercepter la fin de la réponse pour logger
             const originalEnd = res.end;
             res.end = function (this: Response): Response
             {
@@ -51,11 +41,10 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
                 console.log(`[Proxy] Réponse: ${res.statusCode}, durée: ${duration}ms`);
                 return originalEnd.apply(this);
             };
+            proxy(req, res, next);
+        });
 
-            next();
-        }, proxy);
-
-        console.log(`Proxy configuré: /${service.apiName}/* -> ${service.url}`);
+        console.log(`Proxy configuré: /${service.apiName}/* -> ${service.BaseUrl}`);
     });
 
     // Middleware pour les erreurs de proxy

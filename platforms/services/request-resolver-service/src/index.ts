@@ -1,29 +1,26 @@
+require('dotenv').config();
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 import express from "express";
-import dotenv from "dotenv";
 import { loadGatewayConfig } from "./resolver.config";
 import { setupProxies } from "./proxySetup";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
+
 import { securityMiddleware } from "./middlewares/security.middleware";
 import { requestLogger } from "./middlewares/requestLogger.middleware";
 
-dotenv.config();
-
 const config = loadGatewayConfig();
 const app = express();
-app.use(bodyParser.json({ limit: '10mb' })); // Augmente la limite si nécessaire
-app.use(bodyParser.urlencoded({ extended: true }));
+/* app should use bodyParser. For this example we'll use json. bodyParser allows you to
+access the body of your request.
+*/
+app.use(bodyParser.json({ extended: true }));
+// cm - Utilisation du cookieParser
 app.use(cookieParser());
 // Middlewares de sécurité et parsing
 app.use(helmet());
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 app.use(morgan('dev'));
 
@@ -35,17 +32,6 @@ app.use(...securityMiddleware());
 
 // Configuration des proxys
 setupProxies(app, config);
-
-// Gestion des erreurs
-app.use((req, res) =>
-{
-    res.status(404).json({
-        code: 404,
-        status: "Error",
-        message: "Route not found.",
-        data: null,
-    });
-});
 
 app.listen(config.port, () =>
 {
