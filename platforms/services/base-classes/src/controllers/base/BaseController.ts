@@ -179,7 +179,7 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            let lCritere = req.body as CritereDTO;
+            let lCritere = req.params as unknown as CritereDTO;
 
             // Validation des données
             try

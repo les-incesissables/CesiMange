@@ -17,9 +17,7 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
         const proxyOptions: Options = {
             target: service.BaseUrl,
             changeOrigin: true,
-            pathRewrite: {
-                [`^/${service.apiName}`]: `/${service.apiName}` // Garde le préfixe
-            },
+            pathRewrite: {},
             timeout: 10000,
             on: {
                 proxyReq: fixRequestBody,

@@ -259,7 +259,7 @@ function generateEntityContent(className, tableName, schema) {
                 content += `)\n`;
             }
             // G�n�rer la propri�t� avec | undefined
-            content += `    ${camelCaseName}!: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
+            content += `    ${camelCaseName}?: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
         }
     });
     content += `}\n`;
@@ -268,11 +268,12 @@ function generateEntityContent(className, tableName, schema) {
 // Fonction pour g�n�rer le contenu du fichier CritereDTO
 function generateCritereDTOContent(className, schema) {
     let content = `import { ObjectLiteral } from "typeorm";\n`;
+    content += `import { BaseCritereDTO } from "../../../../../../services/data-access-layer/src/models/base/BaseCritereDTO";\n\n`;
     content += `/**\n`;
     content += ` * CritereDTO pour la recherche d'entit�s SQL Server ${className}\n`;
     content += ` * @author DTO Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
-    content += `export class ${className}CritereDTO implements ObjectLiteral\n{\n`;
+    content += `export class ${className}CritereDTO extends BaseCritereDTO implements ObjectLiteral\n{\n`;
     // Ajouter les propri�t�s pour la recherche
     schema.columns.forEach(column => {
         if (!config.excludedFields.includes(column.name)) {
@@ -318,7 +319,7 @@ function generateMetierContent(className, schema) {
     content += ` */\n`;
     content += `export class ${className}Metier extends BaseMetier<${className}, ${className}CritereDTO> {\n`;
     content += `    constructor() {\n`;
-    content += `        super('${className}',${className});\n`;
+    content += `        super('${className}', ${className});\n`;
     content += `    }\n`;
     content += `}\n`;
     return content;

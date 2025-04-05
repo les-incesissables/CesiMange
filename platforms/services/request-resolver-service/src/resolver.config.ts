@@ -27,11 +27,10 @@ export function loadGatewayConfig(): IGatewayConfig
                 ],
                 protectedRoutes: [
                     {
-                        path: '/users/:userId',
-                        methods: ['DELETE', 'PATCH'],
-                        requiredPermissions: ['user:write'],
+                        path: '/:id',
+                        methods: ['DELETE'],
                         ownershipCheck: {
-                            paramName: 'userId',
+                            paramName: 'id',
                             matchField: 'sub'
                         }
                     },

@@ -324,4 +324,20 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     }
 
     //#endregion
+
+    //#region DeleteItem
+    /**
+     * Surchage de la validation du login/GetItem
+     * @param pAuthUsers
+     */
+    public override async validateDeleteItem(pAuthUsers: AuthUsers): Promise<void>
+    {
+        // Validation des champs
+        if (!pAuthUsers.id)
+        {
+            throw new Error('lidentifiant est requis pour la suppression');
+        }
+    }
+
+    //#endregion
 }
