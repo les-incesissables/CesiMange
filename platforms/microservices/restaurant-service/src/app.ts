@@ -59,7 +59,7 @@ console.log('Docker use : ', isDocker);
 
 const restaurantController = new RestaurantController(new RestaurantMetier());
 
-app.use('/api/restaurants', restaurantController.getRouter());
+app.use('/restaurants', restaurantController.getRouter());
 
 // We assign the port number 8080.
 const port = 4003;

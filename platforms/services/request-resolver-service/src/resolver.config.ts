@@ -42,9 +42,34 @@ export function loadGatewayConfig(): IGatewayConfig
                 ]
             },
             {
-                apiName: 'restaurant',
-                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/restaurant',
-                enabled: true
+                apiName: 'restaurants',
+                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4003/restaurants',
+                enabled: true,
+                publicRoutes: [
+                    {
+                        path: '/',
+                        methods: ['GET']
+                    },
+                    {
+                        path: '/:id',
+                        methods: ['GET']
+                    }
+                ],
+                protectedRoutes: [
+                    {
+                        path: '/:id',
+                        methods: ['DELETE'],
+                        ownershipCheck: {
+                            paramName: 'id',
+                            matchField: 'sub'
+                        }
+                    },
+                    {
+                        path: '/admin',
+                        methods: ['GET'],
+                        allowedRoles: ['admin']
+                    }
+                ]
             }
         ]
     };
