@@ -146,7 +146,4 @@ export function checkAccess(service: IServiceDefinition)
 
         return { match: true, params };
     }
-
-
-
 }
