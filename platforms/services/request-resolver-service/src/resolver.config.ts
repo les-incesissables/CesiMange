@@ -103,6 +103,11 @@ export function loadGatewayConfig(): IGatewayConfig
                         allowedRoles: ['admin']
                     }
                 ]
+            },
+            {
+                routeName: 'orders',
+                BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4004') + '/orders',
+                enabled: true
             }
         ]
     };
