@@ -18,13 +18,14 @@ const serviceConfigs = [
         outputDir: '../../microservices/restaurant-service/src/models/',
         metierDir: '../../microservices/restaurant-service/src/metier/',
         controllerDir: '../../microservices/restaurant-service/src/controllers/'
+    },
+    {
+        serviceName: 'order-service',
+        collections: ['orders'],
+        outputDir: '../../microservices/order-service/src/models/',
+        metierDir: '../../microservices/order-service/src/metier/',
+        controllerDir: '../../microservices/order-service/src/controllers/'
     }
-    //{
-    //    serviceName: 'order-service',
-    //    collections: ['order', 'commercial'],
-    //    outputDir: '../order-service/src/models/',
-    //    metierDir: '../order-service/src/metier/'
-    //},
     //{
     //    serviceName: 'delivery-service',
     //    collections: ['deliverie'],
@@ -62,7 +63,8 @@ const folders = {
 };
 
 // Types et interfaces pour l'analyse
-interface FieldInfo {
+interface FieldInfo
+{
     type: string;
     mongooseType: string;
     isRequired: boolean;
@@ -72,37 +74,48 @@ interface FieldInfo {
     nestedSchema?: CollectionSchema;
 }
 
-interface CollectionSchema {
+interface CollectionSchema
+{
     [fieldName: string]: FieldInfo;
 }
 
 // Fonction pour s'assurer qu'un répertoire existe
-function ensureDirectoryExists(dirPath: string): void {
-    if (!fs.existsSync(dirPath)) {
+function ensureDirectoryExists(dirPath: string): void
+{
+    if (!fs.existsSync(dirPath))
+    {
         fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
 // Fonction pour nettoyer un répertoire tout en préservant certains dossiers
-function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void {
-    if (fs.existsSync(dirPath)) {
-        fs.readdirSync(dirPath).forEach(file => {
+function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void
+{
+    if (fs.existsSync(dirPath))
+    {
+        fs.readdirSync(dirPath).forEach(file =>
+        {
             const currentPath = path.join(dirPath, file);
 
             // Si c'est un dossier à préserver, on le garde
-            if (fs.lstatSync(currentPath).isDirectory() && preserveFolders.includes(file)) {
+            if (fs.lstatSync(currentPath).isDirectory() && preserveFolders.includes(file))
+            {
                 console.log(`  Dossier préservé: ${file}`);
                 return;
             }
 
-            if (fs.lstatSync(currentPath).isDirectory()) {
+            if (fs.lstatSync(currentPath).isDirectory())
+            {
                 cleanDirectory(currentPath, preserveFolders);
-                try {
+                try
+                {
                     fs.rmdirSync(currentPath);
-                } catch (err) {
+                } catch (err)
+                {
                     console.warn(`  Impossible de supprimer le dossier ${currentPath}: ${err}`);
                 }
-            } else {
+            } else
+            {
                 fs.unlinkSync(currentPath);
             }
         });
@@ -110,7 +123,8 @@ function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void {
 }
 
 // Fonction pour convertir le nom d'une collection ou d'un champ en nom de classe (PascalCase)
-function toPascalCase(name: string): string {
+function toPascalCase(name: string): string
+{
     // Convertir en PascalCase
     return name
         .split(/[-_]/)
@@ -119,18 +133,22 @@ function toPascalCase(name: string): string {
 }
 
 // Fonction pour convertir le nom d'une collection en nom de classe (PascalCase)
-function collectionNameToClassName(name: string): string {
+function collectionNameToClassName(name: string): string
+{
     // Enlever le "s" final pour les pluriels
     const singularName = name.endsWith('s') ? name.slice(0, -1) : name;
     return toPascalCase(singularName);
 }
 
 // Fonction pour analyser les objets imbriqués
-function analyzeNestedObject(obj: any): CollectionSchema {
+function analyzeNestedObject(obj: any): CollectionSchema
+{
     const nestedSchema: CollectionSchema = {};
 
-    Object.keys(obj).forEach(field => {
-        if (!config.excludedFields.includes(field)) {
+    Object.keys(obj).forEach(field =>
+    {
+        if (!config.excludedFields.includes(field))
+        {
             const typeInfo = getMongooseType(obj[field], field);
             nestedSchema[field] = {
                 ...typeInfo,
@@ -143,21 +161,26 @@ function analyzeNestedObject(obj: any): CollectionSchema {
 }
 
 // Fonction pour déterminer le type Mongoose à partir d'une valeur
-function getMongooseType(value: any, pField?: string): { type: string; mongooseType: string; isArray: boolean; ref?: string; isNestedObject?: boolean; nestedSchema?: CollectionSchema } {
-    if (value === null || value === undefined) {
+function getMongooseType(value: any, pField?: string): { type: string; mongooseType: string; isArray: boolean; ref?: string; isNestedObject?: boolean; nestedSchema?: CollectionSchema }
+{
+    if (value === null || value === undefined)
+    {
         return { type: 'any', mongooseType: 'Schema.Types.Mixed', isArray: false };
     }
 
-    if (Array.isArray(value)) {
-        if (value.length === 0) {
+    if (Array.isArray(value))
+    {
+        if (value.length === 0)
+        {
             return { type: 'any[]', mongooseType: '[Schema.Types.Mixed]', isArray: true };
         }
 
         // Si le premier élément du tableau est un objet (autre que Date ou ObjectId), il pourrait être un objet imbriqué
-        if (typeof value[0] === 'object' && value[0] !== null && !(value[0] instanceof Date) && !mongoose.Types.ObjectId.isValid(value[0])) {
+        if (typeof value[0] === 'object' && value[0] !== null && !(value[0] instanceof Date) && !mongoose.Types.ObjectId.isValid(value[0]))
+        {
             const nestedSchema = analyzeNestedObject(value[0]);
             return {
-                type: `I${toPascalCase(Object.keys(nestedSchema)[0] || 'NestedItem')}[]`,
+                type: `I${toPascalCase(pField || 'NestedItem')}[]`,
                 mongooseType: '[new Schema({...})]',
                 isArray: true,
                 isNestedObject: true,
@@ -174,11 +197,13 @@ function getMongooseType(value: any, pField?: string): { type: string; mongooseT
         };
     }
 
-    if (value instanceof Date) {
+    if (value instanceof Date)
+    {
         return { type: 'Date', mongooseType: 'Date', isArray: false };
     }
 
-    if (mongoose.Types.ObjectId.isValid(value) && typeof value !== 'number') {
+    if (mongoose.Types.ObjectId.isValid(value) && typeof value !== 'number')
+    {
         return {
             type: 'string',
             mongooseType: 'Schema.Types.ObjectId',
@@ -187,11 +212,13 @@ function getMongooseType(value: any, pField?: string): { type: string; mongooseT
         };
     }
 
-    switch (typeof value) {
+    switch (typeof value)
+    {
         case 'string':
             return { type: 'string', mongooseType: 'String', isArray: false };
         case 'number':
-            if (Number.isInteger(value)) {
+            if (Number.isInteger(value))
+            {
                 return { type: 'number', mongooseType: 'Number', isArray: false };
             }
             return { type: 'number', mongooseType: 'Number', isArray: false };
@@ -218,10 +245,12 @@ function getMongooseType(value: any, pField?: string): { type: string; mongooseT
 async function analyzeCollection(collectionName: string): Promise<{
     mainSchema: CollectionSchema;
     nestedSchemas: Map<string, CollectionSchema>;
-}> {
+}>
+{
     // S'assurer que db est défini
     const connection = mongoose.connection;
-    if (!connection.db) {
+    if (!connection.db)
+    {
         throw new Error('La connexion à la base de données n\'est pas établie');
     }
 
@@ -231,7 +260,8 @@ async function analyzeCollection(collectionName: string): Promise<{
     // Récupérer un échantillon de documents
     const sampleDocs = await collection.find({}).limit(config.sampleSize).toArray();
 
-    if (sampleDocs.length === 0) {
+    if (sampleDocs.length === 0)
+    {
         console.log(`  La collection ${collectionName} est vide.`);
         return { mainSchema: {}, nestedSchemas: new Map() };
     }
@@ -241,10 +271,14 @@ async function analyzeCollection(collectionName: string): Promise<{
     const requiredFields = new Set<string>();
 
     // Première passe: identifier tous les champs possibles
-    sampleDocs.forEach(doc => {
-        Object.keys(doc).forEach(field => {
-            if (!config.excludedFields.includes(field)) {
-                if (!mainSchema[field]) {
+    sampleDocs.forEach(doc =>
+    {
+        Object.keys(doc).forEach(field =>
+        {
+            if (!config.excludedFields.includes(field))
+            {
+                if (!mainSchema[field])
+                {
                     const typeInfo = getMongooseType(doc[field], field);
                     mainSchema[field] = {
                         ...typeInfo,
@@ -253,24 +287,21 @@ async function analyzeCollection(collectionName: string): Promise<{
                     requiredFields.add(field);
 
                     // Si c'est un objet imbriqué, ajouter son schéma à la liste des schémas imbriqués
-                    if (typeInfo.isNestedObject && typeInfo.nestedSchema) {
+                    if (typeInfo.isNestedObject && typeInfo.nestedSchema)
+                    {
                         let nestedName: string;
-                        if (typeInfo.isArray) {
-                            nestedName = `I${toPascalCase(field)}Item`;
-                        } else {
-                            nestedName = `I${toPascalCase(field)}`;
-                        }
+                        nestedName = `I${toPascalCase(field)}`;
                         nestedSchemas.set(nestedName, typeInfo.nestedSchema);
 
                         // Vérifier si l'objet imbriqué contient lui-même des objets imbriqués
-                        for (const [nestedField, nestedFieldInfo] of Object.entries(typeInfo.nestedSchema)) {
-                            if (nestedFieldInfo.isNestedObject && nestedFieldInfo.nestedSchema) {
+                        for (const [nestedField, nestedFieldInfo] of Object.entries(typeInfo.nestedSchema))
+                        {
+                            if (nestedFieldInfo.isNestedObject && nestedFieldInfo.nestedSchema)
+                            {
                                 let deepNestedName: string;
-                                if (nestedFieldInfo.isArray) {
-                                    deepNestedName = `I${toPascalCase(nestedField)}Item`;
-                                } else {
-                                    deepNestedName = `I${toPascalCase(nestedField)}`;
-                                }
+
+                                deepNestedName = `I${toPascalCase(nestedField)}`;
+
                                 nestedSchemas.set(deepNestedName, nestedFieldInfo.nestedSchema);
                             }
                         }
@@ -281,18 +312,22 @@ async function analyzeCollection(collectionName: string): Promise<{
     });
 
     // Deuxième passe: vérifier quels champs sont réellement requis
-    sampleDocs.forEach(doc => {
+    sampleDocs.forEach(doc =>
+    {
         const docFields = new Set(Object.keys(doc));
 
-        requiredFields.forEach(field => {
-            if (!docFields.has(field)) {
+        requiredFields.forEach(field =>
+        {
+            if (!docFields.has(field))
+            {
                 requiredFields.delete(field);
             }
         });
     });
 
     // Mettre à jour l'information de requis
-    Object.keys(mainSchema).forEach(field => {
+    Object.keys(mainSchema).forEach(field =>
+    {
         mainSchema[field].isRequired = requiredFields.has(field);
     });
 
@@ -300,34 +335,41 @@ async function analyzeCollection(collectionName: string): Promise<{
 }
 
 // Fonction pour générer le contenu du fichier d'interface
-function generateInterfaceContent(className: string, schema: CollectionSchema, isNested: boolean = false): string {
+function generateInterfaceContent(className: string, schema: CollectionSchema, isNested: boolean = false): string
+{
     const interfaceName = `I${className}`;
 
     let content = isNested ? '' : `import { Document } from 'mongoose';\n\n`;
 
     // Ajouter les importations pour les interfaces imbriquées si nécessaire
     const neededImports = new Set<string>();
-    Object.values(schema).forEach(fieldInfo => {
-        if (fieldInfo.isNestedObject) {
+    Object.values(schema).forEach(fieldInfo =>
+    {
+        if (fieldInfo.isNestedObject)
+        {
             const nestedType = fieldInfo.isArray
                 ? fieldInfo.type.replace('[]', '')
                 : fieldInfo.type;
 
-            if (!isNested) {
+            if (!isNested)
+            {
                 neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
             }
         }
     });
 
-    if (neededImports.size > 0) {
+    if (neededImports.size > 0)
+    {
         content += Array.from(neededImports).join('');
         content += '\n';
     }
 
     content += `export interface ${interfaceName}${isNested ? '' : ' extends Document'} {\n`;
 
-    Object.keys(schema).forEach(field => {
-        if (field !== '_id' || isNested) {
+    Object.keys(schema).forEach(field =>
+    {
+        if (field !== '_id' || isNested)
+        {
             const { type, isRequired } = schema[field];
             content += `  ${field}${isRequired ? '' : '?'}: ${type};\n`;
         }
@@ -339,23 +381,27 @@ function generateInterfaceContent(className: string, schema: CollectionSchema, i
 }
 
 // Fonction pour initialiser les dossiers d'un service
-function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void {
+function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
+{
     const { outputDir, metierDir } = serviceConfig;
 
     // Initialiser le dossier des modèles
-    if (config.cleanOutputDir && fs.existsSync(outputDir)) {
+    if (config.cleanOutputDir && fs.existsSync(outputDir))
+    {
         cleanDirectory(outputDir, config.protectedFolders);
         console.log(`Répertoire nettoyé: ${outputDir}`);
     }
     ensureDirectoryExists(outputDir);
 
     // Créer les sous-répertoires pour les modèles
-    for (const folder of Object.values(folders)) {
+    for (const folder of Object.values(folders))
+    {
         ensureDirectoryExists(path.join(outputDir, folder));
     }
 
     // Initialiser le dossier métier
-    if (fs.existsSync(metierDir)) {
+    if (fs.existsSync(metierDir))
+    {
         // Nettoyer en préservant le dossier base
         cleanDirectory(metierDir, config.protectedFolders);
         console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
@@ -366,7 +412,8 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
 }
 
 // Fonction pour générer le contenu du fichier contrôleur
-function generateControllerContent(className: string, collectionName: string): string {
+function generateControllerContent(className: string, collectionName: string): string
+{
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
@@ -382,7 +429,8 @@ function generateControllerContent(className: string, collectionName: string): s
 }
 
 // Fonction pour générer le contenu du fichier métier mis à jour
-function generateMetierContent(className: string, collectionName: string): string {
+function generateMetierContent(className: string, collectionName: string): string
+{
     const interfaceName = `I${className}`;
 
     let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
@@ -401,9 +449,11 @@ function generateMetierContent(className: string, collectionName: string): strin
 }
 
 // Fonction pour initialiser le dossier des contrôleurs d'un service
-function initializeControllerFolder(controllerDir: string): void {
+function initializeControllerFolder(controllerDir: string): void
+{
     // Initialiser le dossier des contrôleurs
-    if (fs.existsSync(controllerDir)) {
+    if (fs.existsSync(controllerDir))
+    {
         // Nettoyer en préservant le dossier base
         cleanDirectory(controllerDir, config.protectedFolders);
         console.log(`Répertoire des contrôleurs nettoyé: ${controllerDir} (en préservant ${config.protectedFolders.join(', ')})`);
@@ -416,9 +466,11 @@ function initializeControllerFolder(controllerDir: string): void {
 }
 
 // Fonction pour initialiser les dossiers métier d'un service
-function initializeMetierFolder(metierDir: string): void {
+function initializeMetierFolder(metierDir: string): void
+{
     // Initialiser le dossier métier
-    if (fs.existsSync(metierDir)) {
+    if (fs.existsSync(metierDir))
+    {
         // Nettoyer en préservant le dossier base
         cleanDirectory(metierDir, config.protectedFolders);
         console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
@@ -431,8 +483,10 @@ function initializeMetierFolder(metierDir: string): void {
 }
 
 // Fonction principale modifiée pour gérer les objets imbriqués
-async function generateModels(): Promise<void> {
-    try {
+async function generateModels(): Promise<void>
+{
+    try
+    {
         console.log('Démarrage de la génération des modèles, métiers et contrôleurs...');
 
         // Connexion à MongoDB avec Mongoose
@@ -440,7 +494,8 @@ async function generateModels(): Promise<void> {
         console.log('Connecté à MongoDB avec Mongoose');
 
         // Vérifier que la connexion est établie
-        if (!mongoose.connection.db) {
+        if (!mongoose.connection.db)
+        {
             throw new Error('La connexion à la base de données n\'est pas établie');
         }
 
@@ -454,14 +509,16 @@ async function generateModels(): Promise<void> {
         console.log(`${allCollections.length} collections trouvées après filtrage initial.`);
 
         // Pour chaque service configuré
-        for (const serviceConfig of serviceConfigs) {
+        for (const serviceConfig of serviceConfigs)
+        {
             console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
 
             // Initialiser les dossiers pour ce service
             initializeServiceFolders(serviceConfig);
 
             // Initialiser le dossier des contrôleurs si spécifié
-            if (serviceConfig.controllerDir) {
+            if (serviceConfig.controllerDir)
+            {
                 initializeControllerFolder(serviceConfig.controllerDir);
             }
 
@@ -476,17 +533,20 @@ async function generateModels(): Promise<void> {
             console.log(`${serviceCollections.length} collections associées à ce service.`);
 
             // Traiter chaque collection pour ce service
-            for (const collectionName of serviceCollections) {
+            for (const collectionName of serviceCollections)
+            {
                 console.log(`Analyse de la collection: ${collectionName}`);
 
                 const { mainSchema, nestedSchemas } = await analyzeCollection(collectionName);
 
-                if (Object.keys(mainSchema).length > 0) {
+                if (Object.keys(mainSchema).length > 0)
+                {
                     const className = collectionNameToClassName(collectionName);
                     const interfaceName = `I${className}`;
 
                     // Générer les interfaces pour les objets imbriqués d'abord
-                    for (const [nestedName, nestedSchema] of nestedSchemas) {
+                    for (const [nestedName, nestedSchema] of nestedSchemas)
+                    {
                         const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
                         const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
                         const nestedInterfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${nestedName}.ts`);
@@ -511,7 +571,8 @@ async function generateModels(): Promise<void> {
                     console.log(`  Métier généré: ${metierFilePath}`);
 
                     // Générer le fichier contrôleur si le dossier est spécifié
-                    if (serviceConfig.controllerDir) {
+                    if (serviceConfig.controllerDir)
+                    {
                         // Créer le dossier contrôleur pour cette entité
                         const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
                         ensureDirectoryExists(controllerEntityDir);
@@ -521,7 +582,8 @@ async function generateModels(): Promise<void> {
                         fs.writeFileSync(controllerFilePath, controllerContent);
                         console.log(`  Contrôleur généré: ${controllerFilePath}`);
                     }
-                } else {
+                } else
+                {
                     console.log(`  Aucun modèle généré pour ${collectionName} (collection vide ou structure non détectée).`);
                 }
             }
@@ -529,9 +591,11 @@ async function generateModels(): Promise<void> {
 
         console.log('\nGénération des modèles, métiers et contrôleurs terminée avec succès pour tous les services!');
 
-    } catch (error) {
+    } catch (error)
+    {
         console.error('Erreur lors de la génération des modèles, métiers et contrôleurs:', error);
-    } finally {
+    } finally
+    {
         // Fermer la connexion Mongoose
         await mongoose.disconnect();
         console.log('Déconnecté de MongoDB');

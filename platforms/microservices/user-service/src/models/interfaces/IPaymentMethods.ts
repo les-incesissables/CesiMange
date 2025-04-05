@@ -1,4 +1,4 @@
-export interface IPaymentMethodsItem {
+export interface IPaymentMethods {
   provider: string;
   last_four: string;
   expiry_date: string;

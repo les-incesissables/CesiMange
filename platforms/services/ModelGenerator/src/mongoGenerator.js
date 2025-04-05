@@ -64,13 +64,14 @@ const serviceConfigs = [
         outputDir: '../../microservices/restaurant-service/src/models/',
         metierDir: '../../microservices/restaurant-service/src/metier/',
         controllerDir: '../../microservices/restaurant-service/src/controllers/'
+    },
+    {
+        serviceName: 'order-service',
+        collections: ['orders'],
+        outputDir: '../../microservices/order-service/src/models/',
+        metierDir: '../../microservices/order-service/src/metier/',
+        controllerDir: '../../microservices/order-service/src/controllers/'
     }
-    //{
-    //    serviceName: 'order-service',
-    //    collections: ['order', 'commercial'],
-    //    outputDir: '../order-service/src/models/',
-    //    metierDir: '../order-service/src/metier/'
-    //},
     //{
     //    serviceName: 'delivery-service',
     //    collections: ['deliverie'],
@@ -174,7 +175,7 @@ function getMongooseType(value, pField) {
         if (typeof value[0] === 'object' && value[0] !== null && !(value[0] instanceof Date) && !mongoose_1.default.Types.ObjectId.isValid(value[0])) {
             const nestedSchema = analyzeNestedObject(value[0]);
             return {
-                type: `I${toPascalCase(Object.keys(nestedSchema)[0] || 'NestedItem')}[]`,
+                type: `I${toPascalCase(pField || 'NestedItem')}[]`,
                 mongooseType: '[new Schema({...})]',
                 isArray: true,
                 isNestedObject: true,
@@ -256,23 +257,13 @@ function analyzeCollection(collectionName) {
                         // Si c'est un objet imbriqu�, ajouter son sch�ma � la liste des sch�mas imbriqu�s
                         if (typeInfo.isNestedObject && typeInfo.nestedSchema) {
                             let nestedName;
-                            if (typeInfo.isArray) {
-                                nestedName = `I${toPascalCase(field)}Item`;
-                            }
-                            else {
-                                nestedName = `I${toPascalCase(field)}`;
-                            }
+                            nestedName = `I${toPascalCase(field)}`;
                             nestedSchemas.set(nestedName, typeInfo.nestedSchema);
                             // V�rifier si l'objet imbriqu� contient lui-m�me des objets imbriqu�s
                             for (const [nestedField, nestedFieldInfo] of Object.entries(typeInfo.nestedSchema)) {
                                 if (nestedFieldInfo.isNestedObject && nestedFieldInfo.nestedSchema) {
                                     let deepNestedName;
-                                    if (nestedFieldInfo.isArray) {
-                                        deepNestedName = `I${toPascalCase(nestedField)}Item`;
-                                    }
-                                    else {
-                                        deepNestedName = `I${toPascalCase(nestedField)}`;
-                                    }
+                                    deepNestedName = `I${toPascalCase(nestedField)}`;
                                     nestedSchemas.set(deepNestedName, nestedFieldInfo.nestedSchema);
                                 }
                             }

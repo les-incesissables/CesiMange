@@ -4,7 +4,7 @@ import { BaseMetier } from "../../../../../services/base-classes/src/metier/base
 
 /**
  * M�tier pour l'entit� CustomerProfile
- * @Author ModelGenerator - 2025-04-05T14:38:47.917Z - Cr�ation
+ * @Author ModelGenerator - 2025-04-05T16:28:44.443Z - Cr�ation
  */
 export class CustomerProfileMetier extends BaseMetier<ICustomerProfile, Partial<ICustomerProfile>> {
     constructor() {
