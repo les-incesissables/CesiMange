@@ -385,22 +385,17 @@ export class MongoDBRepository<DTO extends Document, CritereDTO> extends Abstrac
         }
 
         // Parcourir tous les crit�res
-        for (const [key, value] of Object.entries(criteriaObj))
-        {
+        for (const [key, value] of Object.entries(criteriaObj)) {
             // Ignorer les champs de pagination et les valeurs vides
-            if (skipFields.includes(key) || value === undefined || value === null || value === '')
-            {
+            if (skipFields.includes(key) || value === undefined || value === null || value === '') {
                 continue;
             }
 
             // Gestion des IDs
-            if (key.toLowerCase() === 'id' || key === 'Id' || key === '_id')
-            {
-                try
-                {
+            if (key.toLowerCase() === 'id' || key === 'Id' || key === '_id') {
+                try {
                     filter._id = this.convertToObjectId(value as string);
-                } catch (error)
-                {
+                } catch (error) {
                     // Si l'ID n'est pas un ObjectId valide, on l'utilise tel quel
                     filter._id = value;
                 }
@@ -408,20 +403,23 @@ export class MongoDBRepository<DTO extends Document, CritereDTO> extends Abstrac
             }
 
             // Gestion des recherches "LIKE"
-            if (key.endsWith('Like') && typeof value === 'string')
-            {
-                const fieldName = key.replace(/Like$/, '');
-                filter[fieldName] = { $regex: this.escapeRegex(value), $options: 'i' };
+            if (key.endsWith('Like') && typeof value === 'string') {
+                const fieldName = key.replace(/Like$/, ''); // Ex: location.cityLike -> location.city
+                if (fieldName.includes('.')) {
+                    // Si l'objet imbriqué (comme location.city) est trouvé, utiliser la notation pointée
+                    filter[fieldName] = { $regex: this.escapeRegex(value), $options: 'i' };
+                } else {
+                    // Cas normal de LIKE pour des champs non imbriqués
+                    filter[fieldName] = { $regex: this.escapeRegex(value), $options: 'i' };
+                }
                 continue;
             }
 
-            // Gestion des op�rateurs de comparaison (ex: age__gt, price__lte)
-            if (key.includes('__'))
-            {
+            // Gestion des opérateurs de comparaison (ex: age__gt, price__lte)
+            if (key.includes('__')) {
                 const [fieldName, operator] = key.split('__');
 
-                switch (operator)
-                {
+                switch (operator) {
                     case 'gt':
                         filter[fieldName] = { $gt: value };
                         break;
@@ -450,32 +448,34 @@ export class MongoDBRepository<DTO extends Document, CritereDTO> extends Abstrac
                         filter[fieldName] = { $exists: Boolean(value) };
                         break;
                     default:
-                        // Op�rateur inconnu, on utilise comme champ normal
+                        // Opérateur inconnu, on utilise comme champ normal
                         filter[key] = value;
                 }
                 continue;
             }
 
             // Gestion des tableaux
-            if (Array.isArray(value))
-            {
+            if (Array.isArray(value)) {
                 filter[key] = { $in: value };
                 continue;
             }
 
-            // Gestion des objets (crit�res imbriqu�s)
+            // Gestion des objets (critères imbriqués)
             if (typeof value === 'object' && !Array.isArray(value) && value !== null && !(value instanceof Date)) {
                 // Si l'objet imbriqué contient des sous-champs comme 'location.address', il faut appliquer la notation pointée
                 for (const [subKey, subValue] of Object.entries(value)) {
-                    // Utiliser la notation pointée pour l'objet imbriqué
                     const nestedField = `${key}.${subKey}`;
-                    filter[nestedField] = subValue;
+                    if (subKey.endsWith('Like') && typeof subValue === 'string') {
+                        // Gérer les LIKE pour les objets imbriqués
+                        filter[nestedField.replace('Like','')] = { $regex: this.escapeRegex(subValue), $options: 'i' };
+                    } else {
+                        filter[nestedField] = subValue;
+                    }
                 }
                 continue;
             }
 
-
-            // Cas par d�faut
+            // Cas par défaut
             filter[key] = value;
         }
 
