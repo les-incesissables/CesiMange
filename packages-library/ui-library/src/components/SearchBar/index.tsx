@@ -25,7 +25,7 @@ const SearchBar: React.FC<onClick> = ({ onClick, textButton, textInput }) => {
                     />
                 </div>
                 <div className="w-full sm:w-auto">
-                    <Button text={textButton} onClick={onClick} />
+                    <Button label={textButton} onClick={onClick} />
                 </div>
             </div>
         </div>
