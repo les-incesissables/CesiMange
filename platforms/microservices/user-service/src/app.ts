@@ -67,7 +67,7 @@ console.log('Docker use : ', isDocker);
 const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-app.use('/api/user-profiles', customerProfileController.getRouter());
+app.use('/user-profiles', customerProfileController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());

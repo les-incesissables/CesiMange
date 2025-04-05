@@ -8,7 +8,7 @@ export function loadGatewayConfig(): IGatewayConfig
         port: Number(process.env.GATEWAY_PORT) || 3000,
         services: [
             {
-                apiName: 'auth',
+                routeName: 'auth',
                 BaseUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:4001/auth',
                 enabled: true,
                 publicRoutes: [
@@ -42,8 +42,8 @@ export function loadGatewayConfig(): IGatewayConfig
                 ]
             },
             {
-                apiName: 'user-service',
-                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/user-profile',
+                routeName: 'user-profiles',
+                BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4002/user-profiles',
                 enabled: true,
                 publicRoutes: [
                     {
@@ -67,7 +67,7 @@ export function loadGatewayConfig(): IGatewayConfig
                 ]
             },
             {
-                apiName: 'restaurants',
+                routeName: 'restaurants',
                 BaseUrl: process.env.restaurant_SERVICE_URL || 'http://localhost:4003/restaurants',
                 enabled: true,
                 publicRoutes: [
