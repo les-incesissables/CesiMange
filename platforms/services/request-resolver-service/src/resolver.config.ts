@@ -23,6 +23,10 @@ export function loadGatewayConfig(): IGatewayConfig
                     {
                         path: '/refresh-token',
                         methods: ['POST']
+                    },
+                    {
+                        path: '/logout',
+                        methods: ['POST']
                     }
                 ],
                 protectedRoutes: [
@@ -31,7 +35,7 @@ export function loadGatewayConfig(): IGatewayConfig
                         methods: ['DELETE'],
                         ownershipCheck: {
                             paramName: 'id',
-                            matchField: 'sub'
+                            matchField: 'id'
                         }
                     },
                     {
