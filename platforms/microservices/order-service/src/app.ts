@@ -10,21 +10,25 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import * as dotenv from 'dotenv';
+import { OrderController } from './controllers/orders/OrderController';
+import { OrderMetier } from './metier/orders/OrderMetier';
 
 const isDocker = process.env.DOCKER_ENV === 'true';
 
-if (process.env.NODE_ENV === 'development' && isDocker === true) {
+if (process.env.NODE_ENV === 'development' && isDocker === true)
+{
     dotenv.config({ path: '.env.development' });
-} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+} else if (process.env.NODE_ENV === 'development' && isDocker === false)
+{
     dotenv.config({ path: '.env.localhost' });
-} else if (process.env.NODE_ENV === 'staging') {
+} else if (process.env.NODE_ENV === 'staging')
+{
     dotenv.config({ path: '.env.staging' });
-} else if (process.env.NODE_ENV === 'production') {
+} else if (process.env.NODE_ENV === 'production')
+{
     dotenv.config({ path: '.env.production' });
 }
 
-import { AuthUsersController } from './controllers/authusers/AuthUsersController';
-import { AuthUsersMetier } from './metier/authusers/AuthUsersMetier';
 
 //#endregion
 
@@ -49,13 +53,9 @@ app.use(helmet());
  */
 app.use(morgan('dev'));
 
-const userController = new AuthUsersController(new AuthUsersMetier());
-//const restaurantController = new RestaurantController(new RestaurantMetier());
-//const orderMetier = new OrderController(new OrderMetier());
-app.use('/auth', userController.getRouter());
+const orderController = new OrderController(new OrderMetier());
 
-//app.use('/api/resto', restaurantController.getRouter());
-//app.use('/api/order', orderMetier.getRouter());
+app.use('/order', orderController.getRouter());
 
 // Gestion des erreurs
 app.use((req, res) =>
@@ -68,11 +68,12 @@ app.use((req, res) =>
     });
 });
 
-// We assign the port number 8080.
+// cm - We assign the port number 4004.
 const port = 4004;
 
 // We can see that the app is listening on which port.
-app.listen(port, () => {
+app.listen(port, () =>
+{
     console.log(`App is listening on port ${port}`);
 });
 
