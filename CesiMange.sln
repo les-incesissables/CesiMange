@@ -41,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resolver", "resolver", "{50
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "request-resolver-service", "platforms\services\request-resolver-service\request-resolver-service.esproj", "{13E98464-688F-A204-BF36-CD159D0A693B}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "auth-service-tests", "platforms\microservices\auth-service-tests\auth-service-tests.esproj", "{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,12 @@ Global
 		{13E98464-688F-A204-BF36-CD159D0A693B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13E98464-688F-A204-BF36-CD159D0A693B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13E98464-688F-A204-BF36-CD159D0A693B}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -135,6 +143,7 @@ Global
 		{964AAA16-A17E-1D20-D4AD-9CA011DDAD47} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{50DF90C9-5708-411A-9D7B-9C20DC4E1705} = {DDDE42CE-7268-48D2-935D-7F842B65BC2F}
 		{13E98464-688F-A204-BF36-CD159D0A693B} = {50DF90C9-5708-411A-9D7B-9C20DC4E1705}
+		{26B5D7B7-E5F4-AE76-5CF9-1E402369741F} = {53732903-5B3C-4A3C-9F59-538B5EA7846F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6369AA69-4B65-4AD3-B1DB-1562BD8A064E}
