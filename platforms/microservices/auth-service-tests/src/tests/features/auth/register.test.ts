@@ -59,5 +59,6 @@ describe('Fonctionnalité d\'inscription', () =>
 
         // Vérifications
         expect(response.body.id).toBe(createdUser.id);
+        expect(response.body.role).toBeTruthy();
     });
 });

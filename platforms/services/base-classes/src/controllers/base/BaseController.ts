@@ -125,7 +125,10 @@ export class BaseController<DTO, CritereDTO>
                 return;
             }
 
-            const lCreatedItem = await this.Metier.createItem(lItemDTO);
+            let lCreatedItem = await this.Metier.createItem(lItemDTO);
+
+            lCreatedItem = await this.afterCreateItem(lCreatedItem);
+
             pRes.status(201).json(lCreatedItem);
         } catch (error)
         {

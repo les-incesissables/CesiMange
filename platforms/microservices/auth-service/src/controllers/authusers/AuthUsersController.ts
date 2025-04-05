@@ -257,6 +257,14 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
         return lNewUser;
     }
+
+    public override async afterCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers>
+    {
+        delete pAuthUsers.password_hash;
+
+        return pAuthUsers;
+    }
+
     //#endregion
 
     //#region GetItem
