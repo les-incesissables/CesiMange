@@ -1,7 +1,8 @@
 import { createProxyMiddleware, Options, fixRequestBody } from 'http-proxy-middleware';
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { IGatewayConfig } from './interfaces/IGatewayConfig';
 import { IServiceDefinition } from './interfaces/IServiceDefinition';
+import { checkAccess } from './middlewares/checkAccess';
 export function setupProxies(router: Router, config: IGatewayConfig): void
 {
     if (!config?.services)
@@ -28,7 +29,7 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
         const proxy = createProxyMiddleware(proxyOptions);
 
         // Middleware unique pour le logging et le proxy
-        router.use(`/${service.apiName}`, (req: Request, res: Response, next: NextFunction) =>
+        router.use(`/${service.apiName}`, checkAccess(service) as RequestHandler, (req: Request, res: Response, next: NextFunction) =>
         {
             console.log(`[Proxy] Requête entrante: ${req.method} ${req.originalUrl} -> ${service.BaseUrl}${req.path}`);
 

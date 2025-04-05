@@ -43,8 +43,6 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         // Routes protégées pour admin uniquement
         this.Router.get('/admin',
             AuthJWT.authenticateJWT,
-
-            AuthJWT.hasRole('admin'),
             this.adminEndpoint);
 
         // Routes protégées pour admin uniquement
@@ -63,7 +61,6 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
         this.Router.delete('/:id',
             AuthJWT.authenticateJWT,
-            AuthJWT.checkId,
             this.deleteItem);
 
         // Route pour la déconnexion

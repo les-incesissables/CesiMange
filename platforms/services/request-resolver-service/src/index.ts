@@ -8,8 +8,8 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
-import { securityMiddleware } from "./middlewares/security.middleware";
-import { requestLogger } from "./middlewares/requestLogger.middleware";
+import { securityMiddleware } from "./middlewares/security";
+import { requestLogger } from "./middlewares/requestLogger";
 
 const config = loadGatewayConfig();
 const app = express();
