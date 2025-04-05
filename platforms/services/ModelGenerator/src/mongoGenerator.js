@@ -135,24 +135,51 @@ function cleanDirectory(dirPath, preserveFolders = []) {
         });
     }
 }
-// Fonction pour convertir le nom d'une collection en nom de classe (PascalCase)
-function collectionNameToClassName(name) {
-    // Enlever le "s" final pour les pluriels
-    const singularName = name.endsWith('s') ? name.slice(0, -1) : name;
+// Fonction pour convertir le nom d'une collection ou d'un champ en nom de classe (PascalCase)
+function toPascalCase(name) {
     // Convertir en PascalCase
-    return singularName
+    return name
         .split(/[-_]/)
         .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
         .join('');
 }
+// Fonction pour convertir le nom d'une collection en nom de classe (PascalCase)
+function collectionNameToClassName(name) {
+    // Enlever le "s" final pour les pluriels
+    const singularName = name.endsWith('s') ? name.slice(0, -1) : name;
+    return toPascalCase(singularName);
+}
+// Fonction pour analyser les objets imbriqu�s
+function analyzeNestedObject(obj) {
+    const nestedSchema = {};
+    Object.keys(obj).forEach(field => {
+        if (!config.excludedFields.includes(field)) {
+            const typeInfo = getMongooseType(obj[field], field);
+            nestedSchema[field] = Object.assign(Object.assign({}, typeInfo), { isRequired: true // Par d�faut, on suppose que tous les champs de l'objet imbriqu� sont requis
+             });
+        }
+    });
+    return nestedSchema;
+}
 // Fonction pour d�terminer le type Mongoose � partir d'une valeur
-function getMongooseType(value) {
+function getMongooseType(value, pField) {
     if (value === null || value === undefined) {
         return { type: 'any', mongooseType: 'Schema.Types.Mixed', isArray: false };
     }
     if (Array.isArray(value)) {
         if (value.length === 0) {
             return { type: 'any[]', mongooseType: '[Schema.Types.Mixed]', isArray: true };
+        }
+        // Si le premier �l�ment du tableau est un objet (autre que Date ou ObjectId), il pourrait �tre un objet imbriqu�
+        if (typeof value[0] === 'object' && value[0] !== null && !(value[0] instanceof Date) && !mongoose_1.default.Types.ObjectId.isValid(value[0])) {
+            const nestedSchema = analyzeNestedObject(value[0]);
+            return {
+                type: `I${toPascalCase(Object.keys(nestedSchema)[0] || 'NestedItem')}[]`,
+                mongooseType: '[new Schema({...})]',
+                isArray: true,
+                isNestedObject: true,
+                nestedSchema
+            };
         }
         const elemType = getMongooseType(value[0]);
         return {
@@ -184,7 +211,16 @@ function getMongooseType(value) {
         case 'boolean':
             return { type: 'boolean', mongooseType: 'Boolean', isArray: false };
         case 'object':
-            return { type: 'Record<string, any>', mongooseType: 'Schema.Types.Mixed', isArray: false };
+            // Si c'est un objet (autre que ceux d�j� trait�s), c'est un objet imbriqu�
+            const nestedSchema = analyzeNestedObject(value);
+            let lResult = {
+                type: `I${toPascalCase(pField || 'NestedObject')}`,
+                mongooseType: 'new Schema({...})',
+                isArray: false,
+                isNestedObject: true,
+                nestedSchema
+            };
+            return lResult;
         default:
             return { type: 'any', mongooseType: 'Schema.Types.Mixed', isArray: false };
     }
@@ -203,19 +239,44 @@ function analyzeCollection(collectionName) {
         const sampleDocs = yield collection.find({}).limit(config.sampleSize).toArray();
         if (sampleDocs.length === 0) {
             console.log(`  La collection ${collectionName} est vide.`);
-            return {};
+            return { mainSchema: {}, nestedSchemas: new Map() };
         }
-        const schema = {};
+        const mainSchema = {};
+        const nestedSchemas = new Map();
         const requiredFields = new Set();
         // Premi�re passe: identifier tous les champs possibles
         sampleDocs.forEach(doc => {
             Object.keys(doc).forEach(field => {
                 if (!config.excludedFields.includes(field)) {
-                    if (!schema[field]) {
-                        const typeInfo = getMongooseType(doc[field]);
-                        schema[field] = Object.assign(Object.assign({}, typeInfo), { isRequired: true // Supposer d'abord que tous les champs sont requis
+                    if (!mainSchema[field]) {
+                        const typeInfo = getMongooseType(doc[field], field);
+                        mainSchema[field] = Object.assign(Object.assign({}, typeInfo), { isRequired: true // Supposer d'abord que tous les champs sont requis
                          });
                         requiredFields.add(field);
+                        // Si c'est un objet imbriqu�, ajouter son sch�ma � la liste des sch�mas imbriqu�s
+                        if (typeInfo.isNestedObject && typeInfo.nestedSchema) {
+                            let nestedName;
+                            if (typeInfo.isArray) {
+                                nestedName = `I${toPascalCase(field)}Item`;
+                            }
+                            else {
+                                nestedName = `I${toPascalCase(field)}`;
+                            }
+                            nestedSchemas.set(nestedName, typeInfo.nestedSchema);
+                            // V�rifier si l'objet imbriqu� contient lui-m�me des objets imbriqu�s
+                            for (const [nestedField, nestedFieldInfo] of Object.entries(typeInfo.nestedSchema)) {
+                                if (nestedFieldInfo.isNestedObject && nestedFieldInfo.nestedSchema) {
+                                    let deepNestedName;
+                                    if (nestedFieldInfo.isArray) {
+                                        deepNestedName = `I${toPascalCase(nestedField)}Item`;
+                                    }
+                                    else {
+                                        deepNestedName = `I${toPascalCase(nestedField)}`;
+                                    }
+                                    nestedSchemas.set(deepNestedName, nestedFieldInfo.nestedSchema);
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -230,19 +291,35 @@ function analyzeCollection(collectionName) {
             });
         });
         // Mettre � jour l'information de requis
-        Object.keys(schema).forEach(field => {
-            schema[field].isRequired = requiredFields.has(field);
+        Object.keys(mainSchema).forEach(field => {
+            mainSchema[field].isRequired = requiredFields.has(field);
         });
-        return schema;
+        return { mainSchema, nestedSchemas };
     });
 }
 // Fonction pour g�n�rer le contenu du fichier d'interface
-function generateInterfaceContent(className, schema) {
+function generateInterfaceContent(className, schema, isNested = false) {
     const interfaceName = `I${className}`;
-    let content = `import { Document } from 'mongoose';\n\n`;
-    content += `export interface ${interfaceName} extends Document {\n`;
+    let content = isNested ? '' : `import { Document } from 'mongoose';\n\n`;
+    // Ajouter les importations pour les interfaces imbriqu�es si n�cessaire
+    const neededImports = new Set();
+    Object.values(schema).forEach(fieldInfo => {
+        if (fieldInfo.isNestedObject) {
+            const nestedType = fieldInfo.isArray
+                ? fieldInfo.type.replace('[]', '')
+                : fieldInfo.type;
+            if (!isNested) {
+                neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
+            }
+        }
+    });
+    if (neededImports.size > 0) {
+        content += Array.from(neededImports).join('');
+        content += '\n';
+    }
+    content += `export interface ${interfaceName}${isNested ? '' : ' extends Document'} {\n`;
     Object.keys(schema).forEach(field => {
-        if (field !== '_id') {
+        if (field !== '_id' || isNested) {
             const { type, isRequired } = schema[field];
             content += `  ${field}${isRequired ? '' : '?'}: ${type};\n`;
         }
@@ -327,8 +404,7 @@ function initializeMetierFolder(metierDir) {
     const baseDir = path.join(metierDir, 'base');
     ensureDirectoryExists(baseDir);
 }
-// Modifier la fonction principale pour inclure la g�n�ration des contr�leurs
-// Modifier la fonction principale pour inclure la g�n�ration des contr�leurs
+// Fonction principale modifi�e pour g�rer les objets imbriqu�s
 function generateModels() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -364,15 +440,23 @@ function generateModels() {
                 // Traiter chaque collection pour ce service
                 for (const collectionName of serviceCollections) {
                     console.log(`Analyse de la collection: ${collectionName}`);
-                    const schema = yield analyzeCollection(collectionName);
-                    if (Object.keys(schema).length > 0) {
+                    const { mainSchema, nestedSchemas } = yield analyzeCollection(collectionName);
+                    if (Object.keys(mainSchema).length > 0) {
                         const className = collectionNameToClassName(collectionName);
                         const interfaceName = `I${className}`;
-                        // G�n�rer le fichier d'interface
-                        const interfaceContent = generateInterfaceContent(className, schema);
+                        // G�n�rer les interfaces pour les objets imbriqu�s d'abord
+                        for (const [nestedName, nestedSchema] of nestedSchemas) {
+                            const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
+                            const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
+                            const nestedInterfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${nestedName}.ts`);
+                            fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
+                            console.log(`  Interface imbriqu�e g�n�r�e: ${nestedInterfaceFilePath}`);
+                        }
+                        // G�n�rer le fichier d'interface principal
+                        const interfaceContent = generateInterfaceContent(className, mainSchema);
                         const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
                         fs.writeFileSync(interfaceFilePath, interfaceContent);
-                        console.log(`  Interface g�n�r�e: ${interfaceFilePath}`);
+                        console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
                         // Cr�er le dossier m�tier pour cette entit�
                         const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
                         ensureDirectoryExists(metierEntityDir);

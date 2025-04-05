@@ -464,15 +464,16 @@ export class MongoDBRepository<DTO extends Document, CritereDTO> extends Abstrac
             }
 
             // Gestion des objets (crit�res imbriqu�s)
-            if (typeof value === 'object' && !Array.isArray(value) && value !== null && !(value instanceof Date))
-            {
-                const subFilter = this.buildFilter(value as any);
-                if (Object.keys(subFilter).length > 0)
-                {
-                    filter[key] = subFilter;
+            if (typeof value === 'object' && !Array.isArray(value) && value !== null && !(value instanceof Date)) {
+                // Si l'objet imbriqué contient des sous-champs comme 'location.address', il faut appliquer la notation pointée
+                for (const [subKey, subValue] of Object.entries(value)) {
+                    // Utiliser la notation pointée pour l'objet imbriqué
+                    const nestedField = `${key}.${subKey}`;
+                    filter[nestedField] = subValue;
                 }
                 continue;
             }
+
 
             // Cas par d�faut
             filter[key] = value;
