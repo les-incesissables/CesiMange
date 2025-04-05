@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import dts from 'vite-plugin-dts';
-
 // https://vite.dev/config/
 export default defineConfig({
     resolve: {
