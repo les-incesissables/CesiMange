@@ -1,15 +1,14 @@
 //#region Imports
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-require('dotenv').config();
+const dotenv = require('dotenv');
 import 'reflect-metadata';
 import express from 'express';
 import * as path from 'path';
 import cors from 'cors';
-import helmet from 'helmet';
+import helmet from 'helmet'; 
 import morgan from 'morgan';
 
-import * as dotenv from 'dotenv';
 import { OrderController } from './controllers/orders/OrderController';
 import { OrderMetier } from './metier/orders/OrderMetier';
 

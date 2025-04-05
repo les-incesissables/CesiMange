@@ -351,10 +351,8 @@ function generateInterfaceContent(className: string, schema: CollectionSchema, i
                 ? fieldInfo.type.replace('[]', '')
                 : fieldInfo.type;
 
-            if (!isNested)
-            {
-                neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
-            }
+
+            neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
         }
     });
 
