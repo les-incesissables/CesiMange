@@ -11,6 +11,7 @@ export abstract class BaseRepository<T> implements IApiRepository<T> {
 
     public async fetchAll(): Promise<T[]> {
         const response = await this.apiProxy.get<T[]>(this.endpoint);
+
         return response.data;
     }
 

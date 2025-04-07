@@ -1,33 +1,36 @@
-import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
 
-// Import the generated route tree
-import { routeTree } from './routeTree.gen';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Route, Routes } from 'react-router';
 
 import './index.css';
+import Welcome from './pages/Welcome';
+import Home from './pages/Home';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Restaurant from './pages/single/Restaurant';
 
-// Create a new router instance
-const router = createRouter({ routeTree });
-const queryClient = new QueryClient();
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
-    }
-}
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 5_000,
+            refetchOnWindowFocus: false,
+            refetchOnMount: 'always',
+        },
+    },
+});
 
 // Render the app
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
-        <StrictMode>
+        <BrowserRouter>
             <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router} />
+                <Routes>
+                    <Route path="/" element={<Welcome />} />
+                    <Route path="/home" element={<Home />}></Route>
+                    <Route path="/restaurants/:id" element={<Restaurant />}></Route>
+                </Routes>
             </QueryClientProvider>
-        </StrictMode>,
+        </BrowserRouter>,
     );
 }

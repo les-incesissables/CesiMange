@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug React/Vite App",
+      "url": "http://localhost:3001",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "skipFiles": [ "<node_internals>/**" ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/src/**",
+        "${workspaceFolder}/../local-middleware/src/**",
+        "${workspaceFolder}/../proxy/src/**",
+        "!**/node_modules/**"
+      ],
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/src/*"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Vite Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [ "run", "dev" ],
+      "port": 9229,
+      "skipFiles": [ "<node_internals>/**" ],
+      "cwd": "${workspaceFolder}",
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/src/**",
+        "${workspaceFolder}/../local-middleware/src/**",
+        "${workspaceFolder}/../proxy/src/**",
+        "!**/node_modules/**"
+      ],
+      "sourceMaps": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full App",
+      "configurations": [ "Debug Vite Server", "Debug React/Vite App" ]
+    }
+  ]
+}

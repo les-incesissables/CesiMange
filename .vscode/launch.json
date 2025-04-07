@@ -44,6 +44,21 @@
             "restart": true,
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/platforms/microservices/restaurant-service"
+        },
+        {
+            "name": "Launch Chrome (Vite)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3001",
+            "webRoot": "${workspaceFolder}/apps/customer-final/front/src",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/apps/customer-final/front/src/**",
+                "${workspaceFolder}/apps/customer-final/local-middleware/src/**",
+                "${workspaceFolder}/apps/customer-final/proxy/src/**",
+                "!**/node_modules/**"
+            ],
+            "sourceMaps": true,
+            "trace": true
         }
     ],
     "compounds": [

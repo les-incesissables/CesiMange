@@ -1,35 +1,40 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { localMiddlewareInstance } from 'customer-final-middleware';
+import HomeLayout from '../layout/HomeLayout';
+import CategorieList from '../components/List/CategorieList';
+import RestaurantList from '../components/List/RestaurantList';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { LocalMiddleware } from '../../../local-middleware/src/middleware/LocalMiddleware';
 
-export const Home: React.FC = () => {
-    const { data, isLoading, error } = useQuery({
-        queryKey: ['users'],
-        queryFn: () => localMiddlewareInstance.getUsers(),
-    });
+const localMiddleware = new LocalMiddleware();
 
-    if (isLoading) return <div>Loading users...</div>;
-    if (error) return <div>Error: {(error as Error).message}</div>;
+const Home: React.FC = () =>
+{
+    try
+    {
+        const { data: restaurantData, isLoading, isError }: UseQueryResult<any, Error> = useQuery({
+            queryKey: ['restaurants'],
+            queryFn: async () =>
+            {
+                return await localMiddleware.callLocalApi(async () =>
+                    await localMiddleware.RestoRepo.fetchAll()
+                );
+            }
+        });
 
-    const users = data?.data || [];
-    
+        if (isLoading) return <div>Chargement en cours...</div>;
+        if (isError) return <div>Erreur de chargement des restaurants</div>;
 
-    return (
-        <div>
-            <h1 className="text-amber-300">Users List</h1>
-            <ul>
-                {Array.isArray(users) && users.length > 0 ? (
-                    users.map((user: any) => (
-                        <li key={user.id}>
-                            {user.name} ({user.email})
-                        </li>
-                    ))
-                ) : (
-                    <li>No users found.</li>
-                )}
-            </ul>
-        </div>
-    );
+        return (
+            <HomeLayout>
+                <CategorieList />
+                <RestaurantList restaurants={restaurantData.data} />
+            </HomeLayout>
+
+        );
+
+    } catch (e)
+    {
+        if (e) return <div>Erreur de chargement des restaurants</div>;
+    }
 };
 
 export default Home;
