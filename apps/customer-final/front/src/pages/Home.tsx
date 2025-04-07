@@ -12,7 +12,9 @@ const Home: React.FC = () => {
         queryKey: ['restaurants'],
         queryFn: async () => await localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.fetchAll()),
     });
-    let l = localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.fetchAll());
+    let l = async () => {
+        await localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.fetchAll());
+    };
     const restaurantData = lData.data;
 
     return (
