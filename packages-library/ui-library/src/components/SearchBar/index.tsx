@@ -13,7 +13,7 @@ const SearchBar: React.FC<onClick> = ({ onClick, textButton, textInput }) => {
 
     return (
         <div className="mx-auto w-full max-w-[700px] px-4">
-            <div className="flex flex-col items-stretch gap-2 rounded-[20px] bg-white p-2.5 outline outline-1 outline-offset-[-1px] outline-black/50 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex flex-col items-stretch gap-2 rounded-[20px] bg-white p-2.5 outline-1 outline-offset-[-1px] outline-black/50 sm:flex-row sm:items-center sm:gap-4">
                 <div className="flex w-full items-center gap-3">
                     <img src="/images/loupe.svg" className="h-5 w-5 shrink-0" />
                     <input
