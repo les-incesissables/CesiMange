@@ -85,6 +85,31 @@ export function checkAccess(service: IServiceDefinition)
             }
         }
 
+        if (protectedRoute.ownershipCheck)
+        {
+            const { matchField, paramName } = protectedRoute.ownershipCheck;
+
+            if (!matchField || !paramName)
+            {
+                return res.status(500).json({ message: 'Mauvaise configuration ownershipCheck.' });
+            }
+
+            const userValue = payload[matchField as keyof typeof payload];
+            const paramValue = req.params[paramName];
+
+            if (!userValue || !paramValue)
+            {
+                return res.status(403).json({ message: 'Accès refusé : données manquantes.' });
+            }
+
+            if (userValue != paramValue)
+            {
+                return res.status(403).json({ message: 'Accès refusé : vous n’êtes pas propriétaire.' });
+            }
+        }
+
+
+
         next();
     };
 
@@ -121,7 +146,4 @@ export function checkAccess(service: IServiceDefinition)
 
         return { match: true, params };
     }
-
-
-
 }

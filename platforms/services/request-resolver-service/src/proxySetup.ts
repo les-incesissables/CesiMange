@@ -27,7 +27,7 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
         const proxy = createProxyMiddleware(proxyOptions);
 
         // Middleware unique pour le logging et le proxy
-        router.use(`/${service.apiName}`, checkAccess(service) as RequestHandler, (req: Request, res: Response, next: NextFunction) =>
+        router.use(`/${service.routeName}`, checkAccess(service) as RequestHandler, (req: Request, res: Response, next: NextFunction) =>
         {
             console.log(`[Proxy] Requête entrante: ${req.method} ${req.originalUrl} -> ${service.BaseUrl}${req.path}`);
 
@@ -43,7 +43,7 @@ export function setupProxies(router: Router, config: IGatewayConfig): void
             proxy(req, res, next);
         });
 
-        console.log(`Proxy configuré: /${service.apiName}/* -> ${service.BaseUrl}`);
+        console.log(`Proxy configuré: /${service.routeName}/* -> ${service.BaseUrl}`);
     });
 
     // Middleware pour les erreurs de proxy

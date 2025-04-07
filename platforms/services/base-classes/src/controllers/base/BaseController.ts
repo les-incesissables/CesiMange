@@ -70,7 +70,12 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            let lCritere = pReq.params as unknown as CritereDTO;
+            let lCritere: CritereDTO;
+
+            if (Object.keys(pReq.params || {}).length > 0)
+                lCritere = pReq.params as unknown as CritereDTO;
+            else
+                lCritere = pReq.body as unknown as CritereDTO;
 
             // cm - Validation des données
             try
