@@ -106,6 +106,7 @@ services:
             - api_network
 
     mssql-auth:
+        user: root
         build:
             context: ./platforms/databases/sqlserver/auth-service
             dockerfile: Dockerfile.mssql
