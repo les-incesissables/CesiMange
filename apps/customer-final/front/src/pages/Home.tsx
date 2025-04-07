@@ -12,6 +12,7 @@ export const Home: React.FC = () => {
     if (error) return <div>Error: {(error as Error).message}</div>;
 
     const users = data?.data || [];
+    
 
     return (
         <div>
