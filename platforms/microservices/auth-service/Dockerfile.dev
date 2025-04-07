@@ -42,5 +42,5 @@ RUN npm install -D tsconfig-paths && \
 EXPOSE 4001
 
 # Le script "dev" dans ton package.json doit être configuré pour utiliser nodemon avec ts-node et tsconfig-paths, par exemple :
-# "dev": "nodemon --watch src --ext ts,json --ignore node_modules --exec \"ts-node -r tsconfig-paths/register src/app.ts\""
+# "dev": "nodemon --watch src --ext ts,json --ignore node_modules --exec \"ts-node -r  src/app.ts\""
 CMD ["npm", "run", "dev"]

@@ -17,7 +17,7 @@ const InputField: React.FC<InputFieldProps> = ({ type = 'text', value, onChange,
             onChange={onChange}
             placeholder={placeholder}
             name={name}
-            className="h-14 w-full rounded-[20px] bg-white px-6 text-2xl shadow outline outline-1 outline-black"
+            className="h-14 w-full rounded-[20px] bg-white px-6 text-2xl shadow outline-1 outline-black"
         />
     );
 };
