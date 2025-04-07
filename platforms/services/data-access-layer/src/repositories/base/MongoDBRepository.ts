@@ -40,20 +40,27 @@ export class MongoDBRepository<DTO extends Document, CritereDTO> extends Abstrac
                 console.log('Connexion Mongoose �tablie');
                 this._isConnected = true;
             }
+            // cm - Check if model exist
+            if (!mongoose.models[this._config.CollectionName])
+            {
+                // cm - Get Schema for the collection
+                this._schema = new mongoose.Schema(
+                    {},
+                    {
+                        strict: false,
+                        collection: this._config.CollectionName,
+                        timestamps: true,
+                        versionKey: false,
+                    }
+                );
 
-            // cm - Recuperation du Schema en fonction de la collection
-            this._schema = new mongoose.Schema(
-                {},
-                {
-                    strict: false,
-                    collection: this._config.CollectionName,
-                    timestamps: true,
-                    versionKey: false,
-                },
-            );
-
-            // cm - Recuperation du Model
-            this._model = mongoose.model<DTO>(this._config.CollectionName, this._schema);
+                // cm - Get Model
+                this._model = mongoose.model<DTO>(this._config.CollectionName, this._schema);
+            } else
+            {
+                // cm - use existing model
+                this._model = mongoose.model<DTO>(this._config.CollectionName);
+            }
         } catch (error)
         {
             console.error("Erreur lors de l'initialisation de Mongoose:", error);

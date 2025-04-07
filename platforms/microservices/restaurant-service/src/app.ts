@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 import * as path from 'path';
-
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
