@@ -50,6 +50,10 @@ const path = __importStar(require("path"));
 const mongoose_1 = __importDefault(require("mongoose"));
 require('dotenv').config();
 const lFrontPath = '../../../apps/customer-final/front/src/models/';
+function parseArgs() {
+    const args = process.argv.slice(2);
+    return args.includes('--front');
+}
 // Configuration g�n�rale
 const config = {
     excludedFields: ['__v'], // Champs � exclure des mod�les
@@ -58,7 +62,7 @@ const config = {
     sampleSize: 10, // Nombre de documents � analyser par collection
     cleanOutputDir: true, // Nettoyer le r�pertoire de sortie avant de g�n�rer les nouveaux fichiers
     protectedFolders: ['base'], // Dossiers � ne pas supprimer lors du nettoyage
-    front: true
+    front: parseArgs()
 };
 // Configuration des services et des collections associ�es
 const serviceConfigs = [
@@ -331,6 +335,9 @@ function initializeServiceFolders(serviceConfig) {
     for (const folder of Object.values(folders)) {
         ensureDirectoryExists(path.join(outputDir, folder));
     }
+}
+function initializeMetierFolders(serviceConfig) {
+    const { outputDir, metierDir } = serviceConfig;
     // Initialiser le dossier m�tier
     if (fs.existsSync(metierDir)) {
         // Nettoyer en pr�servant le dossier base
@@ -420,6 +427,7 @@ function generateModels() {
                 // Initialiser les dossiers pour ce service
                 initializeServiceFolders(serviceConfig);
                 if (!pFront) {
+                    initializeMetierFolders(serviceConfig);
                     // Initialiser le dossier des contr�leurs si sp�cifi�
                     if (serviceConfig.controllerDir) {
                         initializeControllerFolder(serviceConfig.controllerDir);
@@ -446,7 +454,7 @@ function generateModels() {
                             console.log(`  Interface imbriqu�e g�n�r�e: ${nestedInterfaceFilePath}`);
                         }
                         // G�n�rer le fichier d'interface principal
-                        const interfaceContent = generateInterfaceContent(className, mainSchema);
+                        const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
                         const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
                         fs.writeFileSync(interfaceFilePath, interfaceContent);
                         console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
@@ -489,5 +497,5 @@ function generateModels() {
     });
 }
 // Ex�cuter la g�n�ration
-generateModels();
+generateModels(config.front);
 //# sourceMappingURL=mongoGenerator.js.map

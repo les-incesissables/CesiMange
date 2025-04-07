@@ -32,6 +32,7 @@ try
     //// Exécuter le script MongoDB
     console.log('Génération depuis MongoDB...');
     execSync(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
+    execSync(`npx ts-node ${MONGO_GENERATOR_PATH} --front`, { stdio: 'inherit' });
 
     // Exécuter le script SQL Server
     console.log('Génération depuis SQL Server...');

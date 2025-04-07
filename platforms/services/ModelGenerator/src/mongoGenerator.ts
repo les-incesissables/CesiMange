@@ -3,6 +3,11 @@ import * as path from 'path';
 import mongoose from 'mongoose';
 require('dotenv').config();
 const lFrontPath = '../../../apps/customer-final/front/src/models/';
+function parseArgs(): boolean
+{
+    const args = process.argv.slice(2);
+    return args.includes('--front');
+}
 
 // Configuration générale
 const config = {
@@ -12,7 +17,7 @@ const config = {
     sampleSize: 10,                  // Nombre de documents à analyser par collection
     cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
     protectedFolders: ['base'],      // Dossiers à ne pas supprimer lors du nettoyage
-    front: true
+    front: parseArgs()
 };
 
 
@@ -568,7 +573,7 @@ async function generateModels(pFront: boolean = false): Promise<void>
                     }
 
                     // Générer le fichier d'interface principal
-                    const interfaceContent = generateInterfaceContent(className, mainSchema);
+                    const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
                     const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
                     fs.writeFileSync(interfaceFilePath, interfaceContent);
                     console.log(`  Interface principale générée: ${interfaceFilePath}`);
@@ -620,7 +625,4 @@ async function generateModels(pFront: boolean = false): Promise<void>
 }
 
 // Exécuter la génération
-generateModels(config.front).then(() =>
-{
-    generateModels();
-});
+generateModels(config.front);

@@ -58,6 +58,7 @@ try {
     //// Ex�cuter le script MongoDB
     console.log('G�n�ration depuis MongoDB...');
     (0, child_process_1.execSync)(`npx ts-node ${MONGO_GENERATOR_PATH}`, { stdio: 'inherit' });
+    (0, child_process_1.execSync)(`npx ts-node ${MONGO_GENERATOR_PATH} --front`, { stdio: 'inherit' });
     // Ex�cuter le script SQL Server
     console.log('G�n�ration depuis SQL Server...');
     (0, child_process_1.execSync)(`npx ts-node ${SQL_GENERATOR_PATH}`, { stdio: 'inherit' });

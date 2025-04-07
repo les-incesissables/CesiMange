@@ -10,7 +10,7 @@ const Home: React.FC = () =>
 {
     try
     {
-        const { data: restaurantData, isLoading, isError }: UseQueryResult<any, Error> = useQuery({
+        const { data: restaurantData, isLoading, isError }: UseQueryResult<IRestaurant, Error> = useQuery({
             queryKey: ['restaurants'],
             queryFn: async () =>
             {

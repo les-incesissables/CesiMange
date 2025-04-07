@@ -1,10 +1,9 @@
-import { Document } from 'mongoose';
-
 import { IItems } from './IItems';
 import { IDeliveryAddress } from './IDeliveryAddress';
 import { ITracking } from './ITracking';
 
-export interface IOrder extends Document {
+export interface IOrder {
+  _id: string;
   customer_id: number;
   restaurant_id: string;
   driver_id: number;
