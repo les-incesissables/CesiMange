@@ -14,13 +14,9 @@ const Home: React.FC = () =>
             queryKey: ['restaurants'],
             queryFn: async () =>
             {
-                const response = await localMiddleware.callLocalApi(async () =>
+                return await localMiddleware.callLocalApi(async () =>
                     await localMiddleware.RestoRepo.fetchAll()
                 );
-
-                // cm - verification de la reponse
-                if (!response) throw new Error('Aucune donnée reçue');
-                return response;
             },
             retry: 1,
             staleTime: 30000
@@ -40,7 +36,7 @@ const Home: React.FC = () =>
     } catch (e)
     {
         if (e) return <div>Erreur de chargement des restaurants</div>;
-    }  
+    }
 };
 
 export default Home;
