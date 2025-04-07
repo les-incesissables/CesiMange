@@ -2,27 +2,40 @@ import * as fs from 'fs';
 import * as path from 'path';
 import mongoose from 'mongoose';
 require('dotenv').config();
+const lFrontPath = '../../../apps/customer-final/front/src/models/';
+
+// Configuration générale
+const config = {
+    excludedFields: ['__v'],         // Champs à exclure des modèles
+    excludedCollections: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],
+    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/CesiMange',
+    sampleSize: 10,                  // Nombre de documents à analyser par collection
+    cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
+    protectedFolders: ['base'],      // Dossiers à ne pas supprimer lors du nettoyage
+    front: true
+};
+
 
 // Configuration des services et des collections associées
 const serviceConfigs = [
     {
         serviceName: 'user-service',
         collections: ['customer_profiles'],
-        outputDir: '../../microservices/user-service/src/models/',
+        outputDir: !config.front ? '../../microservices/user-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/user-service/src/metier/',
         controllerDir: '../../microservices/user-service/src/controllers/'
     },
     {
         serviceName: 'restaurant-service',
         collections: ['restaurants'],
-        outputDir: '../../microservices/restaurant-service/src/models/',
+        outputDir: !config.front ? '../../microservices/restaurant-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/restaurant-service/src/metier/',
         controllerDir: '../../microservices/restaurant-service/src/controllers/'
     },
     {
         serviceName: 'order-service',
         collections: ['orders'],
-        outputDir: '../../microservices/order-service/src/models/',
+        outputDir: !config.front ? '../../microservices/order-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/order-service/src/metier/',
         controllerDir: '../../microservices/order-service/src/controllers/'
     }
@@ -46,15 +59,6 @@ const serviceConfigs = [
     //}
 ];
 
-// Configuration générale
-const config = {
-    excludedFields: ['__v'],         // Champs à exclure des modèles
-    excludedCollections: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],
-    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/CesiMange',
-    sampleSize: 10,                  // Nombre de documents à analyser par collection
-    cleanOutputDir: true,            // Nettoyer le répertoire de sortie avant de générer les nouveaux fichiers
-    protectedFolders: ['base']       // Dossiers à ne pas supprimer lors du nettoyage
-};
 
 // Structure des dossiers pour les modèles
 const folders = {
@@ -481,7 +485,7 @@ function initializeMetierFolder(metierDir: string): void
 }
 
 // Fonction principale modifiée pour gérer les objets imbriqués
-async function generateModels(): Promise<void>
+async function generateModels(pFront: boolean = false): Promise<void>
 {
     try
     {
@@ -514,14 +518,17 @@ async function generateModels(): Promise<void>
             // Initialiser les dossiers pour ce service
             initializeServiceFolders(serviceConfig);
 
-            // Initialiser le dossier des contrôleurs si spécifié
-            if (serviceConfig.controllerDir)
+            if (!pFront)
             {
-                initializeControllerFolder(serviceConfig.controllerDir);
-            }
+                // Initialiser le dossier des contrôleurs si spécifié
+                if (serviceConfig.controllerDir)
+                {
+                    initializeControllerFolder(serviceConfig.controllerDir);
+                }
 
-            // Initialiser le dossier des métiers
-            initializeMetierFolder(serviceConfig.metierDir);
+                // Initialiser le dossier des métiers
+                initializeMetierFolder(serviceConfig.metierDir);
+            }
 
             // Filtrer les collections pour ce service
             const serviceCollections = allCollections.filter(name =>
@@ -558,28 +565,32 @@ async function generateModels(): Promise<void>
                     fs.writeFileSync(interfaceFilePath, interfaceContent);
                     console.log(`  Interface principale générée: ${interfaceFilePath}`);
 
-                    // Créer le dossier métier pour cette entité
-                    const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
-                    ensureDirectoryExists(metierEntityDir);
-
-                    // Générer le fichier métier
-                    const metierContent = generateMetierContent(className, collectionName);
-                    const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
-                    fs.writeFileSync(metierFilePath, metierContent);
-                    console.log(`  Métier généré: ${metierFilePath}`);
-
-                    // Générer le fichier contrôleur si le dossier est spécifié
-                    if (serviceConfig.controllerDir)
+                    if (!pFront)
                     {
-                        // Créer le dossier contrôleur pour cette entité
-                        const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
-                        ensureDirectoryExists(controllerEntityDir);
+                        // Créer le dossier métier pour cette entité
+                        const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
+                        ensureDirectoryExists(metierEntityDir);
 
-                        const controllerContent = generateControllerContent(className, collectionName);
-                        const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
-                        fs.writeFileSync(controllerFilePath, controllerContent);
-                        console.log(`  Contrôleur généré: ${controllerFilePath}`);
+                        // Générer le fichier métier
+                        const metierContent = generateMetierContent(className, collectionName);
+                        const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
+                        fs.writeFileSync(metierFilePath, metierContent);
+                        console.log(`  Métier généré: ${metierFilePath}`);
+
+                        // Générer le fichier contrôleur si le dossier est spécifié
+                        if (serviceConfig.controllerDir)
+                        {
+                            // Créer le dossier contrôleur pour cette entité
+                            const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
+                            ensureDirectoryExists(controllerEntityDir);
+
+                            const controllerContent = generateControllerContent(className, collectionName);
+                            const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
+                            fs.writeFileSync(controllerFilePath, controllerContent);
+                            console.log(`  Contrôleur généré: ${controllerFilePath}`);
+                        }
                     }
+
                 } else
                 {
                     console.log(`  Aucun modèle généré pour ${collectionName} (collection vide ou structure non détectée).`);
@@ -601,4 +612,4 @@ async function generateModels(): Promise<void>
 }
 
 // Exécuter la génération
-generateModels();
+generateModels(config.front);

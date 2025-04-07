@@ -10,20 +10,6 @@ import { mapErrorCodeToMessage } from '../utils/errorMapper';
  */
 export class LocalMiddleware {
     public RestoRepo = RepositoryService.resto;
-    private cache: Map<string, any> = new Map();
-    private isOffline = false;
-
-    constructor() {
-        window.addEventListener('online', () => {
-            this.isOffline = false;
-            console.log('Network online.');
-            // Optionally process queued requests
-        });
-        window.addEventListener('offline', () => {
-            this.isOffline = true;
-            console.warn('Network offline.');
-        });
-    }
 
     /**
      * Processes incoming messages and normalizes them.
@@ -80,13 +66,6 @@ export class LocalMiddleware {
      * @returns A normalized response.
      */
     public async callLocalApi(apiFunction: () => Promise<any>): Promise<NormalizedResponse> {
-        if (this.isOffline) {
-            return {
-                status: 'failure',
-                data: null,
-                uiMessage: 'You are offline. Please check your connection.',
-            };
-        }
         try {
             const response = await apiFunction();
             return this.processIncomingMessage(response);
@@ -99,18 +78,5 @@ export class LocalMiddleware {
                 uiMessage: mapErrorCodeToMessage(errorCode),
             };
         }
-    }
-
-    // --- Cache Management ---
-    public cacheResponse(key: string, data: any): void {
-        this.cache.set(key, data);
-    }
-
-    public getCachedResponse(key: string): any | undefined {
-        return this.cache.get(key);
-    }
-
-    public clearCache(): void {
-        this.cache.clear();
     }
 }

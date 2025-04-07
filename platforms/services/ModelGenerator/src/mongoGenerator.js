@@ -49,26 +49,37 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const mongoose_1 = __importDefault(require("mongoose"));
 require('dotenv').config();
+const lFrontPath = '../../../apps/customer-final/front/src/models/';
+// Configuration g�n�rale
+const config = {
+    excludedFields: ['__v'], // Champs � exclure des mod�les
+    excludedCollections: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],
+    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/CesiMange',
+    sampleSize: 10, // Nombre de documents � analyser par collection
+    cleanOutputDir: true, // Nettoyer le r�pertoire de sortie avant de g�n�rer les nouveaux fichiers
+    protectedFolders: ['base'], // Dossiers � ne pas supprimer lors du nettoyage
+    front: true
+};
 // Configuration des services et des collections associ�es
 const serviceConfigs = [
     {
         serviceName: 'user-service',
         collections: ['customer_profiles'],
-        outputDir: '../../microservices/user-service/src/models/',
+        outputDir: !config.front ? '../../microservices/user-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/user-service/src/metier/',
         controllerDir: '../../microservices/user-service/src/controllers/'
     },
     {
         serviceName: 'restaurant-service',
         collections: ['restaurants'],
-        outputDir: '../../microservices/restaurant-service/src/models/',
+        outputDir: !config.front ? '../../microservices/restaurant-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/restaurant-service/src/metier/',
         controllerDir: '../../microservices/restaurant-service/src/controllers/'
     },
     {
         serviceName: 'order-service',
         collections: ['orders'],
-        outputDir: '../../microservices/order-service/src/models/',
+        outputDir: !config.front ? '../../microservices/order-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/order-service/src/metier/',
         controllerDir: '../../microservices/order-service/src/controllers/'
     }
@@ -91,15 +102,6 @@ const serviceConfigs = [
     //    metierDir: '../technical-service/src/metier/'
     //}
 ];
-// Configuration g�n�rale
-const config = {
-    excludedFields: ['__v'], // Champs � exclure des mod�les
-    excludedCollections: ['buildenvironment', 'buildinfo', 'cmdline', 'net', 'openssl', 'startup_log', 'systemlog'],
-    mongoUri: process.env.CONNECTION_STRING || 'mongodb://localhost:27017/CesiMange',
-    sampleSize: 10, // Nombre de documents � analyser par collection
-    cleanOutputDir: true, // Nettoyer le r�pertoire de sortie avant de g�n�rer les nouveaux fichiers
-    protectedFolders: ['base'] // Dossiers � ne pas supprimer lors du nettoyage
-};
 // Structure des dossiers pour les mod�les
 const folders = {
     interfaces: 'interfaces',
@@ -299,9 +301,7 @@ function generateInterfaceContent(className, schema, isNested = false) {
             const nestedType = fieldInfo.isArray
                 ? fieldInfo.type.replace('[]', '')
                 : fieldInfo.type;
-            if (!isNested) {
-                neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
-            }
+            neededImports.add(`import { ${nestedType} } from './${nestedType}';\n`);
         }
     });
     if (neededImports.size > 0) {
@@ -397,7 +397,7 @@ function initializeMetierFolder(metierDir) {
 }
 // Fonction principale modifi�e pour g�rer les objets imbriqu�s
 function generateModels() {
-    return __awaiter(this, void 0, void 0, function* () {
+    return __awaiter(this, arguments, void 0, function* (pFront = false) {
         try {
             console.log('D�marrage de la g�n�ration des mod�les, m�tiers et contr�leurs...');
             // Connexion � MongoDB avec Mongoose
@@ -419,12 +419,14 @@ function generateModels() {
                 console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
                 // Initialiser les dossiers pour ce service
                 initializeServiceFolders(serviceConfig);
-                // Initialiser le dossier des contr�leurs si sp�cifi�
-                if (serviceConfig.controllerDir) {
-                    initializeControllerFolder(serviceConfig.controllerDir);
+                if (!pFront) {
+                    // Initialiser le dossier des contr�leurs si sp�cifi�
+                    if (serviceConfig.controllerDir) {
+                        initializeControllerFolder(serviceConfig.controllerDir);
+                    }
+                    // Initialiser le dossier des m�tiers
+                    initializeMetierFolder(serviceConfig.metierDir);
                 }
-                // Initialiser le dossier des m�tiers
-                initializeMetierFolder(serviceConfig.metierDir);
                 // Filtrer les collections pour ce service
                 const serviceCollections = allCollections.filter(name => serviceConfig.collections.includes(name));
                 console.log(`${serviceCollections.length} collections associ�es � ce service.`);
@@ -448,23 +450,25 @@ function generateModels() {
                         const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
                         fs.writeFileSync(interfaceFilePath, interfaceContent);
                         console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
-                        // Cr�er le dossier m�tier pour cette entit�
-                        const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
-                        ensureDirectoryExists(metierEntityDir);
-                        // G�n�rer le fichier m�tier
-                        const metierContent = generateMetierContent(className, collectionName);
-                        const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
-                        fs.writeFileSync(metierFilePath, metierContent);
-                        console.log(`  M�tier g�n�r�: ${metierFilePath}`);
-                        // G�n�rer le fichier contr�leur si le dossier est sp�cifi�
-                        if (serviceConfig.controllerDir) {
-                            // Cr�er le dossier contr�leur pour cette entit�
-                            const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
-                            ensureDirectoryExists(controllerEntityDir);
-                            const controllerContent = generateControllerContent(className, collectionName);
-                            const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
-                            fs.writeFileSync(controllerFilePath, controllerContent);
-                            console.log(`  Contr�leur g�n�r�: ${controllerFilePath}`);
+                        if (!pFront) {
+                            // Cr�er le dossier m�tier pour cette entit�
+                            const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
+                            ensureDirectoryExists(metierEntityDir);
+                            // G�n�rer le fichier m�tier
+                            const metierContent = generateMetierContent(className, collectionName);
+                            const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
+                            fs.writeFileSync(metierFilePath, metierContent);
+                            console.log(`  M�tier g�n�r�: ${metierFilePath}`);
+                            // G�n�rer le fichier contr�leur si le dossier est sp�cifi�
+                            if (serviceConfig.controllerDir) {
+                                // Cr�er le dossier contr�leur pour cette entit�
+                                const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
+                                ensureDirectoryExists(controllerEntityDir);
+                                const controllerContent = generateControllerContent(className, collectionName);
+                                const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
+                                fs.writeFileSync(controllerFilePath, controllerContent);
+                                console.log(`  Contr�leur g�n�r�: ${controllerFilePath}`);
+                            }
                         }
                     }
                     else {
