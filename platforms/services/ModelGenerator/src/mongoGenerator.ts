@@ -400,6 +400,11 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
     {
         ensureDirectoryExists(path.join(outputDir, folder));
     }
+}
+
+function initializeMetierFolders(serviceConfig: typeof serviceConfigs[0]): void
+{
+    const { outputDir, metierDir } = serviceConfig;
 
     // Initialiser le dossier métier
     if (fs.existsSync(metierDir))
@@ -412,6 +417,7 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
 
     console.log(`Dossiers initialisés pour ${serviceConfig.serviceName}`);
 }
+
 
 // Fonction pour générer le contenu du fichier contrôleur
 function generateControllerContent(className: string, collectionName: string): string
@@ -520,6 +526,8 @@ async function generateModels(pFront: boolean = false): Promise<void>
 
             if (!pFront)
             {
+                initializeMetierFolders(serviceConfig);
+
                 // Initialiser le dossier des contrôleurs si spécifié
                 if (serviceConfig.controllerDir)
                 {
@@ -612,4 +620,7 @@ async function generateModels(pFront: boolean = false): Promise<void>
 }
 
 // Exécuter la génération
-generateModels(config.front);
+generateModels(config.front).then(() =>
+{
+    generateModels();
+});
