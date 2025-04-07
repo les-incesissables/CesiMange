@@ -15,6 +15,7 @@ services:
             - ./platforms/microservices/auth-service:/app/platforms/microservices/auth-service
             - ./platforms/services/base-classes:/app/platforms/services/base-classes
             - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+            - ./platforms/services/message-broker-service:/app/platforms/services/message-broker-service
             # Volume anonyme pour préserver les node_modules du container
             - /app/platforms/microservices/auth-service/node_modules
         networks:
@@ -37,6 +38,7 @@ services:
             - ./platforms/microservices/user-service:/app/platforms/microservices/user-service
             - ./platforms/services/base-classes:/app/platforms/services/base-classes
             - ./platforms/services/data-access-layer:/app/platforms/services/data-access-layer
+            - ./platforms/services/message-broker-service:/app/platforms/services/message-broker-service
         networks:
             - api_network
         command: ['npm', 'run', 'dev']
@@ -74,7 +76,8 @@ services:
         env_file:
             - ./platforms/services/request-resolver-service/.env.development
         volumes:
-            - ./platforms/services/request-resolver-service:/app/platforms/microservices/request-resolver-service
+            - ./platforms/services/request-resolver-service:/app/platforms/services/request-resolver-service
+
         networks:
             - api_network
         command: ['npm', 'run', 'dev']
@@ -122,8 +125,6 @@ services:
 
         networks:
             - api_network
-
-    
 
 networks:
     api_network:
