@@ -9,8 +9,7 @@ import { mapErrorCodeToMessage } from '../utils/errorMapper';
  * It abstracts API calls, normalizes responses, and provides additional local services (e.g., caching, offline handling).
  */
 export class LocalMiddleware {
-    private orderRepo = RepositoryService.order;
-    private userRepo = RepositoryService.user;
+    public RestoRepo = RepositoryService.resto;
     private cache: Map<string, any> = new Map();
     private isOffline = false;
 
@@ -100,20 +99,6 @@ export class LocalMiddleware {
                 uiMessage: mapErrorCodeToMessage(errorCode),
             };
         }
-    }
-
-    // --- API Methods ---
-    public async getUsers(): Promise<NormalizedResponse> {
-        console.log('LocalMiddleware: getUsers called');
-        return this.callLocalApi(() => this.userRepo.fetchAll());
-    }
-
-    public async getOrders(): Promise<NormalizedResponse> {
-        return this.callLocalApi(() => this.orderRepo.fetchAll());
-    }
-
-    public async getUser(userId: string): Promise<NormalizedResponse> {
-        return this.callLocalApi(() => this.userRepo.fetchById(userId));
     }
 
     // --- Cache Management ---

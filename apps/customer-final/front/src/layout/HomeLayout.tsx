@@ -3,7 +3,7 @@ import React, { Fragment } from 'react';
 // Importation de composants communs
 import Footer from '../components/Footer';
 import NavBar from '../components/NavBar';
-import LeftSidebar from '../components/LeftSideBar';
+import LeftSidebar from '../components/LesftSideBar/LeftSideBar';
 
 interface HomeLayoutProps {
     children: React.ReactNode; // Accepte n'importe quel élément React valide comme enfant

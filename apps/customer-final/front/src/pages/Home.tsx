@@ -1,110 +1,19 @@
 import HomeLayout from '../layout/HomeLayout';
 import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';
+import { useQuery } from '@tanstack/react-query';
+import { LocalMiddleware } from '../../../local-middleware/src/middleware/LocalMiddleware';
+
+const localMiddleware = new LocalMiddleware();
 
 const Home: React.FC = () => {
-    const restaurantData = [
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Le Gourmet',
-            subtitle: 'Français',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Sushi Zen',
-            subtitle: 'Japonais',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Pizza Mia',
-            subtitle: 'Italien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Spicy India',
-            subtitle: 'Indien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Le Gourmet',
-            subtitle: 'Français',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Sushi Zen',
-            subtitle: 'Japonais',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Pizza Mia',
-            subtitle: 'Italien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Spicy India',
-            subtitle: 'Indien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Le Gourmet',
-            subtitle: 'Français',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Sushi Zen',
-            subtitle: 'Japonais',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Pizza Mia',
-            subtitle: 'Italien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Spicy India',
-            subtitle: 'Indien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Le Gourmet',
-            subtitle: 'Français',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Sushi Zen',
-            subtitle: 'Japonais',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Pizza Mia',
-            subtitle: 'Italien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Spicy India',
-            subtitle: 'Indien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Le Gourmet',
-            subtitle: 'Français',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Sushi Zen',
-            subtitle: 'Japonais',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Pizza Mia',
-            subtitle: 'Italien',
-        },
-        {
-            imageSrc: 'https://placehold.co/180x120',
-            title: 'Spicy India',
-            subtitle: 'Indien',
-        },
-    ];
+    // Utilisation de useQuery pour récupérer la liste des utilisateurs via le middleware local
+    const lData: any = useQuery({
+        queryKey: ['restaurants'],
+        queryFn: async () => await localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.fetchAll()),
+    });
+    let l = localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.fetchAll());
+    const restaurantData = lData.data;
 
     return (
         <HomeLayout>

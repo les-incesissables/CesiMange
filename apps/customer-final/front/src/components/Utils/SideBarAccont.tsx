@@ -6,7 +6,7 @@ interface AccountSidebarProps {
     onClose: () => void;
 }
 
-const AccountSidebar: React.FC<AccountSidebarProps> = ({ onClose }) => {
+const AccountSidebar: React.FC<AccountSidebarProps> = ({}) => {
     const sections = [
         {
             items: [
