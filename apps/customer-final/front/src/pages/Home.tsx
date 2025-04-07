@@ -11,7 +11,7 @@ const localMiddleware = new LocalMiddleware();
 const Home: React.FC = () =>
 {
     const [page, setPage] = useState<number>(1);
-    const limit = 10; // ou n’importe quel nombre d’éléments par page
+    const limit = 10;
 
     const {
         data: restaurantData,
@@ -23,7 +23,7 @@ const Home: React.FC = () =>
         {
      
             return await localMiddleware.callLocalApi(async () =>
-                await localMiddleware.RestoRepo.fetchAll()
+                await localMiddleware.RestoRepo.fetchAll(page, limit)
             );
         }
     });
@@ -40,11 +40,11 @@ const Home: React.FC = () =>
             <RestaurantList restaurants={restaurantData.data as IRestaurant[]} />
 
             <div className="pagination">
-                <button onClick={handlePrevPage} disabled={page === 1}>
+                <button onClick={handlePrevPage} disabled={page == 1}>
                     Page précédente
                 </button>
                 <span>Page {page}</span>
-                <button onClick={handleNextPage} disabled={!restaurantData.hasMore}>
+                <button onClick={handleNextPage}>
                     Page suivante
                 </button>
             </div>
