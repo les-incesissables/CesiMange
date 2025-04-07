@@ -119,7 +119,7 @@ function ensureDirectoryExists(dirPath) {
 }
 // Fonction pour nettoyer un r�pertoire tout en pr�servant certains dossiers
 function cleanDirectory(dirPath, preserveFolders = []) {
-    if (fs.existsSync(dirPath)) {
+    if (fs.existsSync(dirPath) && !config.front) {
         fs.readdirSync(dirPath).forEach(file => {
             const currentPath = path.join(dirPath, file);
             // Si c'est un dossier � pr�server, on le garde
@@ -336,17 +336,6 @@ function initializeServiceFolders(serviceConfig) {
         ensureDirectoryExists(path.join(outputDir, folder));
     }
 }
-function initializeMetierFolders(serviceConfig) {
-    const { outputDir, metierDir } = serviceConfig;
-    // Initialiser le dossier m�tier
-    if (fs.existsSync(metierDir)) {
-        // Nettoyer en pr�servant le dossier base
-        cleanDirectory(metierDir, config.protectedFolders);
-        console.log(`R�pertoire m�tier nettoy�: ${metierDir} (en pr�servant ${config.protectedFolders.join(', ')})`);
-    }
-    ensureDirectoryExists(metierDir);
-    console.log(`Dossiers initialis�s pour ${serviceConfig.serviceName}`);
-}
 // Fonction pour g�n�rer le contenu du fichier contr�leur
 function generateControllerContent(className, collectionName) {
     const interfaceName = `I${className}`;
@@ -427,7 +416,6 @@ function generateModels() {
                 // Initialiser les dossiers pour ce service
                 initializeServiceFolders(serviceConfig);
                 if (!pFront) {
-                    initializeMetierFolders(serviceConfig);
                     // Initialiser le dossier des contr�leurs si sp�cifi�
                     if (serviceConfig.controllerDir) {
                         initializeControllerFolder(serviceConfig.controllerDir);
@@ -445,17 +433,20 @@ function generateModels() {
                     if (Object.keys(mainSchema).length > 0) {
                         const className = collectionNameToClassName(collectionName);
                         const interfaceName = `I${className}`;
+                        // Cr�er le dossier m�tier pour cette entit�
+                        const interfaceEntityDir = path.join(serviceConfig.outputDir, folders.interfaces, interfaceName);
+                        ensureDirectoryExists(interfaceEntityDir);
                         // G�n�rer les interfaces pour les objets imbriqu�s d'abord
                         for (const [nestedName, nestedSchema] of nestedSchemas) {
                             const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
                             const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
-                            const nestedInterfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${nestedName}.ts`);
+                            const nestedInterfaceFilePath = path.join(interfaceEntityDir, `${nestedName}.ts`);
                             fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
                             console.log(`  Interface imbriqu�e g�n�r�e: ${nestedInterfaceFilePath}`);
                         }
                         // G�n�rer le fichier d'interface principal
                         const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
-                        const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
+                        const interfaceFilePath = path.join(interfaceEntityDir, `${interfaceName}.ts`);
                         fs.writeFileSync(interfaceFilePath, interfaceContent);
                         console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
                         if (!pFront) {

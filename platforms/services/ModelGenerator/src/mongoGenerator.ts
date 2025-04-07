@@ -100,7 +100,7 @@ function ensureDirectoryExists(dirPath: string): void
 // Fonction pour nettoyer un répertoire tout en préservant certains dossiers
 function cleanDirectory(dirPath: string, preserveFolders: string[] = []): void
 {
-    if (fs.existsSync(dirPath))
+    if (fs.existsSync(dirPath) && !config.front)
     {
         fs.readdirSync(dirPath).forEach(file =>
         {
@@ -407,29 +407,13 @@ function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
     }
 }
 
-function initializeMetierFolders(serviceConfig: typeof serviceConfigs[0]): void
-{
-    const { outputDir, metierDir } = serviceConfig;
-
-    // Initialiser le dossier métier
-    if (fs.existsSync(metierDir))
-    {
-        // Nettoyer en préservant le dossier base
-        cleanDirectory(metierDir, config.protectedFolders);
-        console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
-    }
-    ensureDirectoryExists(metierDir);
-
-    console.log(`Dossiers initialisés pour ${serviceConfig.serviceName}`);
-}
-
 
 // Fonction pour générer le contenu du fichier contrôleur
 function generateControllerContent(className: string, collectionName: string): string
 {
     const interfaceName = `I${className}`;
 
-    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}/${interfaceName}";\n`;
     content += `import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";\n\n\n`;
     content += `/**\n`;
     content += ` * Contrôleur pour l'entité ${className}\n`;
@@ -446,7 +430,7 @@ function generateMetierContent(className: string, collectionName: string): strin
 {
     const interfaceName = `I${className}`;
 
-    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}/${interfaceName}";\n`;
     content += `import { BaseMetier } from "../../../../../services/base-classes/src/metier/base/BaseMetier";\n\n\n`;
     content += `/**\n`;
     content += ` * Métier pour l'entité ${className}\n`;
@@ -531,8 +515,6 @@ async function generateModels(pFront: boolean = false): Promise<void>
 
             if (!pFront)
             {
-                initializeMetierFolders(serviceConfig);
-
                 // Initialiser le dossier des contrôleurs si spécifié
                 if (serviceConfig.controllerDir)
                 {
@@ -562,19 +544,25 @@ async function generateModels(pFront: boolean = false): Promise<void>
                     const className = collectionNameToClassName(collectionName);
                     const interfaceName = `I${className}`;
 
+                    // Créer le dossier métier pour cette entité
+                    const interfaceEntityDir = path.join(serviceConfig.outputDir, folders.interfaces, interfaceName);
+                    ensureDirectoryExists(interfaceEntityDir);
+
                     // Générer les interfaces pour les objets imbriqués d'abord
                     for (const [nestedName, nestedSchema] of nestedSchemas)
                     {
                         const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
                         const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
-                        const nestedInterfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${nestedName}.ts`);
+                        const nestedInterfaceFilePath = path.join(interfaceEntityDir, `${nestedName}.ts`);
                         fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
                         console.log(`  Interface imbriquée générée: ${nestedInterfaceFilePath}`);
                     }
 
+
+
                     // Générer le fichier d'interface principal
                     const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
-                    const interfaceFilePath = path.join(serviceConfig.outputDir, folders.interfaces, `${interfaceName}.ts`);
+                    const interfaceFilePath = path.join(interfaceEntityDir, `${interfaceName}.ts`);
                     fs.writeFileSync(interfaceFilePath, interfaceContent);
                     console.log(`  Interface principale générée: ${interfaceFilePath}`);
 
