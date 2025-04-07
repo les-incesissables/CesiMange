@@ -1,5 +1,5 @@
 // pages/index.tsx
-import React, { useCallback } from 'react';
+import React from 'react';
 import RestaurantLayout from '../../layout/single/RestaurantLayout';
 import LeftSideBarResto from '../../components/LesftSideBar/LeftSideBar-Resto';
 
