@@ -49,10 +49,10 @@ app.use(helmet());
  */
 app.use(morgan('dev'));
 
-const userController = new AuthUsersController(new AuthUsersMetier());
+const lAuthController = new AuthUsersController(new AuthUsersMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
-app.use('/auth', userController.getRouter());
+app.use('/auth', lAuthController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());

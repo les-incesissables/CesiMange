@@ -4,7 +4,7 @@ import { BaseController } from "../../../../../services/base-classes/src/control
 
 /**
  * Contr�leur pour l'entit� Order
- * @Author ModelGenerator - 2025-04-05T17:07:13.336Z - Cr�ation
+ * @Author ModelGenerator - 2025-04-07T12:21:07.896Z - Cr�ation
  */
 export class OrderController extends BaseController<IOrder, Partial<IOrder>> {
 }

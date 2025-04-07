@@ -19,4 +19,6 @@ export interface IRestaurant extends Document {
   created_at: Date;
   updated_at: Date;
   updatedAt?: Date;
+  banniere: string;
+  logo: string;
 }
