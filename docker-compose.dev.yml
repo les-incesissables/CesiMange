@@ -61,6 +61,24 @@ services:
             - api_network
         command: ['npm', 'run', 'dev']
 
+    resolver-service:
+        build:
+            context: .
+            dockerfile: platforms/services/request-resolver-service/Dockerfile.dev
+        container_name: resolver-service
+        ports:
+            - '8080:8080'
+        environment:
+            - NODE_ENV=development
+            - DOCKER_ENV=true
+        env_file:
+            - ./platforms/services/request-resolver-service/.env.development
+        volumes:
+            - ./platforms/services/request-resolver-service:/app/platforms/microservices/request-resolver-service
+        networks:
+            - api_network
+        command: ['npm', 'run', 'dev']
+
     mongodb-user:
         build:
             context: ./platforms/databases/mongodb/user-service
@@ -88,6 +106,7 @@ services:
             - api_network
 
     mssql-auth:
+        user: root
         build:
             context: ./platforms/databases/sqlserver/auth-service
             dockerfile: Dockerfile.mssql
@@ -104,17 +123,7 @@ services:
         networks:
             - api_network
 
-    nginx-gateway:
-        build:
-            context: .
-            dockerfile: platforms/nginx-gateway/Dockerfile
-        container_name: nginx-gateway-dev
-        ports:
-            - '8080:80'
-        environment:
-            - ENV=development
-        networks:
-            - api_network
+    
 
 networks:
     api_network:
