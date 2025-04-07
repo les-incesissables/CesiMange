@@ -1,9 +1,12 @@
-import * as React from 'react';
+// __root.tsx
 import { Outlet, createRootRoute } from '@tanstack/react-router';
 
 export const Route = createRootRoute({
-    component: RootComponent,
+    // On ne rend ici qu’un Outlet
+    component: () => <Outlet />,
 });
+<<<<<<< HEAD
+=======
 
 function RootComponent() {
     // Déclaration d'un objet conforme à ButtonProps
@@ -16,3 +19,4 @@ function RootComponent() {
         </React.Fragment>
     );
 }
+>>>>>>> d4252847bbfee494beb1ef331e2af0b977925246
