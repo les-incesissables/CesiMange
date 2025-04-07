@@ -4,7 +4,7 @@ import { BaseMetier } from "../../../../../services/base-classes/src/metier/base
 
 /**
  * M�tier pour l'entit� Order
- * @Author ModelGenerator - 2025-04-07T19:31:07.863Z - Cr�ation
+ * @Author ModelGenerator - 2025-04-07T21:48:27.202Z - Cr�ation
  */
 export class OrderMetier extends BaseMetier<IOrder, Partial<IOrder>> {
     constructor() {

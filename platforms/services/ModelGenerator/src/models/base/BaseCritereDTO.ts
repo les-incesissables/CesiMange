@@ -14,7 +14,7 @@ export abstract class BaseCritereDTO implements IBaseCritereDTO
     pageSize?: number;
     sort?: string;
     sortDirection?: "asc" | "desc";
-    includeDeleted?: boolean;
+    hasNext?: boolean;
     limit?: number;
     skip?: number;
     populate?: string[];
