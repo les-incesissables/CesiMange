@@ -1,9 +1,8 @@
 // request-resolver-service/src/gateway.config.ts
 
-import { IGatewayConfig } from "./interfaces/IGatewayConfig";
+import { IGatewayConfig } from './interfaces/IGatewayConfig';
 
-export function loadGatewayConfig(): IGatewayConfig
-{
+export function loadGatewayConfig(): IGatewayConfig {
     const defaultConfig: IGatewayConfig = {
         port: Number(process.env.GATEWAY_PORT) || 3000,
         services: [
@@ -14,20 +13,20 @@ export function loadGatewayConfig(): IGatewayConfig
                 publicRoutes: [
                     {
                         path: '/login',
-                        methods: ['POST']
+                        methods: ['POST'],
                     },
                     {
                         path: '/register',
-                        methods: ['POST']
+                        methods: ['POST'],
                     },
                     {
                         path: '/refresh-token',
-                        methods: ['POST']
+                        methods: ['POST'],
                     },
                     {
                         path: '/logout',
-                        methods: ['POST']
-                    }
+                        methods: ['POST'],
+                    },
                 ],
                 protectedRoutes: [
                     {
@@ -35,15 +34,15 @@ export function loadGatewayConfig(): IGatewayConfig
                         methods: ['DELETE'],
                         ownershipCheck: {
                             paramName: 'id',
-                            matchField: 'id'
-                        }
+                            matchField: 'id',
+                        },
                     },
                     {
                         path: '/admin',
                         methods: ['GET'],
-                        allowedRoles: ['admin']
-                    }
-                ]
+                        allowedRoles: ['admin'],
+                    },
+                ],
             },
             {
                 routeName: 'user-profiles',
@@ -52,16 +51,16 @@ export function loadGatewayConfig(): IGatewayConfig
                 publicRoutes: [
                     {
                         path: '/',
-                        methods: ['GET']
+                        methods: ['GET'],
                     },
                     {
                         path: '/:id',
-                        methods: ['GET']
+                        methods: ['GET'],
                     },
                     {
                         path: '/',
-                        methods: ['POST']
-                    }
+                        methods: ['POST'],
+                    },
                 ],
                 protectedRoutes: [
                     {
@@ -69,10 +68,10 @@ export function loadGatewayConfig(): IGatewayConfig
                         methods: ['DELETE'],
                         ownershipCheck: {
                             paramName: 'id',
-                            matchField: 'sub'
-                        }
-                    }
-                ]
+                            matchField: 'sub',
+                        },
+                    },
+                ],
             },
             {
                 routeName: 'restaurants',
@@ -81,12 +80,12 @@ export function loadGatewayConfig(): IGatewayConfig
                 publicRoutes: [
                     {
                         path: '/',
-                        methods: ['GET']
+                        methods: ['GET'],
                     },
                     {
                         path: '/:id',
-                        methods: ['GET']
-                    }
+                        methods: ['GET'],
+                    },
                 ],
                 protectedRoutes: [
                     {
@@ -94,22 +93,22 @@ export function loadGatewayConfig(): IGatewayConfig
                         methods: ['DELETE'],
                         ownershipCheck: {
                             paramName: 'id',
-                            matchField: 'sub'
-                        }
+                            matchField: 'sub',
+                        },
                     },
                     {
                         path: '/admin',
                         methods: ['GET'],
-                        allowedRoles: ['admin']
-                    }
-                ]
+                        allowedRoles: ['admin'],
+                    },
+                ],
             },
             {
                 routeName: 'orders',
                 BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4004') + '/orders',
-                enabled: true
-            }
-        ]
+                enabled: true,
+            },
+        ],
     };
 
     return defaultConfig;
