@@ -21,7 +21,7 @@ const RestaurantCard: React.FC<IRestaurant> = (pRestaurant: IRestaurant) =>
         >
             {/* Image fixe */}
             <div className="w-full h-28 overflow-hidden rounded-xl border border-black bg-white shrink-0">
-                <img src={pRestaurant.logo} alt={pRestaurant.name} className="w-full h-full object-cover" />
+                <img src={`/images/restaurants/${pRestaurant.logo}`} alt={pRestaurant.name} className="w-full h-full object-cover" />
             </div>
 
             {/* Texte & icône */}

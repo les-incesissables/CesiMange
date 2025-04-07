@@ -9,9 +9,12 @@ export abstract class BaseRepository<T> implements IApiRepository<T> {
         protected endpoint: string,
     ) {}
 
-    public async fetchAll(): Promise<T[]> {
-        const response = await this.apiProxy.get<T[]>(this.endpoint);
+    public async fetchAll(page: number = 1, limit: number = 10): Promise<T[]> {
+        const query = new URLSearchParams();
+        query.append('page', page.toString());
+        query.append('limit', limit.toString());
 
+        const response = await this.apiProxy.get<T[]>(`${this.endpoint}?${query.toString()}`);
         return response.data;
     }
 

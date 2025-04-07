@@ -40,7 +40,10 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            let lCritere = req.body as CritereDTO;
+            const lPage = parseInt(req.query.page as string) || undefined;
+            const lLimit = parseInt(req.query.limit as string) || undefined;
+
+            let lCritere: CritereDTO = { ...req.body, page:lPage, limit:lLimit } as CritereDTO;
 
             // Validation des données
             try

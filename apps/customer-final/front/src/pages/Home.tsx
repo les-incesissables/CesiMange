@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import HomeLayout from '../layout/HomeLayout';
 import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';
@@ -9,33 +10,46 @@ const localMiddleware = new LocalMiddleware();
 
 const Home: React.FC = () =>
 {
-    try
-    {
-        const { data: restaurantData, isLoading, isError }: UseQueryResult<any, Error> = useQuery({
-            queryKey: ['restaurants'],
-            queryFn: async () =>
-            {
-                return await localMiddleware.callLocalApi(async () =>
-                    await localMiddleware.RestoRepo.fetchAll()
-                );
-            }
-        });
+    const [page, setPage] = useState<number>(1);
+    const limit = 10; // ou n’importe quel nombre d’éléments par page
 
-        if (isLoading) return <div>Chargement en cours...</div>;
-        if (isError) return <div>Erreur de chargement des restaurants</div>;
+    const {
+        data: restaurantData,
+        isLoading,
+        isError,
+    }: UseQueryResult<any, Error> = useQuery({
+        queryKey: ['restaurants', page],
+        queryFn: async () =>
+        {
+     
+            return await localMiddleware.callLocalApi(async () =>
+                await localMiddleware.RestoRepo.fetchAll()
+            );
+        }
+    });
 
-        return (
-            <HomeLayout>
-                <CategorieList />
-                <RestaurantList restaurants={restaurantData.data as IRestaurant} />
-            </HomeLayout>
+    if (isLoading) return <div>Chargement en cours...</div>;
+    if (isError) return <div>Erreur de chargement des restaurants</div>;
 
-        );
+    const handleNextPage = () => setPage(prev => prev + 1);
+    const handlePrevPage = () => setPage(prev => Math.max(prev - 1, 1));
 
-    } catch (e)
-    {
-        if (e) return <div>Erreur de chargement des restaurants</div>;
-    }
+    return (
+        <HomeLayout>
+            <CategorieList />
+            <RestaurantList restaurants={restaurantData.data as IRestaurant[]} />
+
+            <div className="pagination">
+                <button onClick={handlePrevPage} disabled={page === 1}>
+                    Page précédente
+                </button>
+                <span>Page {page}</span>
+                <button onClick={handleNextPage} disabled={!restaurantData.hasMore}>
+                    Page suivante
+                </button>
+            </div>
+        </HomeLayout>
+    );
 };
 
 export default Home;
