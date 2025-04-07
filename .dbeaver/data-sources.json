@@ -10,8 +10,8 @@
 			"configuration": {
 				"host": "localhost",
 				"port": "1433",
-				"database": "CesiMange",
-				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dCesiMange",
+				"database": "CesiMangeAuth",
+				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dCesiMangeAuth",
 				"configurationType": "MANUAL",
 				"type": "dev",
 				"closeIdleConnection": true,
