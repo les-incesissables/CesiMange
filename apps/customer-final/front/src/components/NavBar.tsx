@@ -1,10 +1,12 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+
 import LoginButton from './Buttons/LoginButton';
 import ClickableText from './Buttons/ClickableText';
 import SearchBar from './Utils/SearchBar';
 import AccountSidebar from './Utils/SideBarAccont';
+import { Link } from 'react-router';
+import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
     variant: 'general' | 'client';
@@ -65,17 +67,18 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                     {/* Section droite */}
                     <div className="w-full sm:w-52 flex justify-between items-center px-[5px] mt-2 sm:mt-0">
                         <div className="flex items-end gap-2">
-                            <div data-size="48" className="w-10 h-10 relative overflow-hidden">
-                                <img src="/images/bell.svg" onClick={onBellClick} />
-                            </div>
+                            <button className="w-10 h-10 cursor-pointer" onClick={onBellClick}>
+                                <BellIcon className="w-full h-full text-blue-500" />
+                            </button>
+
                             <div data-size="Large" className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
                         </div>
                         <div className="flex items-end gap-2">
-                            <div data-size="48" className="w-10 h-10 relative overflow-hidden">
-                                <img src="/images/shopping-cart.svg" onClick={onCartClick} />
-                            </div>
+                            <button className="w-10 h-10 cursor-pointer" onClick={onCartClick}>
+                                <ShoppingCartIcon className="w-full h-full text-blue-500" />
+                            </button>
                             <div data-size="Large" className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
