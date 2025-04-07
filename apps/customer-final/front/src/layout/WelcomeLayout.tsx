@@ -5,11 +5,11 @@ import Modal from '../components/Utils/Modal';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 
-interface RootLayoutProps {
+interface WelcomeLayoutProps {
     children: React.ReactNode;
 }
 
-const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+const WelcomeLayout: React.FC<WelcomeLayoutProps> = ({ children }) => {
     const [isLoginOpen, setIsModalOpen] = useState(false);
     const [isSignupOpen, setOpen] = useState(false);
 
@@ -36,4 +36,4 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     );
 };
 
-export default RootLayout;
+export default WelcomeLayout;
