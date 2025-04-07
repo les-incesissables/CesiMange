@@ -4,9 +4,20 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Debug Resolver Service with Nodemon",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
+            "skipFiles": ["<node_internals>/**"],
+            "restart": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/platforms/services/request-resolver-service"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Debug Auth Service with Nodemon",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["nodemon", "--exec", "ts-node -r ", "src/app.ts"],
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
             "skipFiles": ["<node_internals>/**"],
             "restart": true,
             "console": "integratedTerminal",
@@ -17,7 +28,7 @@
             "request": "launch",
             "name": "Debug User Service with Nodemon",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["nodemon", "--exec", "ts-node -r tsconfig-paths/register", "src/app.ts"],
+            "runtimeArgs": ["nodemon", "--exec", "ts-node tsconfig-paths/register", "src/app.ts"],
             "skipFiles": ["<node_internals>/**"],
             "restart": true,
             "console": "integratedTerminal",
@@ -28,7 +39,7 @@
             "request": "launch",
             "name": "Debug Restaurant Service with Nodemon",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["nodemon", "--exec", "ts-node -r ", "src/app.ts"],
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
             "skipFiles": ["<node_internals>/**"],
             "restart": true,
             "console": "integratedTerminal",
@@ -37,8 +48,13 @@
     ],
     "compounds": [
         {
-            "name": "Debug All Microservices (Nodemon)",
-            "configurations": ["Debug User Service with Nodemon", "Debug Restaurant Service with Nodemon"]
+            "name": "Debug All Services (Nodemon)",
+            "configurations": [
+                "Debug Resolver Service with Nodemon",
+                "Debug Auth Service with Nodemon",
+                "Debug User Service with Nodemon",
+                "Debug Restaurant Service with Nodemon"
+            ]
         }
     ]
 }
