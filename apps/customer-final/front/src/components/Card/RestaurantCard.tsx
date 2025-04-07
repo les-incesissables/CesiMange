@@ -1,19 +1,27 @@
+import { HeartIcon } from '@heroicons/react/24/outline';
 import React from 'react';
+import { useNavigate } from 'react-router';
 
 interface RestaurantCardProps {
+    name: string;
     imageSrc: string;
     title: string;
     subtitle: string;
     icon?: React.ReactNode;
     bgColor?: string;
-    onClick?: () => void;
 }
 
-const RestaurantCard: React.FC<RestaurantCardProps> = ({ imageSrc, title, subtitle, icon, onClick }) => {
+const RestaurantCard: React.FC<RestaurantCardProps> = ({ name, imageSrc, title, subtitle, icon, bgColor }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(`/restaurants/${name}`);
+    };
+
     return (
         <div
-            className={`w-48 h-52 p-3 bg-yellow-400 rounded-2xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer flex flex-col justify-between overflow-hidden`}
-            onClick={onClick}
+            className={`w-48 h-52 p-3 ${bgColor || 'bg-yellow-400'} rounded-2xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer flex flex-col justify-between overflow-hidden`}
+            onClick={handleClick}
             role="button"
             aria-label={`Carte restaurant : ${title}`}
         >
@@ -29,7 +37,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ imageSrc, title, subtit
                     <span className="text-gray-600 text-xs truncate">{subtitle}</span>
                 </div>
 
-                {icon && <div className="ml-2 w-6 h-6 flex justify-center items-center shrink-0">{icon}</div>}
+                {icon || <HeartIcon className="ml-2 w-6 h-6 shrink-0" />}
             </div>
         </div>
     );
