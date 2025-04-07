@@ -1,7 +1,7 @@
 {
-  "name": "kafka-simple",
+  "name": "message-broker-service",
   "version": "1.0.0",
-  "description": "Simple Kafka client for microservices communication",
+  "description": "Kafka package for microservices communication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/node": "^20.5.9",
     "@types/uuid": "^9.0.3",
+    "eslint": "^9.24.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
