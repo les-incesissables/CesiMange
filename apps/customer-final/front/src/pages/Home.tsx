@@ -1,34 +1,116 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { localMiddlewareInstance } from 'customer-final-middleware';
+import HomeLayout from '../layout/HomeLayout';
+import CategorieList from '../components/List/CategorieList';
+import RestaurantList from '../components/List/RestaurantList';
 
-export const Home: React.FC = () => {
-    const { data, isLoading, error } = useQuery({
-        queryKey: ['users'],
-        queryFn: () => localMiddlewareInstance.getUsers(),
-    });
-
-    if (isLoading) return <div>Loading users...</div>;
-    if (error) return <div>Error: {(error as Error).message}</div>;
-
-    const users = data?.data || [];
-    
+const Home: React.FC = () => {
+    const restaurantData = [
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Le Gourmet',
+            subtitle: 'Français',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Sushi Zen',
+            subtitle: 'Japonais',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Pizza Mia',
+            subtitle: 'Italien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Spicy India',
+            subtitle: 'Indien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Le Gourmet',
+            subtitle: 'Français',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Sushi Zen',
+            subtitle: 'Japonais',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Pizza Mia',
+            subtitle: 'Italien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Spicy India',
+            subtitle: 'Indien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Le Gourmet',
+            subtitle: 'Français',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Sushi Zen',
+            subtitle: 'Japonais',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Pizza Mia',
+            subtitle: 'Italien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Spicy India',
+            subtitle: 'Indien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Le Gourmet',
+            subtitle: 'Français',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Sushi Zen',
+            subtitle: 'Japonais',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Pizza Mia',
+            subtitle: 'Italien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Spicy India',
+            subtitle: 'Indien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Le Gourmet',
+            subtitle: 'Français',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Sushi Zen',
+            subtitle: 'Japonais',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Pizza Mia',
+            subtitle: 'Italien',
+        },
+        {
+            imageSrc: 'https://placehold.co/180x120',
+            title: 'Spicy India',
+            subtitle: 'Indien',
+        },
+    ];
 
     return (
-        <div>
-            <h1 className="text-amber-300">Users List</h1>
-            <ul>
-                {Array.isArray(users) && users.length > 0 ? (
-                    users.map((user: any) => (
-                        <li key={user.id}>
-                            {user.name} ({user.email})
-                        </li>
-                    ))
-                ) : (
-                    <li>No users found.</li>
-                )}
-            </ul>
-        </div>
+        <HomeLayout>
+            <CategorieList />
+            <RestaurantList restaurants={restaurantData} />
+        </HomeLayout>
     );
 };
 
