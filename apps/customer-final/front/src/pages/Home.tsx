@@ -3,6 +3,7 @@ import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { LocalMiddleware } from '../../../local-middleware/src/middleware/LocalMiddleware';
+import { IRestaurant } from '../models/interfaces/IRestaurant/IRestaurant';
 
 const localMiddleware = new LocalMiddleware();
 
@@ -10,7 +11,7 @@ const Home: React.FC = () =>
 {
     try
     {
-        const { data: restaurantData, isLoading, isError }: UseQueryResult<IRestaurant, Error> = useQuery({
+        const { data: restaurantData, isLoading, isError }: UseQueryResult<any, Error> = useQuery({
             queryKey: ['restaurants'],
             queryFn: async () =>
             {
@@ -26,7 +27,7 @@ const Home: React.FC = () =>
         return (
             <HomeLayout>
                 <CategorieList />
-                <RestaurantList restaurants={restaurantData.data} />
+                <RestaurantList restaurants={restaurantData.data as IRestaurant} />
             </HomeLayout>
 
         );

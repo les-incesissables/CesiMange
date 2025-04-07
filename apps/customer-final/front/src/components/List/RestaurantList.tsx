@@ -1,8 +1,9 @@
 import React from 'react';
 import RestaurantCard from '../Card/RestaurantCard';
+import { IRestaurant } from '../../models/interfaces/IRestaurant/IRestaurant';
 
 interface RestaurantListProps {
-    restaurants: any[];
+    restaurants: IRestaurant[];
 }
 
 const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants }) => {
