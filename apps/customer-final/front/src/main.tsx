@@ -8,7 +8,15 @@ import Home from './pages/Home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Restaurant from './pages/single/Restaurant';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 5_000,
+            refetchOnWindowFocus: false,
+            refetchOnMount: 'always',
+        },
+    },
+});
 
 // Render the app
 const rootElement = document.getElementById('root')!;

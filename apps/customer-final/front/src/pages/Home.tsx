@@ -17,9 +17,7 @@ const Home: React.FC = () =>
                 return await localMiddleware.callLocalApi(async () =>
                     await localMiddleware.RestoRepo.fetchAll()
                 );
-            },
-            retry: 1,
-            staleTime: 30000
+            }
         });
 
         if (isLoading) return <div>Chargement en cours...</div>;
