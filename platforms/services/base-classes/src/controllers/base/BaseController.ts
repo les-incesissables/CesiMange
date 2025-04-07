@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { BaseMetier } from '../../metier/base/BaseMetier';
+import { BaseCritereDTO } from '../../../../data-access-layer/src/models/base/BaseCritereDTO';
 
 export class BaseController<DTO, CritereDTO>
 {
@@ -40,7 +41,11 @@ export class BaseController<DTO, CritereDTO>
     {
         try
         {
-            let lCritere = req.body as CritereDTO;
+            const lPage = parseInt(req.query.page as string);
+            const lLimit = parseInt(req.query.limit as string);
+            const lEnhancedLimit = lLimit + 1;
+
+            let lCritere: CritereDTO = { ...req.body, page: lPage, limit: lEnhancedLimit } as CritereDTO;
 
             // Validation des données
             try
@@ -55,8 +60,19 @@ export class BaseController<DTO, CritereDTO>
                 return;
             }
 
-            const items = await this.Metier.getItems(lCritere);
-            res.status(200).json(items);
+            let lItems = await this.Metier.getItems(lCritere);
+
+            // cm - Verifie que il y'a un element supplementaire
+            const lHasNext = lItems.length > lLimit;
+            // cm - Construction des items final -1 element
+            lItems = lHasNext ? lItems.slice(0, -1) : lItems;
+
+            const lPagination: BaseCritereDTO = {
+                hasNext: lHasNext,
+                page: lPage
+            };
+
+            res.status(200).json([lItems, lPagination]);
         } catch (error)
         {
             this.handleError(error, 'getAllItems');

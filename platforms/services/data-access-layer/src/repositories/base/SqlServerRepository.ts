@@ -307,7 +307,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
         }
 
         // Ne pas inclure les éléments supprimés sauf si demandé
-        if (pCritereDTO.includeDeleted !== true && 'deletedAt' in filter) {
+        if (pCritereDTO.hasNext !== true && 'deletedAt' in filter) {
             filter.deletedAt = null;
         }
 

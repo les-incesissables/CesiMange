@@ -339,7 +339,7 @@ function initializeServiceFolders(serviceConfig) {
 // Fonction pour g�n�rer le contenu du fichier contr�leur
 function generateControllerContent(className, collectionName) {
     const interfaceName = `I${className}`;
-    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}/${interfaceName}";\n`;
     content += `import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";\n\n\n`;
     content += `/**\n`;
     content += ` * Contr�leur pour l'entit� ${className}\n`;
@@ -352,7 +352,7 @@ function generateControllerContent(className, collectionName) {
 // Fonction pour g�n�rer le contenu du fichier m�tier mis � jour
 function generateMetierContent(className, collectionName) {
     const interfaceName = `I${className}`;
-    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}";\n`;
+    let content = `import { ${interfaceName} } from "../../models/interfaces/${interfaceName}/${interfaceName}";\n`;
     content += `import { BaseMetier } from "../../../../../services/base-classes/src/metier/base/BaseMetier";\n\n\n`;
     content += `/**\n`;
     content += ` * M�tier pour l'entit� ${className}\n`;
