@@ -11,7 +11,7 @@ import Restaurant from './pages/single/Restaurant';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 5_000,
+            staleTime: 50000,
             refetchOnWindowFocus: false,
             refetchOnMount: 'always',
         },
