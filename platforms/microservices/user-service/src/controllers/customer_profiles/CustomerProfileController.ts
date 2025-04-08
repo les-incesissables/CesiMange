@@ -4,7 +4,7 @@ import { BaseController } from "../../../../../services/base-classes/src/control
 
 /**
  * Contr�leur pour l'entit� CustomerProfile
- * @Author ModelGenerator - 2025-04-07T21:48:27.157Z - Cr�ation
+ * @Author ModelGenerator - 2025-04-08T07:22:46.100Z - Cr�ation
  */
 export class CustomerProfileController extends BaseController<ICustomerProfile, Partial<ICustomerProfile>> {
 }
