@@ -1,12 +1,5 @@
 {
-    "name": "cesimange-monorepo",
-    "private": true,
-    "workspaces": [
-        "apps/*/front",
-        "apps/*/proxy",
-        "apps/*/local-middleware"
-    ],
-    "devDependencies": {
-        "plop": "^4.0.1"
-    }
+  "dependencies": {
+    "gmake": "^1.0.8"
+  }
 }

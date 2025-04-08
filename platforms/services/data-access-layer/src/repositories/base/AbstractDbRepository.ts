@@ -13,6 +13,13 @@ export abstract class AbstractDbRepository<DTO, CritereDTO> implements IDbReposi
      */
     constructor(pConfig: IRepositoryConfig) {
         this._config = pConfig;
+        //try
+        //{
+        //    this.initialize();
+        //} catch (e: any)
+        //{
+        //    console.log(e);
+        //}
     }
 
     public abstract initialize(): Promise<void>;
@@ -24,7 +31,7 @@ export abstract class AbstractDbRepository<DTO, CritereDTO> implements IDbReposi
     abstract itemExists(pCritereDTO: CritereDTO): Promise<boolean>;
     abstract disconnect(): Promise<void>;
     abstract buildFilter(pCritereDTO: CritereDTO): any;
-    abstract formatResults(pResults: any[]): DTO[];
+    abstract formatResults(pResults: any[] | any): DTO[];
 
     /**
      * V�rifie si une valeur est une date

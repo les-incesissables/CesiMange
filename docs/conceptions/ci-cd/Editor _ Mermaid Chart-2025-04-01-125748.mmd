@@ -1,0 +1,25 @@
+graph TD
+    subgraph "Développement"
+        D1[Code Source] --> D2[Tests Unitaires]
+        D2 --> D3[Build Local]
+    end
+    
+    subgraph "Intégration Continue"
+        I1[Repository Git] --> I2[Pipeline CI]
+        I2 --> I3[Build Automatisé]
+        I3 --> I4[Tests Unitaires]
+        I4 --> I5[Analyse Statique]
+        I5 --> I6[Tests d'Intégration]
+    end
+    
+    subgraph "Déploiement Continu"
+        C1[Artefacts Validés] --> C2[Déploiement Test]
+        C2 --> C3[Tests E2E]
+        C3 --> C4[Déploiement Staging]
+        C4 --> C5[Tests de Performance]
+        C5 --> C6[Approbation]
+        C6 --> C7[Déploiement Production]
+    end
+    
+    D3 --> I1
+    I6 --> C1

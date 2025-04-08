@@ -9,22 +9,7 @@ import { mapErrorCodeToMessage } from '../utils/errorMapper';
  * It abstracts API calls, normalizes responses, and provides additional local services (e.g., caching, offline handling).
  */
 export class LocalMiddleware {
-    private orderRepo = RepositoryService.order;
-    private userRepo = RepositoryService.user;
-    private cache: Map<string, any> = new Map();
-    private isOffline = false;
-
-    constructor() {
-        window.addEventListener('online', () => {
-            this.isOffline = false;
-            console.log('Network online.');
-            // Optionally process queued requests
-        });
-        window.addEventListener('offline', () => {
-            this.isOffline = true;
-            console.warn('Network offline.');
-        });
-    }
+    public RestoRepo = RepositoryService.resto;
 
     /**
      * Processes incoming messages and normalizes them.
@@ -81,13 +66,6 @@ export class LocalMiddleware {
      * @returns A normalized response.
      */
     public async callLocalApi(apiFunction: () => Promise<any>): Promise<NormalizedResponse> {
-        if (this.isOffline) {
-            return {
-                status: 'failure',
-                data: null,
-                uiMessage: 'You are offline. Please check your connection.',
-            };
-        }
         try {
             const response = await apiFunction();
             return this.processIncomingMessage(response);
@@ -100,32 +78,5 @@ export class LocalMiddleware {
                 uiMessage: mapErrorCodeToMessage(errorCode),
             };
         }
-    }
-
-    // --- API Methods ---
-    public async getUsers(): Promise<NormalizedResponse> {
-        console.log('LocalMiddleware: getUsers called');
-        return this.callLocalApi(() => this.userRepo.fetchAll());
-    }
-
-    public async getOrders(): Promise<NormalizedResponse> {
-        return this.callLocalApi(() => this.orderRepo.fetchAll());
-    }
-
-    public async getUser(userId: string): Promise<NormalizedResponse> {
-        return this.callLocalApi(() => this.userRepo.fetchById(userId));
-    }
-
-    // --- Cache Management ---
-    public cacheResponse(key: string, data: any): void {
-        this.cache.set(key, data);
-    }
-
-    public getCachedResponse(key: string): any | undefined {
-        return this.cache.get(key);
-    }
-
-    public clearCache(): void {
-        this.cache.clear();
     }
 }

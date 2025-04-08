@@ -1,31 +1,44 @@
-import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
 
-// Import the generated route tree
-import { routeTree } from './routeTree.gen';
+import { BrowserRouter, Route, Routes } from 'react-router';
+
+import './index.css';
+import Welcome from './pages/Welcome';
+import Home from './pages/Home';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Restaurant from './pages/single/Restaurant';
+import DashBoardAccount from './pages/DashBoard/DashBoardAccount';
+import DashboardOrder from './pages/DashBoard/DashBoardOrder';
+import DashBoardFavorites from './pages/DashBoard/DashboardFavorites';
+import DashBoardSponsorship from './pages/DashBoard/DashboardSponsorShip';
 
-// Create a new router instance
-const router = createRouter({ routeTree });
-const queryClient = new QueryClient();
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
-    }
-}
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 5_000,
+            refetchOnWindowFocus: false,
+            refetchOnMount: 'always',
+        },
+    },
+});
 
 // Render the app
 const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
-        <StrictMode>
+        <BrowserRouter>
             <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router} />
+                <Routes>
+                    <Route path="/" element={<Welcome />} />
+                    <Route path="/home" element={<Home />}></Route>
+                    <Route path="/restaurants/:id" element={<Restaurant />}></Route>
+                    <Route path="/dashboard/account" element={<DashBoardAccount />}></Route>
+                    <Route path="/dashboard/order" element={<DashboardOrder />}></Route>
+                    <Route path="/dashboard/favorites" element={<DashBoardFavorites />}></Route>
+                    <Route path="/dashboard/sponsorship" element={<DashBoardSponsorship />}></Route>
+                </Routes>
             </QueryClientProvider>
-        </StrictMode>,
+        </BrowserRouter>,
     );
 }

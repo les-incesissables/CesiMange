@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant Client as Client Final
+    participant Livreur as Application Livreur
+    participant Gateway as API Gateway
+    participant TrackerMS as Microservice Tracking
+    participant Socket as WebSocket Server
+    participant DB as MongoDB (Suivi)
+
+    Livreur->>Gateway: Mise à jour position (POST)
+    Gateway->>TrackerMS: Transmet position
+    TrackerMS->>DB: Enregistre position
+    TrackerMS->>Socket: Émet événement mise à jour
+    
+    Note over Client,Socket: Connexion WebSocket établie
+    
+    Socket-->>Client: Mise à jour en temps réel
+    
+    Client->>Gateway: Demande détails commande (GET)
+    Gateway->>TrackerMS: Récupère détails et historique
+    TrackerMS->>DB: Requête historique positions
+    DB-->>TrackerMS: Données de suivi
+    TrackerMS-->>Gateway: Données formatées
+    Gateway-->>Client: Détails commande + tracking

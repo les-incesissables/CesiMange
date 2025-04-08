@@ -6,14 +6,14 @@ import { IBaseCritereDTO } from '../../interfaces/IBaseCritereDTO';
  */
 export abstract class BaseCritereDTO implements IBaseCritereDTO {
     //#region Properties
-    id?: string;
+    id?: number;
     ids?: string[];
     search?: string;
     page?: number;
     pageSize?: number;
     sort?: string;
     sortDirection?: 'asc' | 'desc';
-    includeDeleted?: boolean;
+    hasNext?: boolean;
     limit?: number;
     skip?: number;
     populate?: string[];
