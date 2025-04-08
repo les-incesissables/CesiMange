@@ -5,14 +5,15 @@ interface TriStateButtonProps {
     text?: string;
     selected?: boolean;
     onClick?: () => void;
+    bg?: string;
 }
 
-const Button: React.FC<TriStateButtonProps> = ({ text = 'button', selected = false, onClick }) => {
+const Button: React.FC<TriStateButtonProps> = ({ text = 'button', selected = false, onClick, bg = 'bg-black' }) => {
     // Classes de base pour le bouton
     const baseClasses = 'group h-9 px-4 py-4 rounded-[20px] inline-flex justify-center items-center gap-2.5 transition-all duration-300';
 
     // Définition des classes de fond et de texte selon l'état sélectionné ou non
-    const defaultBg = 'bg-black';
+    const defaultBg = bg;
     const defaultText = 'text-white';
     const hoverBg = 'hover:bg-yellow-400';
 

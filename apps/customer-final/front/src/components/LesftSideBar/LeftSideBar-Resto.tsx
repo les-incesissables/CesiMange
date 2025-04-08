@@ -1,19 +1,32 @@
-// LeftSideBar-Resto.tsx
+'use client';
 import React from 'react';
 import CategorieRestoList from '../List/CategorieRestoList';
+import { IRestaurant } from '../../models/interfaces/IRestaurant/IRestaurant';
 
-const categories = ['catégorie 1', 'catégorie 2', 'catégorie 3'];
+interface LeftSideBarRestoProps {
+    restaurant: IRestaurant;
+}
 
-const LeftSideBarResto: React.FC = () => {
+const LeftSideBarResto: React.FC<LeftSideBarRestoProps> = ({ restaurant }) => {
+    // Extraction des catégories depuis le menu et les articles
+    const menuCategories = restaurant.menu?.map((menuItem) => menuItem.categorie) || [];
+    const articleCategories = restaurant.articles.map((article) => article.category);
+    // Fusionner les catégories et éliminer les doublons
+    const categories = Array.from(new Set([...menuCategories, ...articleCategories]));
+
     return (
-        <div className="w-80 h-[846px] px-16 pb-24 border-r border-black inline-flex flex-col justify-start items-center gap-10 overflow-hidden">
-            <img className="w-80 h-32 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" src="https://placehold.co/312x130" alt="Restaurant Banner" />
-            <div className="justify-start text-black text-4xl font-bold font-['Inter']">Nom resto</div>
-            <div className="justify-start text-black text-2xl font-normal font-['Inter']">Description</div>
-            <div className="w-64 h-0 outline-1 outline-offset-[-0.50px] outline-black" />
+        <aside className="w-80 h-screen sticky top-[80px] border-r border-black flex flex-col justify-start items-center gap-10 overflow-hidden">
+            <img
+                className="w-full h-32 object-contain shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+                src="/images/banner.png" // Modifiez le chemin si nécessaire.
+                alt={`${restaurant.name} Banner`}
+            />
+            <h1 className="w-56 text-center text-black text-4xl font-bold font-['Inter'] underline">{restaurant.name}</h1>
+            <p className="w-56 text-center text-black text-2xl font-normal font-['Inter']">{restaurant.description}</p>
+            <hr className="w-64 border border-black/50" />
             <CategorieRestoList categories={categories} />
-            <div className="w-60 h-0 outline-1 outline-offset-[-0.50px] outline-black" />
-        </div>
+            <hr className="w-60 border border-black/50" />
+        </aside>
     );
 };
 

@@ -1,8 +1,8 @@
 //#region Imports
+import 'reflect-metadata';
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-import 'reflect-metadata';
 import express from 'express';
 import * as path from 'path';
 import cors from 'cors';

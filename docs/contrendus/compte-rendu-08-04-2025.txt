@@ -1,0 +1,7 @@
+COMPTE-RENDU DU 08/04/2025
+
+###NOM###Mahmoud Charif
+###MATIN###TICKET : CESIMANGE-145 & 143
+Correction du crash auth service + Mise a jour de la BDD et des models + Affichage des restaurants actif + Correction de la pagination.
+###APRESMIDI###
+

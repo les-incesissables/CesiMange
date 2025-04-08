@@ -13,13 +13,13 @@ export abstract class AbstractDbRepository<DTO, CritereDTO> implements IDbReposi
      */
     constructor(pConfig: IRepositoryConfig) {
         this._config = pConfig;
-        try
-        {
-            this.initialize();
-        } catch (e: any)
-        {
-            console.log(e);
-        }
+        //try
+        //{
+        //    this.initialize();
+        //} catch (e: any)
+        //{
+        //    console.log(e);
+        //}
     }
 
     public abstract initialize(): Promise<void>;

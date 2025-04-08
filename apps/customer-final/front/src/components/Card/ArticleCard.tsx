@@ -1,28 +1,26 @@
 'use client';
 import React from 'react';
-
-export interface Article {
-    id: number; // Ajout de l'identifiant
-    image: string;
-    text: string;
-}
+import { IArticles } from '../../models/interfaces/IRestaurant/IArticles';
 
 interface ArticleCardProps {
-    article: Article;
+    article: IArticles;
     onAdd?: () => void;
 }
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ article, onAdd }) => {
     return (
-        <div className="w-44 p-5 bg-white rounded-[20px] inline-flex flex-col justify-start items-start gap-[5px] overflow-hidden">
-            <img className="w-32 h-32 rounded-[20px]" src={article.image} alt={article.text} />
-            <div className="w-32 flex flex-col justify-start items-start gap-2.5">
-                <div className="flex flex-col justify-center items-center gap-2.5">
-                    <div className="text-black text-base font-normal font-['Inter'] leading-snug">{article.text}</div>
-                </div>
-                <div className="self-stretch inline-flex justify-center items-center">
-                    <button onClick={onAdd} data-state="Default" className="h-5 px-4 py-4 bg-lime-500 rounded-[20px] flex justify-center items-center gap-2.5">
-                        <div className="text-center text-white text-base font-bold font-['Inter']">+</div>
+        <div className="w-44 p-5 bg-white rounded-[20px] inline-flex flex-col justify-start items-center gap-4 overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200">
+            <img className="w-32 h-32 rounded-[20px] object-cover" src={article.image_url} alt={article.name} />
+            <div className="w-full flex flex-col items-center gap-2">
+                <div className="text-black text-base font-normal font-['Inter'] leading-snug underline text-center">{article.name}</div>
+                <div className="w-full flex items-center justify-between">
+                    <div className="text-black text-base font-normal font-['Inter']">{article.price} €</div>
+                    <button
+                        onClick={onAdd}
+                        data-state="Default"
+                        className="h-8 w-8 bg-lime-500 hover:bg-lime-800 rounded-full flex justify-center items-center transition-colors duration-200"
+                    >
+                        <span className="text-white text-base font-bold font-['Inter']">+</span>
                     </button>
                 </div>
             </div>

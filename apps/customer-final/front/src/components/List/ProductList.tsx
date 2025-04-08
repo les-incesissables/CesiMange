@@ -1,17 +1,18 @@
 import React from 'react';
-import ArticleCard, { Article } from '../Card/ArticleCard';
+import ArticleCard from '../Card/ArticleCard';
+import { IArticles } from '../../models/interfaces/IRestaurant/IArticles';
 
 interface ProductListProps {
-    articles: Article[];
-    onAddToCart?: (article: Article) => void;
+    articles: IArticles[];
+    onAddToCart?: () => void;
 }
 
 const ProductList: React.FC<ProductListProps> = ({ articles, onAddToCart }) => {
     return (
         <ul className="flex flex-wrap gap-4">
             {articles.map((article) => (
-                <li key={article.id}>
-                    <ArticleCard article={article} onAdd={() => onAddToCart && onAddToCart(article)} />
+                <li>
+                    <ArticleCard article={article} onAdd={() => onAddToCart} />
                 </li>
             ))}
         </ul>

@@ -3,6 +3,8 @@ import { Document } from 'mongoose';
 import { ILocation } from './ILocation';
 import { IHours } from './IHours';
 import { IDeliveryOptions } from './IDeliveryOptions';
+import { IMenu } from './IMenu';
+import { IArticles } from './IArticles';
 
 export interface IRestaurant extends Document {
   name: string;
@@ -21,4 +23,6 @@ export interface IRestaurant extends Document {
   updatedAt?: Date;
   banniere: string;
   logo: string;
+  menu: IMenu[];
+  articles: IArticles[];
 }
