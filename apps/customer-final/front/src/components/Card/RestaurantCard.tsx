@@ -3,13 +3,11 @@ import React from 'react';
 import { useNavigate } from 'react-router';
 import { IRestaurant } from '../../models/interfaces/IRestaurant/IRestaurant';
 
-const RestaurantCard: React.FC<IRestaurant> = (pRestaurant: IRestaurant) =>
-{
+const RestaurantCard: React.FC<IRestaurant> = (pRestaurant: IRestaurant) => {
     const navigate = useNavigate();
 
-    const handleClick = () =>
-    {
-        navigate(`/restaurants/${pRestaurant.name}`);
+    const handleClick = (sender: any) => {
+        navigate(`/restaurants/${pRestaurant.name}`, { state: pRestaurant });
     };
 
     return (
