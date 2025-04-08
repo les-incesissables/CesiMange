@@ -56,7 +56,11 @@ const Home: React.FC = () =>
 
                 <button
                     onClick={handleNextPage}
-                    className="px-6 py-2 bg-yellow-400 text-black rounded-[20px] font-['Inter'] font-bold hover:bg-yellow-500 transition-all shadow-[0px_4px_4px_rgba(0,0,0,0.25)] hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]"
+                    disabled={!restaurantData.data[1].hasNext}
+                    className={`px-6 py-2 rounded-[20px] font-['Inter'] font-bold transition-all shadow-[0px_4px_4px_rgba(0,0,0,0.25)] ${!restaurantData.data[1].hasNext
+                            ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                            : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]'
+                        }`}
                 >
                     Suivant →
                 </button>
