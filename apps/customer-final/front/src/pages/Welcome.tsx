@@ -20,9 +20,9 @@ const Welcome: React.FC = () => {
                     <div className="bg-yellow-400 p-5 rounded-2xl shadow-lg transition-all duration-300">
                         <SearchBar onClick={handleGoToHome} textButton="Découvrir" placeHolder="Rechercher" />
                         <ul className="text-black text-2xl font-normal font-['Inter'] pl-5">
-                            <li>1 rue du Verger</li>
-                            <li>44 rue du dossier</li>
-                            <li>1 avenue de la semaine</li>
+                            {/*<li>1 rue du Verger</li>*/}
+                            {/*<li>44 rue du dossier</li>*/}
+                            {/*<li>1 avenue de la semaine</li>*/}
                         </ul>
                     </div>
                 </div>

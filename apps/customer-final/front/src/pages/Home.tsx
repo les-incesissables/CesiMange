@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useEffect } from 'react';
 import HomeLayout from '../layout/HomeLayout';
 import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';
@@ -13,8 +13,7 @@ const LIMIT = 10;
 const Home: React.FC = () =>
 {
     const { searchTerm } = useSearch();
-
-    const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+    const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } = useInfiniteQuery({
         queryKey: ['restaurants', searchTerm],
         queryFn: ({ pageParam = 1 }) =>
         {
@@ -26,6 +25,14 @@ const Home: React.FC = () =>
         getNextPageParam: (lastPage) => (lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null),
         initialPageParam: 1
     });
+
+    useEffect(() =>
+    {
+        if (searchTerm)
+        {
+            refetch();
+        }
+    }, [searchTerm, refetch]);
 
     if (isLoading) return <div>Chargement...</div>;
     if (isError) return <div>Erreur</div>;

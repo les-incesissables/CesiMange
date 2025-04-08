@@ -7,30 +7,24 @@ interface SearchBarProps
 {
     placeHolder: string;
     textButton: string;
-    onClick?: () => void; // Callback optionnel pour actions supplémentaires
+    onClick?: (term: string) => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ placeHolder, textButton, onClick }) =>
 {
     const [inputValue, setInputValue] = useState('');
-    const { setSearchTerm } = useSearch();
+    const { triggerSearch } = useSearch();
 
     const handleSearch = () =>
     {
-        if (onClick)
-        {
-            onClick();
-        }
-
-        setSearchTerm(inputValue); // 1. Met à jour le contexte global
+        const trimmedValue = inputValue.trim();
+        triggerSearch(trimmedValue); // Use triggerSearch instead of setSearchTerm
+        onClick?.(trimmedValue);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) =>
     {
-        if (e.key === 'Enter')
-        {
-            handleSearch();
-        }
+        if (e.key === 'Enter') handleSearch();
     };
 
     return (
