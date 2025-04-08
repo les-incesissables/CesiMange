@@ -9,28 +9,18 @@ import { IRestaurant } from '../models/interfaces/IRestaurant/IRestaurant';
 const localMiddleware = new LocalMiddleware();
 const LIMIT = 10;
 
-const Home: React.FC = () =>
-{
-    const {
-        data,
-        isLoading,
-        isError,
-        hasNextPage,
-        fetchNextPage,
-        isFetchingNextPage,
-    } = useInfiniteQuery({
+const Home: React.FC = () => {
+    const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
         queryKey: ['restaurants'],
-        queryFn: ({ pageParam = 1 }) => localMiddleware.callLocalApi(() =>
-            localMiddleware.RestoRepo.fetchAll(pageParam, LIMIT)
-        ),
-        getNextPageParam: (lastPage) => lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null,
+        queryFn: ({ pageParam = 1 }) => localMiddleware.callLocalApi(() => localMiddleware.RestoRepo.fetchAll(pageParam, LIMIT)),
+        getNextPageParam: (lastPage) => (lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null),
         initialPageParam: 1,
     });
 
     if (isLoading) return <div>Chargement...</div>;
     if (isError) return <div>Erreur</div>;
 
-    const allRestaurants = data?.pages.flatMap(page => page.data[0] as IRestaurant[]) ?? [];
+    const allRestaurants = data?.pages.flatMap((page) => page.data[0] as IRestaurant[]) ?? [];
     const currentPage = data?.pages[data.pages.length - 1].data[1].page || 1;
 
     return (
@@ -47,16 +37,13 @@ const Home: React.FC = () =>
                     onClick={() => fetchNextPage()}
                     disabled={!hasNextPage || isFetchingNextPage}
                     className={`px-6 py-2 rounded-[20px] font-['Inter'] font-bold transition-all shadow-[0px_4px_4px_rgba(0,0,0,0.25)] 
-                        ${!hasNextPage
-                            ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
-                            : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]'
+                        ${
+                            !hasNextPage
+                                ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                                : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]'
                         }`}
                 >
-                    {isFetchingNextPage
-                        ? 'Chargement...'
-                        : hasNextPage
-                            ? 'Charger plus →'
-                            : 'Plus de restaurants'}
+                    {isFetchingNextPage ? 'Chargement...' : hasNextPage ? 'Charger plus →' : 'Plus de restaurants'}
                 </button>
             </div>
         </HomeLayout>

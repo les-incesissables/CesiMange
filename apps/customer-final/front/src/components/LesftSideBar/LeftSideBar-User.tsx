@@ -1,18 +1,26 @@
 'use client';
 import React from 'react';
 import ClickableText from '../Buttons/ClickableText';
+import { useNavigate } from 'react-router';
 
 interface OptionItemProps {
     icon: string;
     label: string;
-    seleted?: boolean;
+    path: string;
+    selected?: boolean;
 }
 
-const OptionItem: React.FC<OptionItemProps> = ({ icon, label, seleted = false }) => {
+const OptionItem: React.FC<OptionItemProps> = ({ icon, label, path, selected = false }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(path);
+    };
+
     return (
         <div className="flex items-center gap-3">
             {icon && <img src={icon} alt={`${label} icon`} className="w-7 h-7 object-contain" />}
-            <ClickableText text={label} selected={seleted} />
+            <ClickableText text={label} selected={selected} onClick={handleClick} />
         </div>
     );
 };
@@ -27,10 +35,10 @@ const LeftSideBarUser: React.FC = () => {
 
             {/* Liste des options */}
             <nav className="flex flex-col gap-4">
-                <OptionItem icon="/images/users.svg" label="Mon Compte" />
-                <OptionItem icon="/images/archive.svg" label="Mes Commandes" />
-                <OptionItem icon="/images/heart.svg" label="Mes favoris" />
-                <OptionItem icon="/images/users.svg" label="Parrainage" />
+                <OptionItem icon="/images/users.svg" label="Mon Compte" path="/dashboard/account" />
+                <OptionItem icon="/images/archive.svg" label="Mes Commandes" path="/dashboard/order" />
+                <OptionItem icon="/images/heart.svg" label="Mes favoris" path="/dashboard/favorites" />
+                <OptionItem icon="/images/users.svg" label="Parrainage" path="/dashboard/sponsorship" />
             </nav>
 
             <hr className="w-full border border-black/50" />
