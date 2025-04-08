@@ -7,14 +7,17 @@ interface LeftSideBarRestoProps {
     restaurant: IRestaurant;
 }
 
-const categories = ['catégorie 1', 'catégorie 2', 'catégorie 3'];
-
 const LeftSideBarResto: React.FC<LeftSideBarRestoProps> = ({ restaurant }) => {
+    // Extraction des catégories depuis le menu et les articles
+    const menuCategories = restaurant.menu?.map((menuItem) => menuItem.categorie) || [];
+    const articleCategories = restaurant.articles.map((article) => article.category);
+    const categories = Array.from(new Set([...menuCategories, ...articleCategories]));
+
     return (
-        <aside className="w-80 h-[846px] px-16 pt-12 pb-24 border-r border-black flex flex-col justify-center items-center gap-10 overflow-hidden">
+        <aside className="w-80 h-screen sticky top-0 border-r border-black flex flex-col justify-start items-center gap-10 overflow-hidden">
             <img
                 className="w-full h-32 object-contain shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                src="https://placehold.co/312x130"
+                src="/images/banner.png" // Modifiez le chemin si nécessaire.
                 alt={`${restaurant.name} Banner`}
             />
             <h1 className="w-56 text-center text-black text-4xl font-bold font-['Inter'] underline">{restaurant.name}</h1>
