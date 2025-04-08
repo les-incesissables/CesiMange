@@ -324,7 +324,7 @@ function generateInterfaceContent(className, schema, isNested = false) {
 }
 // Fonction pour initialiser les dossiers d'un service
 function initializeServiceFolders(serviceConfig) {
-    const { outputDir, metierDir } = serviceConfig;
+    const { outputDir } = serviceConfig;
     // Initialiser le dossier des mod�les
     if (config.cleanOutputDir && fs.existsSync(outputDir)) {
         cleanDirectory(outputDir, config.protectedFolders);
@@ -370,7 +370,7 @@ function initializeControllerFolder(controllerDir) {
     // Initialiser le dossier des contr�leurs
     if (fs.existsSync(controllerDir)) {
         // Nettoyer en pr�servant le dossier base
-        cleanDirectory(controllerDir, config.protectedFolders);
+        //cleanDirectory(controllerDir, config.protectedFolders);
         console.log(`R�pertoire des contr�leurs nettoy�: ${controllerDir} (en pr�servant ${config.protectedFolders.join(', ')})`);
     }
     ensureDirectoryExists(controllerDir);
@@ -383,7 +383,7 @@ function initializeMetierFolder(metierDir) {
     // Initialiser le dossier m�tier
     if (fs.existsSync(metierDir)) {
         // Nettoyer en pr�servant le dossier base
-        cleanDirectory(metierDir, config.protectedFolders);
+        //cleanDirectory(metierDir, config.protectedFolders);
         console.log(`R�pertoire m�tier nettoy�: ${metierDir} (en pr�servant ${config.protectedFolders.join(', ')})`);
     }
     ensureDirectoryExists(metierDir);
@@ -439,34 +439,55 @@ function generateModels() {
                         // G�n�rer les interfaces pour les objets imbriqu�s d'abord
                         for (const [nestedName, nestedSchema] of nestedSchemas) {
                             const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
-                            const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
                             const nestedInterfaceFilePath = path.join(interfaceEntityDir, `${nestedName}.ts`);
-                            fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
-                            console.log(`  Interface imbriqu�e g�n�r�e: ${nestedInterfaceFilePath}`);
+                            // V�rifier si le fichier existe d�j�
+                            if (!fs.existsSync(nestedInterfaceFilePath)) {
+                                const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
+                                fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
+                                console.log(`  Interface imbriqu�e g�n�r�e: ${nestedInterfaceFilePath}`);
+                            }
+                            else {
+                                console.log(`  L'interface imbriqu�e existe d�j�: ${nestedInterfaceFilePath} (conserv�e)`);
+                            }
                         }
                         // G�n�rer le fichier d'interface principal
-                        const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
                         const interfaceFilePath = path.join(interfaceEntityDir, `${interfaceName}.ts`);
-                        fs.writeFileSync(interfaceFilePath, interfaceContent);
-                        console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
+                        if (!fs.existsSync(interfaceFilePath)) {
+                            const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
+                            fs.writeFileSync(interfaceFilePath, interfaceContent);
+                            console.log(`  Interface principale g�n�r�e: ${interfaceFilePath}`);
+                        }
+                        else {
+                            console.log(`  L'interface principale existe d�j�: ${interfaceFilePath} (conserv�e)`);
+                        }
                         if (!pFront) {
                             // Cr�er le dossier m�tier pour cette entit�
                             const metierEntityDir = path.join(serviceConfig.metierDir, collectionName);
                             ensureDirectoryExists(metierEntityDir);
                             // G�n�rer le fichier m�tier
-                            const metierContent = generateMetierContent(className, collectionName);
                             const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
-                            fs.writeFileSync(metierFilePath, metierContent);
-                            console.log(`  M�tier g�n�r�: ${metierFilePath}`);
+                            if (!fs.existsSync(metierFilePath)) {
+                                const metierContent = generateMetierContent(className, collectionName);
+                                fs.writeFileSync(metierFilePath, metierContent);
+                                console.log(`  M�tier g�n�r�: ${metierFilePath}`);
+                            }
+                            else {
+                                console.log(`  Le fichier m�tier existe d�j�: ${metierFilePath} (conserv�)`);
+                            }
                             // G�n�rer le fichier contr�leur si le dossier est sp�cifi�
                             if (serviceConfig.controllerDir) {
                                 // Cr�er le dossier contr�leur pour cette entit�
                                 const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
                                 ensureDirectoryExists(controllerEntityDir);
-                                const controllerContent = generateControllerContent(className, collectionName);
                                 const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
-                                fs.writeFileSync(controllerFilePath, controllerContent);
-                                console.log(`  Contr�leur g�n�r�: ${controllerFilePath}`);
+                                if (!fs.existsSync(controllerFilePath)) {
+                                    const controllerContent = generateControllerContent(className, collectionName);
+                                    fs.writeFileSync(controllerFilePath, controllerContent);
+                                    console.log(`  Contr�leur g�n�r�: ${controllerFilePath}`);
+                                }
+                                else {
+                                    console.log(`  Le fichier contr�leur existe d�j�: ${controllerFilePath} (conserv�)`);
+                                }
                             }
                         }
                     }
