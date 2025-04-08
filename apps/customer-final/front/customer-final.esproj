@@ -12,6 +12,6 @@
     <None Include=".vscode\launch.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src\models\" />
+    <Folder Include="src\models\interfaces\" />
   </ItemGroup>
 </Project>

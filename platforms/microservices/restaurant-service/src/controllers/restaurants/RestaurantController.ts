@@ -7,4 +7,10 @@ import { BaseController } from "../../../../../services/base-classes/src/control
  * @Author ModelGenerator - 2025-04-08T08:01:12.301Z - Cr�ation
  */
 export class RestaurantController extends BaseController<IRestaurant, Partial<IRestaurant>> {
+
+    override beforeGetItems(pCritereDTO: IRestaurant): IRestaurant
+    {
+        pCritereDTO.status = "active";
+        return pCritereDTO;
+    }
 }
