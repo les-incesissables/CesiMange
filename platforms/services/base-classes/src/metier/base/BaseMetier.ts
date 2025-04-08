@@ -26,8 +26,15 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             pModel
         );
         this.Repository = lRepo;
+        this.initialize();
     }
+
     //#endregion
+
+    public async initialize(): Promise<void>
+    {
+        return this.Repository.initialize();
+    }
 
     //#region CRUD
     /**
@@ -96,9 +103,12 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             const preparedDTO = await this.beforeCreateItem(pDTO);
 
             // Déléguer la création au repository
-            const item = await this.Repository.createItem(preparedDTO);
+            const lResult = await this.Repository.createItem(preparedDTO);
 
-            return item;
+            if (lResult)
+                await this.afterCreateItem(lResult);
+
+            return lResult;
         } catch (error)
         {
             this.handleError(error, 'createItem');

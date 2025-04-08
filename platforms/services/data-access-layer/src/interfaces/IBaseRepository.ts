@@ -41,4 +41,6 @@ export interface IBaseRepository<DTO, CritereDTO>
      * @param pCritereDTO - Critères de recherche
      */
     itemExists(pCritereDTO: CritereDTO): Promise<boolean>;
+
+    initialize(): Promise<void>;
 }

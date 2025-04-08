@@ -25,7 +25,7 @@ const config = {
 const serviceConfigs = [
     {
         serviceName: 'user-service',
-        collections: ['customer_profiles'],
+        collections: ['user_profiles'],
         outputDir: !config.front ? '../../microservices/user-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/user-service/src/metier/',
         controllerDir: '../../microservices/user-service/src/controllers/'

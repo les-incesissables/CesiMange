@@ -5,7 +5,7 @@ import { IPaymentMethods } from './IPaymentMethods';
 import { IPreferences } from './IPreferences';
 import { IFavories } from './IFavories';
 
-export interface ICustomerProfile extends Document {
+export interface IUserProfile extends Document {
   user_id?: number;
   first_name: string;
   last_name: string;

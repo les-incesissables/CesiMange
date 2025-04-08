@@ -3,5 +3,6 @@
  */
 export enum EEventType
 {
-    USER_DELETED = "USER_DELETED"
+    USER_DELETED = "USER_DELETED",
+    USER_CREATED = "USER_CREATED"
 }

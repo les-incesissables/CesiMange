@@ -18,7 +18,7 @@ export class RestaurantMetier extends BaseMetier<IRestaurant, Partial<IRestauran
         // Configuration Kafka pour le ServiceBroker
         const kafkaConfig: KafkaConfig = {
             clientId: 'restaurant-service',
-            brokers: ['localhost:9092'], // Ajustez selon votre configuration
+            brokers: ['localhost:9092'],
         };
 
         this.serviceBroker = new ServiceBroker(kafkaConfig);
@@ -32,7 +32,7 @@ export class RestaurantMetier extends BaseMetier<IRestaurant, Partial<IRestauran
     {
         try
         {
-            // Souscription à l'événement de suppression d'utilisateur
+            // cm - Souscription à l'événement USER_DELETED
             await this.serviceBroker.subscribeToEvent<number | undefined>(
                 EEventType.USER_DELETED,
                 async (pMessage: number | undefined) =>
@@ -55,25 +55,25 @@ export class RestaurantMetier extends BaseMetier<IRestaurant, Partial<IRestauran
     {
         try
         {
-            // Récupérer tous les restaurants liés à cet utilisateur
-            const restaurantCritereDTO = { owner_id: pMessage } as Partial<IRestaurant>;
-            const restaurants = await this.getItems(restaurantCritereDTO);
+            // cm - Récupére tous les restaurants liés à cet utilisateur
+            const lRestaurantCritereDTO = { owner_id: pMessage } as Partial<IRestaurant>;
+            const lRestaurants = await this.getItems(lRestaurantCritereDTO);
 
             // Mettre à jour chaque restaurant
-            for (const restaurant of restaurants)
+            for (const lRestaurant of lRestaurants)
             {
                 // Modifier les propriétés selon vos besoins métier
-                restaurant.status = 'closed';
-                restaurant.updated_at = new Date();
+                lRestaurant.status = 'closed';
+                lRestaurant.updated_at = new Date();
 
                 // Appliquer la mise à jour (exemple)
-                const restaurantCritere = { id: restaurant.id };
-                await this.updateItem(restaurant, restaurantCritere);
+                const lRestaurantCritere = { id: lRestaurant.id };
+                await this.updateItem(lRestaurant, lRestaurantCritere);
 
-                console.log(`Restaurant ${restaurant.id} mis à jour suite à la suppression de l'utilisateur ${pMessage}`);
+                console.log(`Restaurant ${lRestaurant.id} mis à jour suite à la suppression de l'utilisateur ${pMessage}`);
             }
 
-            console.log(`${restaurants.length} restaurant(s) mis à jour suite à la suppression de l'utilisateur ${pMessage}`);
+            console.log(`${lRestaurants.length} restaurant(s) mis à jour suite à la suppression de l'utilisateur ${pMessage}`);
         } catch (error)
         {
             console.error('Erreur lors de la gestion de l\'événement de suppression d\'utilisateur:', error);
