@@ -89,9 +89,9 @@ const useAuth = (): UseAuthReturn => {
             } else {
                 setHasError(false);
             }
-            const response = await API.post('users/login', {
+            const response = await API.post('auth/login', {
                 email: inputsConnexion.email,
-                password: inputsConnexion.password,
+                password_hash: inputsConnexion.password,
             });
             if (response.status === 200) {
                 setConnexion(response);
@@ -117,14 +117,20 @@ const useAuth = (): UseAuthReturn => {
         if (response.data.error) {
             setIsSubmitted(true);
         } else {
-            if (response.data.token) {
+            /*  if (response.data.token) {
                 localStorage.setItem('user', JSON.stringify(response.data));
                 // On convertit la date en chaîne pour le stockage
                 localStorage.setItem('timeSession', moment().add(150, 'days').toString());
+            } */
+            if (response.data.xsrfToken) {
+                localStorage.setItem('xsrfToken', JSON.stringify(response.data.xsrfToken));
+                // On convertit la date en chaîne pour le stockage
+                localStorage.setItem('timeSession', moment().add(1, 'days').toString());
             }
-            /*  if (!isMobile()) {
-        toast('Vous êtes connecté(e)', { type: 'success' });
-      } */
+
+            if (response.data) {
+                console.log(response.data);
+            }
             setIsSubmitted(true);
             setHasError(false);
             refresh();
@@ -158,7 +164,7 @@ const useAuth = (): UseAuthReturn => {
     const signUp = async (inputsConnexion: SignUpInput): Promise<boolean | void> => {
         try {
             setIsSignupSubmitted(true);
-            const response = await API.post('users/signup', {
+            const response = await API.post('users/register', {
                 email: inputsConnexion.email,
                 password: inputsConnexion.password,
                 passwordConfirm: inputsConnexion.passwordConfirm,

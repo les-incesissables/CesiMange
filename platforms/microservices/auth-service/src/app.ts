@@ -49,6 +49,10 @@ app.use(helmet());
  */
 app.use(morgan('dev'));
 
+console.log('Connecting to', process.env.AUTH_SERVICE_URL);
+console.log('DB name is', process.env.DB_NAME);
+console.log('Docker use : ', isDocker);
+
 const lAuthController = new AuthUsersController(new AuthUsersMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
