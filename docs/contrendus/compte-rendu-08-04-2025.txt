@@ -9,3 +9,6 @@ Mise en place de contrendu journalier
 Ajout du order service et mise a jour de la bdd avec yannick + creation du dashboard / pagination useQuery => Infinit Query
 Ajout d'images pour les restaurants
 
+NJE :
+- Réglage des Dockerfile des microservices pour leur utilisation dans Kubernetes,
+- Réglage du Docker compose
