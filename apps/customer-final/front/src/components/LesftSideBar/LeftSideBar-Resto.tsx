@@ -18,7 +18,7 @@ const LeftSideBarResto: React.FC<LeftSideBarRestoProps> = ({ restaurant }) => {
         <aside className="w-80 h-screen sticky top-[80px] border-r border-black flex flex-col justify-start items-center gap-10 overflow-hidden">
             <img
                 className="w-full h-32 object-contain shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                src="/images/banner.png" // Modifiez le chemin si nécessaire.
+                src={"/images/restaurants/bannieres/" + restaurant.banniere}
                 alt={`${restaurant.name} Banner`}
             />
             <h1 className="w-56 text-center text-black text-4xl font-bold font-['Inter'] underline">{restaurant.name}</h1>

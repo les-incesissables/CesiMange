@@ -19,7 +19,7 @@ export interface IRestaurant {
   delivery_options: IDeliveryOptions;
   created_at: Date;
   updated_at: Date;
-  updatedAt?: Date;
+  updatedAt: Date;
   banniere: string;
   logo: string;
   menu: IMenu[];
