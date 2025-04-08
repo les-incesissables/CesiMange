@@ -1,24 +1,30 @@
+// src/components/Utils/Modal.tsx
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    children: React.ReactNode;
+// Définition de l'interface pour la prop onConfirm
+export interface ModalConfirm {
+    label: string;
+    class?: string;
+    disabled?: boolean;
+    onClick: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+interface ModalProps {
+    isOpen: boolean;
+    title?: string | null;
+    onClose: () => void;
+    children: React.ReactNode;
+    onConfirm?: ModalConfirm | false;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, onConfirm }) => {
     useEffect(() => {
-        if (!isOpen) {
-            // Rien à faire si le modal n'est pas ouvert
-            return;
-        }
+        if (!isOpen) return;
 
-        // Ici, vous pouvez gérer le code à exécuter quand le modal s’ouvre
-
+        // Bloquer le scroll
         document.body.style.overflow = 'hidden';
 
-        // Et si besoin, retourner une fonction de nettoyage
         return () => {
             document.body.style.overflow = 'auto';
         };
@@ -33,9 +39,32 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 sm:px-0" onClick={handleBackdropClick}>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 px-4 sm:px-0" onClick={handleBackdropClick}>
+            {title && (
+                <div className="mb-4">
+                    <h2 className="text-xl font-bold">{title}</h2>
+                </div>
+            )}
             <div className="relative bg-[#E4DBC7] rounded-2xl outline-1 outline-black w-full max-w-md max-h-screen overflow-y-auto p-6 shadow-xl">
-                {children}
+                <section>{children}</section>
+
+                {/* Footer avec bouton de confirmation */}
+                {onConfirm && (
+                    <div className="mt-4 text-center">
+                        <button
+                            type="button"
+                            className={`bg-black text-white m-0 rounded-full px-4 py-2 hover:text-blueMain cursor-pointer hover:bg-white hover:text-black`}
+                            disabled={onConfirm.disabled}
+                            onClick={() => {
+                                if (!onConfirm.disabled) {
+                                    onConfirm.onClick();
+                                }
+                            }}
+                        >
+                            {onConfirm.label ? onConfirm.label : 'Valider'}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>,
         document.body,
