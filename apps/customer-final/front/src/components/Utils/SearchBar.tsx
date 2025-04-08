@@ -4,11 +4,11 @@ import Button from '../Buttons/Button';
 
 interface SearchBarProps {
     onClick?: () => void;
-    textInput: string;
+    placeHolder: string;
     textButton: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onClick, textInput, textButton }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onClick, placeHolder, textButton }) => {
     const [searchText, setSearchText] = useState('');
 
     return (
@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClick, textInput, textButton })
                 </div>
                 <input
                     type="text"
-                    placeholder={textInput}
+                    placeholder={placeHolder}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     className="bg-transparent outline-none text-black/50 text-xl font-normal font-['Inter'] flex-1"
