@@ -211,32 +211,62 @@
         }
 
         function parseImportedContent(content) {
+            // Reset all fields
             teamMembers.forEach(member => {
                 document.getElementById(`name-${member.toLowerCase().replace(' ', '-')}`).value = '';
                 document.getElementById(`tasks-morning-${member.toLowerCase().replace(' ', '-')}`).value = '';
                 document.getElementById(`tasks-afternoon-${member.toLowerCase().replace(' ', '-')}`).value = '';
             });
 
-            const sections = content.split('\n\n');
+            // Check if the file contains header information
+            const firstLine = content.split('\n')[0];
+            if (firstLine && firstLine.includes('COMPTE-RENDU DU')) {
+                // Skip the header line
+                content = content.substring(content.indexOf('###NOM###'));
+            }
+
+            // Parse each entry - looking for ###NOM###, ###MATIN###, and ###APRESMIDI### tags
             let currentMember = 0;
-
-            sections.forEach(section => {
-                if (section.includes('###NOM###')) {
-                    const namePart = section.split('###MATIN###')[0];
-                    const name = namePart.replace('###NOM###', '').trim();
-                    
-                    const morningPart = section.split('###MATIN###')[1].split('###APRESMIDI###')[0].trim();
-                    const afternoonPart = section.split('###APRESMIDI###')[1].trim();
-
-                    if (currentMember < teamMembers.length) {
-                        const memberPrefix = teamMembers[currentMember].toLowerCase().replace(' ', '-');
-                        document.getElementById(`name-${memberPrefix}`).value = name;
-                        document.getElementById(`tasks-morning-${memberPrefix}`).value = morningPart;
-                        document.getElementById(`tasks-afternoon-${memberPrefix}`).value = afternoonPart;
-                        currentMember++;
-                    }
+            let entries = [];
+            
+            // Match all content between ###NOM### tags
+            const regex = /###NOM###([\s\S]*?)(?=###NOM###|$)/g;
+            let match;
+            
+            while ((match = regex.exec(content)) !== null && currentMember < teamMembers.length) {
+                const entryContent = match[1];
+                
+                // Extract the name
+                let name = '';
+                if (entryContent.includes('###MATIN###')) {
+                    name = entryContent.substring(0, entryContent.indexOf('###MATIN###')).trim();
                 }
-            });
+                
+                // Extract morning tasks
+                let morningTasks = '';
+                if (entryContent.includes('###MATIN###') && entryContent.includes('###APRESMIDI###')) {
+                    morningTasks = entryContent.substring(
+                        entryContent.indexOf('###MATIN###') + '###MATIN###'.length,
+                        entryContent.indexOf('###APRESMIDI###')
+                    ).trim();
+                }
+                
+                // Extract afternoon tasks
+                let afternoonTasks = '';
+                if (entryContent.includes('###APRESMIDI###')) {
+                    afternoonTasks = entryContent.substring(
+                        entryContent.indexOf('###APRESMIDI###') + '###APRESMIDI###'.length
+                    ).trim();
+                }
+                
+                // Set the values in the form
+                const memberPrefix = teamMembers[currentMember].toLowerCase().replace(' ', '-');
+                document.getElementById(`name-${memberPrefix}`).value = name;
+                document.getElementById(`tasks-morning-${memberPrefix}`).value = morningTasks;
+                document.getElementById(`tasks-afternoon-${memberPrefix}`).value = afternoonTasks;
+                
+                currentMember++;
+            }
 
             generateSummary();
             document.getElementById('fileInput').value = '';
