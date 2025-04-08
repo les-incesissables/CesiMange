@@ -71,7 +71,7 @@ export class UserProfileMetier extends BaseMetier<IUserProfile, Partial<IUserPro
                 notifications: lNotif
             }
             let lUserProfile: Partial<IUserProfile> = {
-                id: pMessage.id,
+                user_id: pMessage.id,
                 first_name: "",
                 last_name: "",
                 profile_picture: "",
