@@ -1,0 +1,58 @@
+# ===== Stage 1 : Builder =====
+FROM node:22.14-alpine AS builder
+WORKDIR /app
+
+# Copier uniquement les fichiers de dépendances pour profiter du cache
+# (Si auth-service utilise des modules partagés, copie aussi leurs package.json)
+COPY platforms/services/data-access-layer/package*.json platforms/services/data-access-layer/
+COPY platforms/services/base-classes/package*.json platforms/services/base-classes/
+COPY platforms/services/request-resolver-service/package*.json platforms/services/request-resolver-service/
+COPY platforms/services/message-broker-service/package*.json platforms/services/message-broker-service/
+COPY platforms/microservices/auth-service/package*.json platforms/microservices/auth-service/
+
+# Installer les dépendances pour les modules partagés
+WORKDIR /app/platforms/services/data-access-layer
+RUN npm install
+
+WORKDIR /app/platforms/services/base-classes
+RUN npm install
+
+WORKDIR /app/platforms/services/request-resolver-service
+RUN npm install
+
+WORKDIR /app/platforms/services/message-broker-service
+RUN npm install
+# Copier le reste du code source pour message-broker-service
+COPY platforms/services/message-broker-service platforms/services/message-broker-service
+
+# Installer les dépendances pour auth-service et forcer la recompilation des modules natifs (ex: bcrypt)
+WORKDIR /app/platforms/microservices/auth-service
+RUN npm install && npm rebuild bcrypt
+
+# Copier le reste du code source pour auth-service
+COPY platforms/microservices/auth-service platforms/microservices/auth-service
+
+# ===== Stage 2 : Image finale pour le développement =====
+FROM node:22.14-alpine
+WORKDIR /app
+
+# Copier uniquement le dossier auth-service depuis l'étape builder
+COPY --from=builder /app/platforms/microservices/auth-service platforms/microservices/auth-service
+# Copier également le dossier message-broker-service depuis l'étape builder
+COPY --from=builder /app/platforms/services/message-broker-service platforms/services/message-broker-service
+
+WORKDIR /app/platforms/microservices/auth-service
+
+# Installer tsconfig-paths pour la résolution d'alias à l'exécution, installer globalement nodemon,
+# nettoyer le cache npm et créer le dossier de cache avec les bonnes permissions
+RUN npm install -D tsconfig-paths && \
+    npm cache clear --force && \
+    npm install -g nodemon && \
+    npm install --no-audit && \
+    mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
+
+EXPOSE 4001
+
+# Le script "dev" dans package.json doit être configuré pour utiliser nodemon avec ts-node et tsconfig-paths, par exemple :
+# "dev": "nodemon --watch src --ext ts,json --ignore node_modules --exec \"ts-node -r tsconfig-paths/register src/app.ts\""
+CMD ["npm", "run", "dev"]

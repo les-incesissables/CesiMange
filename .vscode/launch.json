@@ -1,0 +1,75 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Resolver Service with Nodemon",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
+            "skipFiles": ["<node_internals>/**"],
+            "restart": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/platforms/services/request-resolver-service"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Auth Service with Nodemon",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
+            "skipFiles": ["<node_internals>/**"],
+            "restart": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/platforms/microservices/auth-service"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug User Service with Nodemon",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nodemon", "--exec", "ts-node tsconfig-paths/register", "src/app.ts"],
+            "skipFiles": ["<node_internals>/**"],
+            "restart": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/platforms/microservices/user-service"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Restaurant Service with Nodemon",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nodemon", "--exec", "ts-node", "src/app.ts"],
+            "skipFiles": ["<node_internals>/**"],
+            "restart": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/platforms/microservices/restaurant-service"
+        },
+        {
+            "name": "Launch Chrome (Vite)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3001",
+            "webRoot": "${workspaceFolder}/apps/customer-final/front/src",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/apps/customer-final/front/src/**",
+                "${workspaceFolder}/apps/customer-final/local-middleware/src/**",
+                "${workspaceFolder}/apps/customer-final/proxy/src/**",
+                "!**/node_modules/**"
+            ],
+            "sourceMaps": true,
+            "trace": true
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug All Services (Nodemon)",
+            "configurations": [
+                "Debug Resolver Service with Nodemon",
+                "Debug Auth Service with Nodemon",
+                "Debug User Service with Nodemon",
+                "Debug Restaurant Service with Nodemon"
+            ]
+        }
+    ]
+}

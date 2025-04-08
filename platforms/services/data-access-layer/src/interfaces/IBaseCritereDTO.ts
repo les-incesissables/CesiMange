@@ -9,7 +9,7 @@ export interface IBaseCritereDTO
     /**
      * Identifiant unique de l'élément recherché
      */
-    id?: string;
+    id?: number;
 
     /**
      * Liste d'identifiants pour recherche multiple
@@ -44,7 +44,7 @@ export interface IBaseCritereDTO
     /**
      * Indique si les éléments supprimés doivent être inclus
      */
-    includeDeleted?: boolean;
+    hasNext?: boolean;
 
     /**
      * Nombre maximum d'éléments à retourner

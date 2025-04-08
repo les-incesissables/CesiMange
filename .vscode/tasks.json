@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build:user-service",
+            "type": "shell",
+            "command": "npm run build",
+            "options": {
+                "cwd": "${workspaceFolder}/platforms/microservices/user-service"
+            },
+            "group": "build"
+        },
+        {
+            "label": "build:restaurant-service",
+            "type": "shell",
+            "command": "npm run build",
+            "options": {
+                "cwd": "${workspaceFolder}/platforms/microservices/restaurant-service"
+            },
+            "group": "build"
+        },
+        {
+            "label": "clean:all",
+            "type": "shell",
+            "command": "npm run clean && cd ../restaurant-service && npm run clean && cd ../resolution-controller && npm run clean",
+            "options": {
+                "cwd": "${workspaceFolder}/platforms/microservices/user-service"
+            },
+            "group": "build"
+        }
+    ]
+}

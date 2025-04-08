@@ -4,7 +4,7 @@ export * from './interfaces/IDbRepository';
 export * from './interfaces/IRepositoryConfig';
 
 // === Enums ===
-export * from './interfaces/enums/EDatabaseType';
+export * from './enums/EDatabaseType';
 
 // === Models de base ===
 export * from './models/base/BaseDTO';

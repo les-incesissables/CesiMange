@@ -1,4 +1,5 @@
 //#region Imports
+import 'reflect-metadata';
 import express from 'express';
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -13,8 +14,23 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { UserController } from './controllers/user/UserController';
-import { UserMetier } from './metier/user/UserMetier';
+
+
+import * as dotenv from 'dotenv';
+import { UserProfileController } from './controllers/user_profiles/UserProfileController';
+import { UserProfileMetier } from './metier/user_profiles/UserProfileMetier';
+
+const isDocker = process.env.DOCKER_ENV === 'true';
+
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
+    dotenv.config({ path: '.env.development' });
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+    dotenv.config({ path: '.env.localhost' });
+} else if (process.env.NODE_ENV === 'staging') {
+    dotenv.config({ path: '.env.staging' });
+} else if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+}
 
 //#endregion
 
@@ -44,12 +60,15 @@ app.use(
  */
 app.use(morgan('dev'));
 
-const userController = new UserController(new UserMetier());
+console.log('Connecting to', process.env.CONNECTION_STRING);
+console.log('DB name is', process.env.MONGO_DB_NAME);
+console.log('Docker use : ', isDocker);
 
-//const restaurantController = new RestaurantController(new RestaurantMetier());
-//const orderMetier = new OrderController(new OrderMetier());
 
-app.use('/api/users', userController.getRouter());
+const userProfileController = new UserProfileController(new UserProfileMetier());
+
+app.use('/user-profiles', userProfileController.getRouter());
+
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
 

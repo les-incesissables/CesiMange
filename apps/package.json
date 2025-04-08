@@ -1,0 +1,22 @@
+{
+    "name": "cesimange-apps",
+    "private": true,
+    "workspaces": [
+        "customer-final/*"
+    ],
+    "scripts": {
+        "build": "yarn workspaces run build",
+        "start": "yarn workspaces run start",
+        "dev": "yarn workspaces run dev",
+        "test": "yarn workspaces run test"
+    },
+    "engines": {
+        "node": ">=14",
+        "npm": ">=7",
+        "yarn": ">=1.22.0"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3",
+        "plop": "^4.0.1"
+    }
+}

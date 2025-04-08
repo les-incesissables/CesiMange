@@ -1,0 +1,51 @@
+{
+	"folders": {},
+	"connections": {
+		"microsoft-195eb923c4c-6be7c8603657ea5c": {
+			"provider": "sqlserver",
+			"driver": "microsoft",
+			"name": "CesiMange",
+			"save-password": true,
+			"show-system-objects": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "1433",
+				"database": "CesiMangeAuth",
+				"url": "jdbc:sqlserver://;serverName\u003dlocalhost;databaseName\u003dCesiMangeAuth",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-all-schemas@": "true",
+					"sslTrustServerCertificate": "true"
+				},
+				"auth-model": "sqlserver_database"
+			},
+			"filters": [
+				{
+					"id": "CesiMange",
+					"type": "org.jkiss.dbeaver.ext.mssql.model.SQLServerSchema",
+					"enabled": true,
+					"include": ["dbo"]
+				}
+			]
+		}
+	},
+	"virtual-models": {"microsoft-195eb923c4c-6be7c8603657ea5c":{"CesiMange":{"dbo":{":T_AUTH_USERS":{"properties":{"erd.diagram.state":{"serialized":"\u003cdiagram version\u003d\"1\" name\u003d\"empty\" time\u003d\"202504020032\"\u003e\u003centities\u003e\u003cdata-source id\u003d\"microsoft-195eb923c4c-6be7c8603657ea5c\"\u003e\u003centity id\u003d\"1\" name\u003d\"T_AUTH_USERS\" fq-name\u003d\"CesiMange.dbo.T_AUTH_USERS\" order\u003d\"0\" color-bg\u003d\"128,64,32\" x\u003d\"225\" y\u003d\"40\"\u003e\u003cpath name\u003d\"dbo\"/\u003e\u003cpath name\u003d\"CesiMange\"/\u003e\u003c/entity\u003e\u003centity id\u003d\"2\" name\u003d\"T_AUDIT_LOGS\" fq-name\u003d\"CesiMange.dbo.T_AUDIT_LOGS\" order\u003d\"1\" x\u003d\"40\" y\u003d\"80\"\u003e\u003cpath name\u003d\"dbo\"/\u003e\u003cpath name\u003d\"CesiMange\"/\u003e\u003c/entity\u003e\u003c/data-source\u003e\u003c/entities\u003e\u003crelations/\u003e\u003c/diagram\u003e"}}}}}}},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "0,255,64",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		}
+	}
+}

@@ -1,39 +1,47 @@
 {
     "name": "user-service",
-    "version": "1.0.0",
+    "description": "user-service",
+    "version": "0.0.0",
     "private": true,
-    "description": "User microservice API",
-    "main": "dist/app.js",
-    "types": "dist/app.d.ts",
-    "scripts": {
-        "build": "tsc",
-        "clean": "rm -rf dist",
-        "start": "node dist/app.js",
-        "dev": "nodemon src/app.ts"
-    },
     "author": {
         "name": ""
     },
-    "dependencies": {
-        "cors": "^2.8.5",
-        "debug": "^2.2.0",
-        "dotenv": "^16.4.7",
-        "escape-string-regexp": "^5.0.0",
-        "express": "^4.14.0",
-        "helmet": "^8.1.0",
-        "morgan": "^1.10.0"
+    "main": "app.ts",
+    "scripts": {
+        "build": "tsc --build",
+        "clean": "tsc --build --clean",
+        "start": "node dist\\user-service\\app.js",
+        "dev": "nodemon -L"
     },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "debug": "^2.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.14.0",
+    "helmet": "^8.1.0",
+    "mongoose": "8.13.1",
+    "morgan": "^1.10.0",
+    "mssql": "7.3.0",
+    "reflect-metadata": "0.2.2",
+    "typeorm": "0.4.0-alpha.1",
+    "kafkajs": "2.3.0-beta.3"
+  },
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/debug": "0.0.30",
         "@types/express": "^4.0.37",
         "@types/morgan": "^1.9.9",
+        "@types/mssql": "^9.1.7",
         "@types/node": "^14.14.7",
         "@typescript-eslint/eslint-plugin": "^5.33.0",
         "@typescript-eslint/parser": "^5.33.0",
+        "cross-env": "^7.0.3",
+        "debug": "^2.2.0",
         "eslint": "^8.21.0",
         "nodemon": "^3.1.9",
         "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typeorm": "0.4.0-alpha.1",
         "typescript": "^4.5.2"
     },
     "eslintConfig": {

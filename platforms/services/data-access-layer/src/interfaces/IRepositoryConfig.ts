@@ -1,9 +1,10 @@
-import { EDatabaseType } from '../interfaces/enums/EDatabaseType';
+import { EDatabaseType } from '../enums/EDatabaseType';
 
 /**
  * Configuration du repository MongoDB
  */
 export interface IRepositoryConfig {
+
     /**
      * Cha�ne de connexion MongoDB
      * Ex: mongodb://localhost:27017
@@ -24,4 +25,17 @@ export interface IRepositoryConfig {
      *
      */
     TypeBDD: EDatabaseType;
+
+    // kafka
+    clientId?: string;
+    brokers: string[];
+    topics: string[];
+    groupId: string;
+    ssl?: boolean;
+    sasl?: {
+        mechanism: string;
+        username: string;
+        password: string;
+    };
+    fromBeginning?: boolean;
 }

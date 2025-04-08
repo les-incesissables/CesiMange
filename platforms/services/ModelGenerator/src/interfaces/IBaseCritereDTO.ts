@@ -44,7 +44,7 @@ export interface IBaseCritereDTO
     /**
      * Indique si les éléments supprimés doivent être inclus
      */
-    includeDeleted?: boolean;
+    hasNext?: boolean;
 
     /**
      * Nombre maximum d'éléments à retourner

@@ -1,0 +1,30 @@
+# ===== STAGE UNIQUE POUR LE DEV =====
+FROM node:22.14-alpine
+
+# Crée le dossier de travail
+WORKDIR /app
+
+# Copier uniquement les fichiers package.json pour bénéficier du cache Docker
+COPY platforms/services/request-resolver-service/package*.json ./platforms/services/request-resolver-service/
+
+# Se déplacer dans le dossier de service
+WORKDIR /app/platforms/services/request-resolver-service
+
+# Installer les dépendances
+RUN npm install
+
+# Copier le code source de l'application
+COPY platforms/services/request-resolver-service ./platforms/services/request-resolver-service
+
+# On nettoie également le cache npm et on crée le dossier de cache avec les bonnes permissions
+RUN npm install -D tsconfig-paths && \
+    npm cache clear --force && \
+    npm install -g nodemon && \
+    npm install --no-audit && \
+    mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
+
+# Expose le port utilisé par le service
+EXPOSE 4001
+
+# Lancer le service avec nodemon
+CMD ["npm", "run", "dev"]
