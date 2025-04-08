@@ -4,52 +4,54 @@ import { IServiceDefinition } from '../interfaces/IServiceDefinition';
 import { AuthJWT } from '../utils/authJWT';
 import { JwtPayload } from 'jsonwebtoken';
 
-export function checkAccess(service: IServiceDefinition)
+export function checkAccess(pService: IServiceDefinition)
 {
     return (req: Request, res: Response, next: NextFunction) =>
     {
-        const method = req.method.toUpperCase();
-        const path = req.path;
+        let payload: JwtPayload | null;
+        const lMethod = req.method.toUpperCase();
 
         const isMethodMatch = (methods: string[], m: string) =>
             methods.map(x => x.toUpperCase()).includes(m);
 
         // 1. Vérifie les routes publiques avec matching manuel
-        const publicRoute = service.publicRoutes?.find(route =>
+        const lPublicRoute = pService.publicRoutes?.find(route =>
         {
             const result = matchRoute(route.path, req);
-            return result.match && isMethodMatch(route.methods, method);
+            return result.match && isMethodMatch(route.methods, lMethod);
         });
-        if (publicRoute) return next();
+        if (lPublicRoute) return next();
 
         // 2. Vérifie les routes protégées avec matching manuel
-        const protectedRoute = service.protectedRoutes?.find(route =>
+        const lProtectedRoute = pService.protectedRoutes?.find(route =>
         {
-            const result = matchRoute(route.path, req);
-            return result.match && isMethodMatch(route.methods, method);
+            const lResult = matchRoute(route.path, req);
+            return lResult.match && isMethodMatch(route.methods, lMethod);
         });
 
-        if (!protectedRoute)
+        if (!lProtectedRoute)
         {
             return res.status(403).json({ error: 'Route protégée non autorisée' });
         }
 
         // Optionnel : fusionner les params extraits dans req.params
-        const matchResult = matchRoute(protectedRoute.path, req);
-        req.params = { ...req.params, ...matchResult.params };
+        const lMatchResult = matchRoute(lProtectedRoute.path, req);
+        req.params = { ...req.params, ...lMatchResult.params };
 
         // 3. Récupération et vérification du token
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer '))
+        const lAuthHeader = req.headers.authorization;
+        if (!lAuthHeader || !lAuthHeader.startsWith('Bearer '))
         {
             return res.status(401).json({ error: 'Token manquant' });
         }
 
-        const token = authHeader.split(' ')[1];
-        let payload: JwtPayload | null;
+        const lToken = lAuthHeader.split(' ')[1];
+
         try
         {
-            payload = AuthJWT.verifyToken(token);
+            // cm - Verification du token
+            payload = AuthJWT.verifyToken(lToken);
+
         } catch (err)
         {
             return res.status(401).json({ error: 'Token invalide' });
@@ -60,10 +62,10 @@ export function checkAccess(service: IServiceDefinition)
         }
 
         // 4. Vérifie les permissions
-        if (protectedRoute.requiredPermissions)
+        if (lProtectedRoute.requiredPermissions)
         {
             const userPerms = payload.permissions || [];
-            const hasPermission = protectedRoute.requiredPermissions.every(p =>
+            const hasPermission = lProtectedRoute.requiredPermissions.every(p =>
                 userPerms.includes(p)
             );
             if (!hasPermission)
@@ -73,10 +75,10 @@ export function checkAccess(service: IServiceDefinition)
         }
 
         // 5. Vérifie les rôles
-        if (protectedRoute.allowedRoles)
+        if (lProtectedRoute.allowedRoles)
         {
             const userRoles = payload.roles || [];
-            const hasRole = protectedRoute.allowedRoles.some(r =>
+            const hasRole = lProtectedRoute.allowedRoles.some(r =>
                 userRoles.includes(r)
             );
             if (!hasRole)
@@ -85,9 +87,9 @@ export function checkAccess(service: IServiceDefinition)
             }
         }
 
-        if (protectedRoute.ownershipCheck)
+        if (lProtectedRoute.ownershipCheck)
         {
-            const { matchField, paramName } = protectedRoute.ownershipCheck;
+            const { matchField, paramName } = lProtectedRoute.ownershipCheck;
 
             if (!matchField || !paramName)
             {
