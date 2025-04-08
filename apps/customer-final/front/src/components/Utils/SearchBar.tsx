@@ -2,20 +2,20 @@
 import React, { useState } from 'react';
 import Button from '../Buttons/Button';
 
-interface onClick {
+interface SearchBarProps {
     onClick?: () => void;
     textInput: string;
     textButton: string;
 }
 
-const SearchBar: React.FC<onClick> = ({ onClick, textInput, textButton }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onClick, textInput, textButton }) => {
     const [searchText, setSearchText] = useState('');
 
     return (
-        <div className="w-full max-w-[700px] mx-auto h-12 p-2.5 bg-white rounded-[20px] outline outline-1 outline-offset-[-1px] outline-black/50 inline-flex justify-between items-center">
+        <div className="w-full max-w mx-auto h-12 p-2.5 bg-white rounded-[20px] outline outline-1 outline-offset-[-1px] outline-black/50 inline-flex justify-between items-center">
             <div className="flex flex-1 justify-start items-center gap-5">
                 <div data-size="48" className="w-7 h-7 relative overflow-hidden">
-                    <img src="/images/loupe.svg" />
+                    <img src="/images/loupe.svg" alt="Icône de recherche" />
                 </div>
                 <input
                     type="text"

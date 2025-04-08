@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import LoginButton from './Buttons/LoginButton';
 import ClickableText from './Buttons/ClickableText';
 import SearchBar from './Utils/SearchBar';
-import AccountSidebar from './Utils/SideBarAccont';
+import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 
@@ -70,7 +70,6 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                             <button className="w-10 h-10 cursor-pointer" onClick={onBellClick}>
                                 <BellIcon className="w-full h-full" />
                             </button>
-
                             <div data-size="Large" className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
