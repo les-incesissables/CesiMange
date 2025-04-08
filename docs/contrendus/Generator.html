@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="fr"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compte-rendu journalier d'équipe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .member-input {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .date {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        #exportBtn {
+            background-color: #2196F3;
+        }
+        #exportBtn:hover {
+            background-color: #1976D2;
+        }
+        #importBtn {
+            background-color: #FF9800;
+        }
+        #importBtn:hover {
+            background-color: #F57C00;
+        }
+        .file-input-wrapper {
+            display: none;
+        }
+        .import-export-group {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Compte-rendu journalier</h1>
+    <div class="date" id="currentDate"></div>
+
+    <div class="import-export-group">
+        <button id="importBtn" onclick="document.getElementById('fileInput').click()">Importer un compte-rendu</button>
+        <button id="exportBtn" onclick="exportToFile()">Exporter en fichier texte</button>
+        <input type="file" id="fileInput" accept=".txt" style="display: none;" onchange="importFile(this)">
+    </div>
+
+    <div id="team-inputs"></div>
+    
+    <div class="button-group">
+        <button onclick="generateSummary()">Générer le compte-rendu</button>
+    </div>
+    
+    <div id="summary"></div>
+
+    <script>
+        // Afficher la date du jour
+        const today = new Date().toLocaleDateString('fr-FR');
+        document.getElementById('currentDate').textContent = "Date : " + today;
+
+        // Créer les champs pour chaque membre
+        const teamMembers = ['Membre 1', 'Membre 2', 'Membre 3', 'Membre 4', 'Membre 5'];
+        const inputsContainer = document.getElementById('team-inputs');
+
+        teamMembers.forEach(member => {
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'member-input';
+            memberDiv.innerHTML = `
+                <h3>${member}</h3>
+                <input type="text" placeholder="Nom" id="name-${member.toLowerCase().replace(' ', '-')}">
+                <textarea placeholder="Tâches réalisées aujourd'hui" id="tasks-${member.toLowerCase().replace(' ', '-')}"></textarea>
+            `;
+            inputsContainer.appendChild(memberDiv);
+        });
+
+        function generateSummary() {
+            let summaryText = `<h2>Compte-rendu du ${today}</h2>`;
+
+            teamMembers.forEach(member => {
+                const nameId = `name-${member.toLowerCase().replace(' ', '-')}`;
+                const tasksId = `tasks-${member.toLowerCase().replace(' ', '-')}`;
+                
+                const name = document.getElementById(nameId).value || member;
+                const tasks = document.getElementById(tasksId).value;
+
+                if (tasks.trim() !== '') {
+                    summaryText += `
+                        <h3>${name}</h3>
+                        <p>${tasks.replace(/\n/g, '<br>')}</p>
+                    `;
+                }
+            });
+
+            document.getElementById('summary').innerHTML = summaryText;
+        }
+
+        function exportToFile() {
+            let exportText = `COMPTE-RENDU DU ${today}\n\n`;
+
+            teamMembers.forEach(member => {
+                const nameId = `name-${member.toLowerCase().replace(' ', '-')}`;
+                const tasksId = `tasks-${member.toLowerCase().replace(' ', '-')}`;
+                
+                const name = document.getElementById(nameId).value || member;
+                const tasks = document.getElementById(tasksId).value;
+
+                if (tasks.trim() !== '') {
+                    exportText += `###NOM###${name}\n`;
+                    exportText += `###TACHES###${tasks}\n\n`;
+                }
+            });
+
+            const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `compte-rendu-${today.replace(/\//g, '-')}.txt`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    parseImportedContent(content);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseImportedContent(content) {
+            // Réinitialiser tous les champs
+            teamMembers.forEach(member => {
+                document.getElementById(`name-${member.toLowerCase().replace(' ', '-')}`).value = '';
+                document.getElementById(`tasks-${member.toLowerCase().replace(' ', '-')}`).value = '';
+            });
+
+            // Diviser le contenu en sections
+            const sections = content.split('\n\n');
+            let currentMember = 0;
+
+            sections.forEach(section => {
+                if (section.includes('###NOM###') && section.includes('###TACHES###')) {
+                    const namePart = section.split('###TACHES###')[0];
+                    const name = namePart.replace('###NOM###', '').trim();
+                    const tasks = section.split('###TACHES###')[1].trim();
+
+                    if (currentMember < teamMembers.length) {
+                        const memberPrefix = teamMembers[currentMember].toLowerCase().replace(' ', '-');
+                        document.getElementById(`name-${memberPrefix}`).value = name;
+                        document.getElementById(`tasks-${memberPrefix}`).value = tasks;
+                        currentMember++;
+                    }
+                }
+            });
+
+            // Générer le résumé
+            generateSummary();
+            
+            // Réinitialiser l'input file
+            document.getElementById('fileInput').value = '';
+        }
+    </script>
+
+
+</body></html>
