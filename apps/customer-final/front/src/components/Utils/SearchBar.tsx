@@ -1,15 +1,37 @@
 'use client';
 import React, { useState } from 'react';
 import Button from '../Buttons/Button';
+import { useSearch } from './SearchContext';
 
-interface SearchBarProps {
-    onClick?: () => void;
+interface SearchBarProps
+{
     placeHolder: string;
     textButton: string;
+    onClick?: () => void; // Callback optionnel pour actions supplémentaires
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onClick, placeHolder, textButton }) => {
-    const [searchText, setSearchText] = useState('');
+const SearchBar: React.FC<SearchBarProps> = ({ placeHolder, textButton, onClick }) =>
+{
+    const [inputValue, setInputValue] = useState('');
+    const { setSearchTerm } = useSearch();
+
+    const handleSearch = () =>
+    {
+        if (onClick)
+        {
+            onClick();
+        }
+
+        setSearchTerm(inputValue); // 1. Met à jour le contexte global
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) =>
+    {
+        if (e.key === 'Enter')
+        {
+            handleSearch();
+        }
+    };
 
     return (
         <div className="w-full max-w mx-auto h-12 p-2.5 bg-white rounded-[20px] outline outline-1 outline-offset-[-1px] outline-black/50 inline-flex justify-between items-center">
@@ -20,12 +42,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClick, placeHolder, textButton 
                 <input
                     type="text"
                     placeholder={placeHolder}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="bg-transparent outline-none text-black/50 text-xl font-normal font-['Inter'] flex-1"
                 />
             </div>
-            <Button text={textButton} onClick={onClick} />
+            <Button text={textButton} onClick={handleSearch} />
         </div>
     );
 };

@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import DashBoardLayout from '../../layout/DashBoardLayout';
-import RestaurantList from '../../components/List/RestaurantList';
 
 const DashBoardFavorites: React.FC = () => {
     return (

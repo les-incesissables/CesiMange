@@ -11,7 +11,7 @@ export interface Order {
     // Additional fields if needed.
 }
 
-export class OrderRepository extends BaseRepository<Order> {
+export class OrderRepository extends BaseRepository<Order, Partial<Order>> {
     constructor(apiProxy: any) {
         super(apiProxy, '/orders');
     }

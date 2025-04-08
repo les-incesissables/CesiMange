@@ -8,21 +8,26 @@ import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 
-interface HeaderProps {
+interface HeaderProps
+{
     variant: 'general' | 'client';
     onLoginClick?: () => void;
     onBellClick?: () => void;
     onCartClick?: () => void;
 }
 
-const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onCartClick }) => {
+const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onCartClick }) =>
+{
     const [showPopup, setShowPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
     // Fermer en cliquant en dehors
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+    useEffect(() =>
+    {
+        const handleClickOutside = (e: MouseEvent) =>
+        {
+            if (popupRef.current && !popupRef.current.contains(e.target as Node))
+            {
                 setShowPopup(false);
             }
         };
@@ -30,7 +35,8 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (variant === 'general') {
+    if (variant === 'general')
+    {
         return (
             <header className="sticky top-0 z-50 px-4 sm:px-24 py-2.5 bg-yellow-400 border-b border-black">
                 <div className="flex items-center justify-between w-full">
@@ -48,7 +54,8 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                 </div>
             </header>
         );
-    } else if (variant === 'client') {
+    } else if (variant === 'client')
+    {
         return (
             <header className="sticky top-0 z-50 px-4 sm:px-24 py-2.5 bg-yellow-400 border-b border-black">
                 <div className="max-w-[1440px] mx-auto flex flex-wrap sm:flex-nowrap justify-between items-center">
@@ -61,7 +68,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
 
                     {/* Barre de recherche */}
                     <div className="rounded-2xl shadow-lg transition-all duration-300">
-                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher"/>
+                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher" onClick={() => { }} />
                     </div>
 
                     {/* Section droite */}

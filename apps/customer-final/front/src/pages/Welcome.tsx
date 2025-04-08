@@ -10,7 +10,7 @@ const Welcome: React.FC = () => {
 
     const handleGoToHome = useCallback(() => {
         navigate('/home');
-        //eslint-disable-next-line
+
     }, [navigate]);
 
     return (
@@ -18,7 +18,7 @@ const Welcome: React.FC = () => {
             <div className="w-full bg-[#E4DBC7] inline-flex flex-col justify-start items-center gap-5">
                 <div className="p-2.5 flex flex-col justify-center items-center gap-2.5">
                     <div className="bg-yellow-400 p-5 rounded-2xl shadow-lg transition-all duration-300">
-                        <SearchBar onClick={handleGoToHome} textButton="Découvrir" textInput="Rechercher" />
+                        <SearchBar onClick={handleGoToHome} textButton="Découvrir" placeHolder="Rechercher" />
                         <ul className="text-black text-2xl font-normal font-['Inter'] pl-5">
                             <li>1 rue du Verger</li>
                             <li>44 rue du dossier</li>

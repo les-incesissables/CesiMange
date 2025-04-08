@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import UserCard from '../Card/UserCard';
 
 interface UserItem {
     imageUrl: string;
@@ -12,7 +11,7 @@ interface UserCardListProps {
     users?: UserItem[];
 }
 
-const UserCardList: React.FC<UserCardListProps> = ({ users }) => {
+const UserCardList: React.FC<UserCardListProps> = () => {
     return (
         <ul className="flex flex-wrap gap-4">
             {/* {users.map((user, index) => (
