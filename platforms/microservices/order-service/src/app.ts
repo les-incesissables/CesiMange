@@ -54,7 +54,7 @@ app.use(morgan('dev'));
 
 const orderController = new OrderController(new OrderMetier());
 
-app.use('/order', orderController.getRouter());
+app.use('/orders', orderController.getRouter());
 
 // Gestion des erreurs
 app.use((req, res) =>
