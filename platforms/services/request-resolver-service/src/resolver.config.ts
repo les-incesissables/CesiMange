@@ -118,6 +118,14 @@ export function loadGatewayConfig(): IGatewayConfig
                         },
                     },
                     {
+                        path: '/',
+                        methods: ['GET'],
+                    },
+                    {
+                        path: '/:id',
+                        methods: ['GET'],
+                    },
+                    {
                         path: '/admin',
                         methods: ['GET'],
                         allowedRoles: ['admin'],
