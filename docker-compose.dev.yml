@@ -108,8 +108,7 @@ services:
         networks:
             - api_network
 
-    mssql-auth:
-        user: root
+    mssql-auth-service:
         build:
             context: ./platforms/databases/sqlserver/auth-service
             dockerfile: Dockerfile.mssql
@@ -121,8 +120,11 @@ services:
             - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
             - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
             - ./platforms/databases/sqlserver/auth-service/seed:/init-sql
-            #- ./platforms/databases/sqlserver/auth-service/seed:/init-sql # Montre le dossier seed
-
+        environment:
+            - SA_PASSWORD=ProdPassword123!
+            - ACCEPT_EULA=Y
+            - MSSQL_UID=10001
+        user: '10001:0'
         networks:
             - api_network
 

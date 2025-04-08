@@ -2,7 +2,7 @@ services:
     auth-service:
         build:
             context: .
-            dockerfile: platforms/microservices/auth-service/Dockerfile.prod
+            dockerfile: platforms/microservices/auth-service/Dockerfile
         container_name: auth-service-prod
         ports:
             - '4001:4001'
@@ -15,7 +15,7 @@ services:
     user-service:
         build:
             context: .
-            dockerfile: platforms/microservices/user-service/Dockerfile.prod
+            dockerfile: platforms/microservices/user-service/Dockerfile
         container_name: user-service-prod
         ports:
             - '4002:4002'
@@ -28,7 +28,7 @@ services:
     restaurant-service:
         build:
             context: .
-            dockerfile: platforms/microservices/restaurant-service/Dockerfile.prod
+            dockerfile: platforms/microservices/restaurant-service/Dockerfile
         container_name: restaurant-service-prod
         ports:
             - '4003:4003'
@@ -68,26 +68,14 @@ services:
         ports:
             - '1433:1433'
         volumes:
-            - ./platforms/data/sqlserver/auth-service/data:/var/opt/mssql/data
-            - ./platforms/data/sqlserver/auth-service/log:/var/opt/mssql/log
-            - ./platforms/data/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
+            - ./platforms/databases/sqlserver/auth-service/data:/var/opt/mssql/data
+            - ./platforms/databases/sqlserver/auth-service/log:/var/opt/mssql/log
+            - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
         environment:
-            SA_PASSWORD: 'ProdPassword123!'
-            ACCEPT_EULA: 'Y'
-        networks:
-            - api_network
-
-    nginx-gateway:
-        build:
-            context: .
-            dockerfile: platforms/nginx-gateway/Dockerfile
-        container_name: nginx-gateway-prod
-        ports:
-            - '80:80'
-        env_file:
-            - ./platforms/nginx-gateway/.env.production
-        environment:
-            - ENV=production
+            - SA_PASSWORD=ProdPassword123!
+            - ACCEPT_EULA=Y
+            - MSSQL_UID=10001
+        user: '10001:0'
         networks:
             - api_network
 
