@@ -1,7 +1,13 @@
 COMPTE-RENDU DU 08/04/2025
 
-###NOM###Mahmoud Charif
+###NOM###COMPTE-RENDU DU 08/04/2025Mahmoud Charif
 ###MATIN###TICKET : CESIMANGE-145 & 143
 Correction du crash auth service + Mise a jour de la BDD et des models + Affichage des restaurants actif + Correction de la pagination.
-###APRESMIDI###
+
+Mise en place de contrendu journalier
+###APRESMIDI###developp
+
+Ajout du order service et mise a jour de la bdd avec yannick + creation du dashboard / pagination useQuery => Infinit Query
+Ajout d'images pour les restaurants
+
 
