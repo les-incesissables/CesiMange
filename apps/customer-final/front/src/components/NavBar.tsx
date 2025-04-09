@@ -8,6 +8,7 @@ import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
+import CartPopup from './CartPopUp';
 
 interface HeaderProps {
     variant: 'general' | 'client';
@@ -19,9 +20,11 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) =
     const { cart } = useCart();
 
     const [showPopup, setShowPopup] = useState(false);
+    const [showCartPopup, setShowCartPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
     const onCartClick = () => {
+        setShowCartPopup(true);
         console.log(`Nombre d'éléments dans le cart : ${cart.length}`);
 
         const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -90,6 +93,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) =
                             <div data-size="Large" className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
+                            {showCartPopup && <CartPopup onClose={() => setShowCartPopup(false)} />}
                         </div>
                         <div ref={popupRef}>
                             <img
