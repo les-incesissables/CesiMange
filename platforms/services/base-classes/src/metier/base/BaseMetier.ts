@@ -5,34 +5,26 @@ import { Repository, EDatabaseType, IBaseRepository } from '../../../../data-acc
  * @template DTO - Type de données retourné/manipulé
  * @template CritereDTO - Type des critères de recherche
  */
-export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO, CritereDTO>
-{
+export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO, CritereDTO> {
     protected Repository: Repository<DTO, CritereDTO>;
     protected CollectionName: string;
     protected ServiceName?: string;
 
     //#region CTOR
-    constructor (pCollectionName: string, pModel?: any)
-    {
+    constructor(pCollectionName: string, pModel?: any) {
         this.CollectionName = pCollectionName;
         let lDatabaseType: EDatabaseType = EDatabaseType.MONGODB;
 
-        if (pModel)
-            lDatabaseType = EDatabaseType.SQL_SERVER;
+        if (pModel) lDatabaseType = EDatabaseType.SQL_SERVER;
 
-        const lRepo = new Repository<DTO, CritereDTO>(
-            pCollectionName,
-            lDatabaseType,
-            pModel
-        );
+        const lRepo = new Repository<DTO, CritereDTO>(pCollectionName, lDatabaseType, pModel);
         this.Repository = lRepo;
-        this.initialize();
+        //this.initialize();
     }
 
     //#endregion
 
-    public async initialize(): Promise<void>
-    {
+    public async initialize(): Promise<void> {
         return this.Repository.initialize();
     }
 
@@ -40,10 +32,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Obtenir tous les éléments selon des critères
      */
-    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
-    {
-        try
-        {
+    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]> {
+        try {
             // Validation des critères si nécessaire
             this.validateCritereDTO(pCritereDTO);
             this.validateGetItems(pCritereDTO);
@@ -56,8 +46,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
 
             // Appliquer des transformations ou règles après la récupération
             return items;
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'getItems');
             throw error;
         }
@@ -66,10 +55,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Obtenir un élément par critères
      */
-    async getItem(pCritereDTO: CritereDTO): Promise<DTO>
-    {
-        try
-        {
+    async getItem(pCritereDTO: CritereDTO): Promise<DTO> {
+        try {
             // Validation des critères
             this.validateCritereDTO(pCritereDTO);
             this.validateGetItem(pCritereDTO);
@@ -81,8 +68,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             const item = await this.Repository.getItem(pCritereDTO);
 
             return item;
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'getItem');
             throw error;
         }
@@ -91,10 +77,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Créer un nouvel élément
      */
-    async createItem(pDTO: DTO): Promise<DTO>
-    {
-        try
-        {
+    async createItem(pDTO: DTO): Promise<DTO> {
+        try {
             // Validation des données
             this.validateDTO(pDTO);
             await this.validateCreateItem(pDTO);
@@ -105,12 +89,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             // Déléguer la création au repository
             const lResult = await this.Repository.createItem(preparedDTO);
 
-            if (lResult)
-                await this.afterCreateItem(lResult);
+            if (lResult) await this.afterCreateItem(lResult);
 
             return lResult;
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'createItem');
             throw error;
         }
@@ -119,10 +101,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Mettre à jour un élément existant
      */
-    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
-        try
-        {
+    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
+        try {
             // Validation des données et critères
             this.validateDTO(pDTO);
             this.validateCritereDTO(pCritereDTO);
@@ -135,8 +115,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             const item = await this.Repository.updateItem(preparedDTO, pCritereDTO);
 
             return item;
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'updateItem');
             throw error;
         }
@@ -145,10 +124,8 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Supprimer un élément
      */
-    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
-    {
-        try
-        {
+    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean> {
+        try {
             // Validation des critères
             this.validateCritereDTO(pCritereDTO);
             await this.validateDeleteItem(pCritereDTO);
@@ -159,12 +136,10 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
             // Déléguer la suppression au repository
             const result = await this.Repository.deleteItem(pCritereDTO);
 
-            if (result)
-                await this.afterDeleteItem(pCritereDTO);
+            if (result) await this.afterDeleteItem(pCritereDTO);
 
             return result;
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'deleteItem');
             throw error;
         }
@@ -173,17 +148,14 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Vérifier si un élément existe selon des critères
      */
-    async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
-    {
-        try
-        {
+    async itemExists(pCritereDTO: CritereDTO): Promise<boolean> {
+        try {
             // Validation des critères
             this.validateCritereDTO(pCritereDTO);
 
             // Déléguer la vérification au repository
             return await this.Repository.itemExists(pCritereDTO);
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'itemExists');
             throw error;
         }
@@ -196,11 +168,9 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
      * Valider les données avant création/mise à jour
      * À surcharger pour des validations spécifiques
      */
-    protected validateDTO(pDTO: DTO): void
-    {
+    protected validateDTO(pDTO: DTO): void {
         // Validation de base
-        if (!pDTO)
-        {
+        if (!pDTO) {
             throw new Error('Les données sont requises');
         }
     }
@@ -209,11 +179,9 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
      * Valider les critères de recherche
      * À surcharger pour des validations spécifiques
      */
-    protected validateCritereDTO(pCritereDTO: CritereDTO): void
-    {
+    protected validateCritereDTO(pCritereDTO: CritereDTO): void {
         // Validation de base
-        if (!pCritereDTO)
-        {
+        if (!pCritereDTO) {
             throw new Error('Les critères sont requis');
         }
     }
@@ -221,8 +189,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
     /**
      * Gestion des erreurs
      */
-    protected handleError(error: any, methodName: string): void
-    {
+    protected handleError(error: any, methodName: string): void {
         console.error(`Erreur dans ${methodName}:`, error);
         // Logique spécifique de gestion des erreurs
     }
@@ -231,78 +198,63 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
      * Méthodes de validation et prétraitement à implémenter
      * dans les classes dérivées
      */
-    protected validateGetItems(pCritereDTO: CritereDTO): void
-    {
+    protected validateGetItems(pCritereDTO: CritereDTO): void {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected validateGetItem(pCritereDTO: CritereDTO): void
-    {
+    protected validateGetItem(pCritereDTO: CritereDTO): void {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected async validateCreateItem(pDTO: DTO): Promise<void>
-    {
+    protected async validateCreateItem(pDTO: DTO): Promise<void> {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected async validateUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async validateUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<void> {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected async validateDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async validateDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected beforeGetItems(pCritereDTO: CritereDTO): void
-    {
+    protected beforeGetItems(pCritereDTO: CritereDTO): void {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected beforeGetItem(pCritereDTO: CritereDTO): void
-    {
+    protected beforeGetItem(pCritereDTO: CritereDTO): void {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected async beforeCreateItem(pDTO: DTO): Promise<DTO>
-    {
+    protected async beforeCreateItem(pDTO: DTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
+    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // Méthode à implémenter dans les classes dérivées
     }
 
-    protected afterGetItems(pDTOs: DTO[]): DTO[]
-    {
+    protected afterGetItems(pDTOs: DTO[]): DTO[] {
         return pDTOs;
     }
 
-    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO>
-    {
+    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO> {
         return pDTO;
     }
 
-    protected async afterCreateItem(pDTO: DTO): Promise<DTO>
-    {
+    protected async afterCreateItem(pDTO: DTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
+    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
     //#endregion

@@ -1,29 +1,27 @@
-import { AuthUsers } from "../../models/entities/authusers/AuthUsers";
-import { AuthUsersCritereDTO } from "../../models/entities/authusers/AuthUsersCritereDTO";
-import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";
-import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcrypt";
+import { AuthUsers } from '../../models/entities/authusers/AuthUsers';
+import { AuthUsersCritereDTO } from '../../models/entities/authusers/AuthUsersCritereDTO';
+import { BaseController } from '../../../../../services/base-classes/src/controllers/base/BaseController';
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcrypt';
 
-import { AuthJWT } from "../../middleware/authJWT";
-import { AuthUsersMetier } from "../../metier/authusers/AuthUsersMetier";
+import { AuthJWT } from '../../middleware/authJWT';
+import { AuthUsersMetier } from '../../metier/authusers/AuthUsersMetier';
 
 /**
  * Contrôleur pour l'entité AuthUsers
  * @author Controller Generator - 2025-04-01T19:17:50.592Z - Creation
  * @modified - 02/04/2025 - Implémentation de la sécurité JWT+CSRF avec AuthJWT
  */
-export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCritereDTO>
-{
+export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCritereDTO> {
     //#region Attributes
-    private readonly TOKEN_EXPIRATION = "8h";
+    private readonly TOKEN_EXPIRATION = '8h';
     private readonly TOKEN_EXPIRATION_MS = 8 * 60 * 60 * 1000; // 8 heures en millisecondes
     private readonly REFRESH_TOKEN_EXPIRATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours en millisecondes
 
     //#endregion
 
     //#region CTOR
-    constructor (pMetier: AuthUsersMetier)
-    {
+    constructor(pMetier: AuthUsersMetier) {
         super(pMetier);
     }
 
@@ -31,9 +29,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
     //#region Methods
 
-
-    override initializeRoutes(): void
-    {
+    override initializeRoutes(): void {
         // Routes publiques
         this.Router.post('/login', this.getItem);
         this.Router.post('/register', this.createItem);
@@ -41,27 +37,17 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         this.Router.post('/verify-token', this.refreshToken);
 
         // Routes protégées pour admin uniquement
-        this.Router.get('/admin',
-            AuthJWT.authenticateJWT,
-            this.adminEndpoint);
+        this.Router.get('/admin', AuthJWT.authenticateJWT, this.adminEndpoint);
 
         // Routes protégées pour admin uniquement
-        this.Router.get('/user',
-            AuthJWT.authenticateJWT,
-            this.adminEndpoint);
+        this.Router.get('/user', AuthJWT.authenticateJWT, this.adminEndpoint);
 
         // Routes protégées par propriété de ressource
-        this.Router.get('/:id',
-            AuthJWT.authenticateJWT,
-            this.getItem);
+        this.Router.get('/:id', AuthJWT.authenticateJWT, this.getItem);
 
-        this.Router.put('/:id',
-            AuthJWT.authenticateJWT,
-            this.updateItem);
+        this.Router.put('/:id', AuthJWT.authenticateJWT, this.updateItem);
 
-        this.Router.delete('/:id',
-            AuthJWT.authenticateJWT,
-            this.deleteItem);
+        this.Router.delete('/:id', AuthJWT.authenticateJWT, this.deleteItem);
 
         // Route pour la déconnexion
         this.Router.post('/logout', this.logout);
@@ -70,28 +56,26 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     /**
      * Endpoint réservé aux administrateurs
      */
-    private adminEndpoint(req: Request, res: Response): void
-    {
+    private adminEndpoint(req: Request, res: Response): void {
         res.status(200).json({ message: 'Accès admin accordé', user: req.user });
     }
 
     /**
      * Déconnexion utilisateur - efface les cookies
      */
-    private logout(req: Request, res: Response): void
-    {
+    private logout(req: Request, res: Response): void {
         // Effacer les cookies en les définissant avec une date d'expiration dans le passé
         res.cookie('access_token', '', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            expires: new Date(0)
+            expires: new Date(0),
         });
 
         res.cookie('refresh_token', '', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             expires: new Date(0),
-            path: '/refresh-token'
+            path: '/refresh-token',
         });
 
         res.status(200).json({ message: 'Déconnexion réussie' });
@@ -100,14 +84,13 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
     /**
      * Méthode commune pour générer des tokens et configurer les cookies
      * Utilisée à la fois par le login (afterGetItem) et le rafraîchissement de token
-     * 
+     *
      * @param pUser L'utilisateur pour lequel générer les tokens
      * @param res L'objet Response pour configurer les cookies
      * @param message Message à inclure dans la réponse (optionnel)
      * @returns Un objet contenant les informations à renvoyer au client
      */
-    private async generateTokensAndSetCookies(pUser: AuthUsers, res: Response, message?: string): Promise<any>
-    {
+    private async generateTokensAndSetCookies(pUser: AuthUsers, res: Response, message?: string): Promise<any> {
         // 1. Générer un nouveau CSRF token
         const lXsrfToken = AuthJWT.generateCSRFToken();
 
@@ -116,7 +99,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             id: pUser.id,
             username: pUser.email,
             roles: pUser.role,
-            xsrfToken: lXsrfToken
+            xsrfToken: lXsrfToken,
         };
 
         // 3. Générer un nouveau JWT
@@ -137,7 +120,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: this.TOKEN_EXPIRATION_MS
+            maxAge: this.TOKEN_EXPIRATION_MS,
         });
 
         res.cookie('refresh_token', lRefreshToken, {
@@ -145,7 +128,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
             maxAge: this.REFRESH_TOKEN_EXPIRATION_MS,
-            path: '/refresh-token'
+            path: '/refresh-token',
         });
 
         // cm - Delete les colonne sensible
@@ -157,22 +140,19 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             ...pUser,
             xsrfToken: lXsrfToken,
             TOKEN_EXPIRATION_MS: this.TOKEN_EXPIRATION_MS,
-            REFRESH_TOKEN_EXPIRATION_MS: this.REFRESH_TOKEN_EXPIRATION_MS
+            REFRESH_TOKEN_EXPIRATION_MS: this.REFRESH_TOKEN_EXPIRATION_MS,
         };
     }
 
     /**
      * Rafraîchit le token JWT en utilisant le refresh token
      */
-    private async refreshToken(req: Request, res: Response): Promise<void>
-    {
-        try
-        {
+    private async refreshToken(req: Request, res: Response): Promise<void> {
+        try {
             // 1. Récupérer le refresh token depuis le cookie
             const refreshToken = req.cookies.refresh_token;
 
-            if (!refreshToken)
-            {
+            if (!refreshToken) {
                 res.status(401).json({ message: 'Refresh token manquant' });
                 return;
             }
@@ -183,8 +163,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
             const user = await this.Metier.getItem(userCriteria);
 
-            if (!user || !user.id)
-            {
+            if (!user || !user.id) {
                 res.status(403).json({ message: 'Refresh token invalide ou expiré' });
                 return;
             }
@@ -194,13 +173,11 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
             // 4. Envoyer la réponse
             res.status(200).json(result);
-
-        } catch (error)
-        {
+        } catch (error) {
             console.error('Erreur lors du rafraîchissement du token:', error);
             res.status(500).json({ message: 'Erreur lors du rafraîchissement du token' });
         }
-    };
+    }
     //#endregion
 
     //#region CreateItem
@@ -208,11 +185,9 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Surchage de la validation du register/CreateItem
      * @param pAuthUsers
      */
-    public override async validateCreateItem(pAuthUsers: AuthUsers): Promise<void>
-    {
+    public override async validateCreateItem(pAuthUsers: AuthUsers): Promise<void> {
         // Validation des champs
-        if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
-        {
+        if (!pAuthUsers.email || !pAuthUsers.password_hash) {
             throw new Error('Tous les champs sont requis');
         }
 
@@ -222,8 +197,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
 
         // Verifie si l'utilisateur/email existe déjà
         const lExistingUser = await this.Metier.getItem(lAuthUser);
-        if (lExistingUser && lExistingUser.email)
-        {
+        if (lExistingUser && lExistingUser.email) {
             throw new Error('Cet utilisateur existe déjà');
         }
     }
@@ -232,11 +206,9 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Surchage de le beforeCreateItem du register/CreateItem
      * @param pAuthUsers
      */
-    public override async beforeCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers>
-    {
+    public override async beforeCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers> {
         let lNewUser: AuthUsers;
-        if (pAuthUsers.password_hash)
-        {
+        if (pAuthUsers.password_hash) {
             // Hashe le mot de passe
             const lHashedPassword = await bcrypt.hash(pAuthUsers.password_hash, 10);
 
@@ -246,17 +218,14 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
             lNewUser.password_hash = lHashedPassword;
             lNewUser.email = pAuthUsers.email;
             lNewUser.role = 'user';
-        }
-        else
-        {
-            throw new Error("No Password");
+        } else {
+            throw new Error('No Password');
         }
 
         return lNewUser;
     }
 
-    public override async afterCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers>
-    {
+    public override async afterCreateItem(pAuthUsers: AuthUsers): Promise<AuthUsers> {
         delete pAuthUsers.password_hash;
 
         return pAuthUsers;
@@ -269,11 +238,9 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Surchage de la validation du login/GetItem
      * @param pAuthUsers
      */
-    public override async validateGetItem(pAuthUsers: AuthUsers): Promise<void>
-    {
+    public override async validateGetItem(pAuthUsers: AuthUsers): Promise<void> {
         // Validation des champs
-        if (!pAuthUsers.email || !pAuthUsers.password_hash)
-        {
+        if (!pAuthUsers.email || !pAuthUsers.password_hash) {
             throw new Error('Email et mot de passe requis');
         }
 
@@ -283,16 +250,14 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         // Rechercher l'utilisateur dans la base de données
         const lUser: AuthUsers = await this.Metier.getItem(lAuthUsers);
 
-        if (!lUser || !lUser.password_hash)
-        {
+        if (!lUser || !lUser.password_hash) {
             throw new Error('Identifiants invalides');
         }
 
         // Vérifier le mot de passe
         const lIsPasswordValid = await bcrypt.compare(pAuthUsers.password_hash, lUser.password_hash);
 
-        if (!lIsPasswordValid)
-        {
+        if (!lIsPasswordValid) {
             throw new Error('Identifiants invalides');
         }
     }
@@ -301,8 +266,7 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Surchage de le beforeGetItem du login/GetItem
      * @param pAuthUsers
      */
-    public override beforeGetItem(pAuthUsers: AuthUsersCritereDTO): AuthUsersCritereDTO
-    {
+    public override beforeGetItem(pAuthUsers: AuthUsersCritereDTO): AuthUsersCritereDTO {
         // Préparation du critère de recherche
         let lCritere: AuthUsersCritereDTO = new AuthUsersCritereDTO();
         lCritere.email = pAuthUsers.email;
@@ -310,13 +274,11 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
         return lCritere;
     }
 
-    public override async afterGetItem(pAuthUsers: AuthUsers, pRes: Response): Promise<AuthUsers>
-    {
+    public override async afterGetItem(pAuthUsers: AuthUsers, pRes: Response): Promise<AuthUsers> {
         return await this.generateTokensAndSetCookies(pAuthUsers, pRes);
     }
 
-    public override async beforeDeleteItem(pCritere: AuthUsers) : Promise<AuthUsers>
-    {
+    public override async beforeDeleteItem(pCritere: AuthUsers): Promise<AuthUsers> {
         const lCritere = new AuthUsersCritereDTO();
         lCritere.id = pCritere.id;
 
@@ -330,11 +292,9 @@ export class AuthUsersController extends BaseController<AuthUsers, AuthUsersCrit
      * Surchage de la validation du login/GetItem
      * @param pAuthUsers
      */
-    public override async validateDeleteItem(pAuthUsers: AuthUsers): Promise<void>
-    {
+    public override async validateDeleteItem(pAuthUsers: AuthUsers): Promise<void> {
         // Validation des champs
-        if (!pAuthUsers.id)
-        {
+        if (!pAuthUsers.id) {
             throw new Error('lidentifiant est requis pour la suppression');
         }
     }
