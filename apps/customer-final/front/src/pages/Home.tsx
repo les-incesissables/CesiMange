@@ -15,12 +15,12 @@ const Home: React.FC = () =>
     const { searchTerm } = useSearch();
     const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } = useInfiniteQuery({
         queryKey: ['restaurants', searchTerm],
-        queryFn: ({ pageParam = 1 }) =>
+        queryFn: async ({ pageParam = 1 }) =>
         {
             const lRestaurantCritere = {
                 nameLike: searchTerm
             };
-            return localMiddleware.callLocalApi(() => localMiddleware.RestoRepo.getItems(lRestaurantCritere, pageParam, LIMIT));
+            return await localMiddleware.callLocalApi(async () => await localMiddleware.RestoRepo.getItems(lRestaurantCritere, pageParam, LIMIT));
         },
         getNextPageParam: (lastPage) => (lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null),
         initialPageParam: 1
