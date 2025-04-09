@@ -1,20 +1,12 @@
 FROM mongo:latest
 
-# Copier les fichiers seed pour l'initialisation
+# Copier les fichiers d'initialisation
 COPY seed/ /docker-entrypoint-initdb.d/
 
-# Copier le script d'entrypoint personnalisé
+# Copier et préparer le script (sans dos2unix)
 COPY entrypoint.sh /entrypoint.sh
-
-# Convertir les fins de ligne Windows en Linux et rendre le script exécutable
-RUN apt-get update && apt-get install -y dos2unix \
-    && dos2unix /entrypoint.sh \
-    && chmod +x /entrypoint.sh \
-    && apt-get purge -y dos2unix \
-    && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's/\r$//' /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 EXPOSE 27017
-
-# Utiliser votre script d'entrypoint personnalisé
 ENTRYPOINT ["/entrypoint.sh"]
-
