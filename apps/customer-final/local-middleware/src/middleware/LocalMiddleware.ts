@@ -10,7 +10,7 @@ import { mapErrorCodeToMessage } from '../utils/errorMapper';
  */
 export class LocalMiddleware {
     public RestoRepo = RepositoryService.resto;
-
+    public AuthRepo = RepositoryService.auth;
     /**
      * Processes incoming messages and normalizes them.
      * @param message - The raw message received.

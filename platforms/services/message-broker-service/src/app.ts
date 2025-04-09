@@ -2,15 +2,13 @@
 import { Kafka, Producer, Consumer, Admin, Message, KafkaMessage, Partitioners } from 'kafkajs';
 
 // Définition des interfaces pour nos objets
-interface Plat
-{
+interface Plat {
     nom: string;
     quantite: number;
     prix: number;
 }
 
-interface Commande
-{
+interface Commande {
     id: string;
     clientId: string;
     restaurant: string;
@@ -22,48 +20,38 @@ interface Commande
 // Configuration Kafka simple
 const kafka = new Kafka({
     clientId: 'uber-eat-app',
-    brokers: ['localhost:9092']
+    brokers: ['localhost:9092', 'kafka:9092'],
 });
 
 // Fonction d'attente
-const wait = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 1. Créer les topics nécessaires
-async function setupTopics(): Promise<void>
-{
+async function setupTopics(): Promise<void> {
     console.log('Création des topics Kafka...');
 
     const admin: Admin = kafka.admin();
     await admin.connect();
 
     // Seulement 3 topics pour notre exemple simplifié
-    const topics: string[] = [
-        'commandes',
-        'preparation',
-        'livraison'
-    ];
+    const topics: string[] = ['commandes', 'preparation', 'livraison'];
 
-    try
-    {
+    try {
         await admin.createTopics({
-            topics: topics.map(topic => ({
+            topics: topics.map((topic) => ({
                 topic,
                 numPartitions: 1,
-                replicationFactor: 1
-            }))
+                replicationFactor: 1,
+            })),
         });
         console.log('Topics créés avec succès');
-    } catch (error: any)
-    {
-        if (error.message && error.message.includes('TOPIC_ALREADY_EXISTS'))
-        {
+    } catch (error: any) {
+        if (error.message && error.message.includes('TOPIC_ALREADY_EXISTS')) {
             console.log('Topics déjà existants');
-        } else
-        {
+        } else {
             throw error;
         }
-    } finally
-    {
+    } finally {
         await admin.disconnect();
     }
 
@@ -75,36 +63,36 @@ async function setupTopics(): Promise<void>
 async function startCommandeService(): Promise<{
     passerCommande: (clientId: string, restaurant: string, plats: Plat[]) => Promise<string>;
     close: () => Promise<void>;
-}>
-{
+}> {
     const producer: Producer = kafka.producer({
         // Utiliser l'ancien partitionner pour maintenir la compatibilité
-        createPartitioner: Partitioners.LegacyPartitioner
+        createPartitioner: Partitioners.LegacyPartitioner,
     });
     await producer.connect();
 
     console.log('Service de commande démarré');
 
     // Simuler une nouvelle commande
-    async function passerCommande(clientId: string, restaurant: string, plats: Plat[]): Promise<string>
-    {
+    async function passerCommande(clientId: string, restaurant: string, plats: Plat[]): Promise<string> {
         const commande: Commande = {
             id: `cmd-${Date.now()}`,
             clientId,
             restaurant,
             plats,
             statut: 'reçue',
-            horodatage: new Date().toISOString()
+            horodatage: new Date().toISOString(),
         };
 
         console.log(`📱 COMMANDE: Nouvelle commande ${commande.id} reçue de ${clientId}`);
 
         await producer.send({
             topic: 'commandes',
-            messages: [{
-                key: commande.id,
-                value: JSON.stringify(commande)
-            }]
+            messages: [
+                {
+                    key: commande.id,
+                    value: JSON.stringify(commande),
+                },
+            ],
         });
 
         return commande.id;
@@ -112,16 +100,15 @@ async function startCommandeService(): Promise<{
 
     return {
         passerCommande,
-        close: async () => await producer.disconnect()
+        close: async () => await producer.disconnect(),
     };
 }
 
 // 3. Service de préparation restaurant
-async function startRestaurantService(): Promise<{ close: () => Promise<void> }>
-{
+async function startRestaurantService(): Promise<{ close: () => Promise<void> }> {
     const consumer: Consumer = kafka.consumer({ groupId: 'restaurant-group' });
     const producer: Producer = kafka.producer({
-        createPartitioner: Partitioners.LegacyPartitioner
+        createPartitioner: Partitioners.LegacyPartitioner,
     });
 
     await consumer.connect();
@@ -130,15 +117,9 @@ async function startRestaurantService(): Promise<{ close: () => Promise<void> }>
 
     // Réagir aux nouvelles commandes
     await consumer.run({
-        eachMessage: async ({ topic, partition, message }: {
-            topic: string,
-            partition: number,
-            message: KafkaMessage
-        }) =>
-        {
+        eachMessage: async ({ topic, partition, message }: { topic: string; partition: number; message: KafkaMessage }) => {
             // Vérifier que message.value existe
-            if (!message.value)
-            {
+            if (!message.value) {
                 console.error('Message reçu sans valeur');
                 return;
             }
@@ -155,10 +136,12 @@ async function startRestaurantService(): Promise<{ close: () => Promise<void> }>
             // Notifier que la commande est prête
             await producer.send({
                 topic: 'preparation',
-                messages: [{
-                    key: commande.id,
-                    value: JSON.stringify(commande)
-                }]
+                messages: [
+                    {
+                        key: commande.id,
+                        value: JSON.stringify(commande),
+                    },
+                ],
             });
 
             console.log(`🍔 RESTAURANT: Commande ${commande.id} prête pour livraison`);
@@ -166,20 +149,18 @@ async function startRestaurantService(): Promise<{ close: () => Promise<void> }>
     });
 
     return {
-        close: async () =>
-        {
+        close: async () => {
             await consumer.disconnect();
             await producer.disconnect();
-        }
+        },
     };
 }
 
 // 4. Service de livraison
-async function startLivraisonService(): Promise<{ close: () => Promise<void> }>
-{
+async function startLivraisonService(): Promise<{ close: () => Promise<void> }> {
     const consumer: Consumer = kafka.consumer({ groupId: 'livraison-group' });
     const producer: Producer = kafka.producer({
-        createPartitioner: Partitioners.LegacyPartitioner
+        createPartitioner: Partitioners.LegacyPartitioner,
     });
 
     await consumer.connect();
@@ -188,15 +169,9 @@ async function startLivraisonService(): Promise<{ close: () => Promise<void> }>
 
     // Réagir aux commandes prêtes à être livrées
     await consumer.run({
-        eachMessage: async ({ topic, partition, message }: {
-            topic: string,
-            partition: number,
-            message: KafkaMessage
-        }) =>
-        {
+        eachMessage: async ({ topic, partition, message }: { topic: string; partition: number; message: KafkaMessage }) => {
             // Vérifier que message.value existe
-            if (!message.value)
-            {
+            if (!message.value) {
                 console.error('Message reçu sans valeur');
                 return;
             }
@@ -213,10 +188,12 @@ async function startLivraisonService(): Promise<{ close: () => Promise<void> }>
             // Notifier que la commande est livrée
             await producer.send({
                 topic: 'livraison',
-                messages: [{
-                    key: commande.id,
-                    value: JSON.stringify(commande)
-                }]
+                messages: [
+                    {
+                        key: commande.id,
+                        value: JSON.stringify(commande),
+                    },
+                ],
             });
 
             console.log(`🏠 LIVRAISON: Commande ${commande.id} livrée avec succès au client ${commande.clientId}`);
@@ -224,32 +201,24 @@ async function startLivraisonService(): Promise<{ close: () => Promise<void> }>
     });
 
     return {
-        close: async () =>
-        {
+        close: async () => {
             await consumer.disconnect();
             await producer.disconnect();
-        }
+        },
     };
 }
 
 // 5. Notifications client (abonnement au topic livraison)
-async function startNotificationService(): Promise<{ close: () => Promise<void> }>
-{
+async function startNotificationService(): Promise<{ close: () => Promise<void> }> {
     const consumer: Consumer = kafka.consumer({ groupId: 'notification-group' });
 
     await consumer.connect();
     await consumer.subscribe({ topic: 'livraison', fromBeginning: false });
 
     await consumer.run({
-        eachMessage: async ({ topic, partition, message }: {
-            topic: string,
-            partition: number,
-            message: KafkaMessage
-        }) =>
-        {
+        eachMessage: async ({ topic, partition, message }: { topic: string; partition: number; message: KafkaMessage }) => {
             // Vérifier que message.value existe
-            if (!message.value)
-            {
+            if (!message.value) {
                 console.error('Message reçu sans valeur');
                 return;
             }
@@ -261,15 +230,13 @@ async function startNotificationService(): Promise<{ close: () => Promise<void> 
     });
 
     return {
-        close: async () => await consumer.disconnect()
+        close: async () => await consumer.disconnect(),
     };
 }
 
 // 6. Scénario complet
-async function runUberEatDemo(): Promise<void>
-{
-    try
-    {
+async function runUberEatDemo(): Promise<void> {
+    try {
         // Préparer les topics
         await setupTopics();
 
@@ -289,14 +256,14 @@ async function runUberEatDemo(): Promise<void>
         await commandeService.passerCommande('alice', 'Burger King', [
             { nom: 'Whopper', quantite: 1, prix: 7.5 },
             { nom: 'Frites', quantite: 1, prix: 3.5 },
-            { nom: 'Coca', quantite: 1, prix: 2.5 }
+            { nom: 'Coca', quantite: 1, prix: 2.5 },
         ]);
 
         await wait(2000);
 
         await commandeService.passerCommande('bob', 'Sushi Shop', [
             { nom: 'California Roll', quantite: 2, prix: 12 },
-            { nom: 'Miso Soup', quantite: 1, prix: 4 }
+            { nom: 'Miso Soup', quantite: 1, prix: 4 },
         ]);
 
         // Laisser le temps aux messages de circuler
@@ -311,16 +278,13 @@ async function runUberEatDemo(): Promise<void>
         await notificationService.close();
 
         console.log('Tous les services arrêtés proprement');
-
-    } catch (error: any)
-    {
+    } catch (error: any) {
         console.error('Erreur:', error);
     }
 }
 
 // Exécuter la démo
-runUberEatDemo().catch((error: Error) =>
-{
+runUberEatDemo().catch((error: Error) => {
     console.error('Erreur non gérée:', error);
     process.exit(1);
 });

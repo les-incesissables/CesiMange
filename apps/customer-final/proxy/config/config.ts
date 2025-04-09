@@ -1,6 +1,6 @@
 // apps/customer-app/config/config.ts
 
-const env = process.env.NODE_ENV || 'development';
+const env = 'development';
 
 interface ApiConfig {
     baseURL: string;

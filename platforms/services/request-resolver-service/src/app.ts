@@ -11,6 +11,20 @@ import morgan from 'morgan';
 import { securityMiddleware } from './middlewares/security';
 import { requestLogger } from './middlewares/requestLogger';
 
+import * as dotenv from 'dotenv';
+
+const isDocker = process.env.DOCKER_ENV === 'true';
+
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
+    dotenv.config({ path: '.env.development' });
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
+    dotenv.config({ path: '.env.localhost' });
+} else if (process.env.NODE_ENV === 'staging') {
+    dotenv.config({ path: '.env.staging' });
+} else if (process.env.NODE_ENV === 'production') {
+    dotenv.config({ path: '.env.production' });
+}
+
 const config = loadGatewayConfig();
 const app = express();
 /* app should use bodyParser. For this example we'll use json. bodyParser allows you to
