@@ -1,15 +1,11 @@
 FROM mongo:latest
 
-# Copier les fichiers seed pour l'initialisation
+# Copie tout le contenu de seed/ (fichiers .json et init.sh) dans /docker-entrypoint-initdb.d/
 COPY seed/ /docker-entrypoint-initdb.d/
 
-# Copier le script d'entrypoint personnalisé
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-
+# Expose le port si nécessaire
 EXPOSE 27017
 
-# Utiliser votre script d'entrypoint personnalisé
-ENTRYPOINT ["/entrypoint.sh"]
-
-CMD ["mongod"]
+# L'image officielle de Mongo exécute automatiquement tout script .sh ou .js
+# présent dans /docker-entrypoint-initdb.d/ lors du premier démarrage,
+# si /data/db est vide. On n'override pas ENTRYPOINT ni CMD pour s'appuyer sur le comportement par défaut.
