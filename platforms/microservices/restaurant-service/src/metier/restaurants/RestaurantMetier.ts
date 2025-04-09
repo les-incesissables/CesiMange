@@ -17,7 +17,7 @@ export class RestaurantMetier extends BaseMetier<IRestaurant, Partial<IRestauran
         // Configuration Kafka pour le ServiceBroker
         const kafkaConfig: KafkaConfig = {
             clientId: 'restaurant-service',
-            brokers: ['kafka:9092'],
+            brokers: ['localhost:9092', 'kafka:29092'],
         };
 
         this.serviceBroker = new ServiceBroker(kafkaConfig);

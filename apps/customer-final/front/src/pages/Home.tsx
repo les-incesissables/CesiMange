@@ -1,4 +1,4 @@
-﻿﻿import React from 'react';
+﻿import React from 'react';
 import HomeLayout from '../layout/HomeLayout';
 import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';

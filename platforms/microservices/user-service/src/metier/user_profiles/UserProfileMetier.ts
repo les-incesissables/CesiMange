@@ -41,7 +41,7 @@ export class UserProfileMetier extends BaseMetier<IUserProfile, Partial<IUserPro
         // Configuration Kafka pour le ServiceBroker
         const kafkaConfig: KafkaConfig = {
             clientId: 'user-service',
-            brokers: ['localhost:9092'],
+            brokers: ['localhost:9092', 'kafka:29092'],
         };
 
         this.serviceBroker = new ServiceBroker(kafkaConfig);

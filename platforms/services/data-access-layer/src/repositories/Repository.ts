@@ -17,7 +17,7 @@ export class Repository<DTO, Critere> extends BaseRepository<DTO, Critere> {
             TypeBDD: pTypeBDD,
             clientId: 'cesi-mange',
             topics: pTopic || [],
-            brokers: [process.env.brokers || 'localhost:9092' || 'kafka:9092'],
+            brokers: ['localhost:9092', 'kafka:29092'],
             groupId: pCollectionName,
         };
 

@@ -20,7 +20,7 @@ interface Commande {
 // Configuration Kafka simple
 const kafka = new Kafka({
     clientId: 'uber-eat-app',
-    brokers: ['localhost:9092', 'kafka:9092'],
+    brokers: ['localhost:9092', 'kafka:29092'],
 });
 
 // Fonction d'attente
