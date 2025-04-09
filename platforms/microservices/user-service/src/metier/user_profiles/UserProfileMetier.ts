@@ -1,27 +1,6 @@
 import { IUserProfile } from '../../models/interfaces/IUserProfile/IUserProfile';
 import { BaseMetier } from '../../../../../services/base-classes/src/metier/base/BaseMetier';
 import { KafkaConfig } from 'kafkajs';
-
-import {
-    ModifiedPathsSnapshot,
-    Document,
-    Model,
-    Types,
-    ClientSession,
-    DocumentSetOptions,
-    QueryOptions,
-    MergeType,
-    UpdateQuery,
-    AnyObject,
-    PopulateOptions,
-    Query,
-    SaveOptions,
-    ToObjectOptions,
-    FlattenMaps,
-    UpdateWithAggregationPipeline,
-    pathsToSkip,
-    Error,
-} from 'mongoose';
 import { IPreferences } from '../../models/interfaces/IUserProfile/IPreferences';
 import { INotifications } from '../../models/interfaces/IUserProfile/INotifications';
 
