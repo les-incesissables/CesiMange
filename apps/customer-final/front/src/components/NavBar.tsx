@@ -7,27 +7,31 @@ import SearchBar from './Utils/SearchBar';
 import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
+import { useCart } from '../context/CartContext';
 
-interface HeaderProps
-{
+interface HeaderProps {
     variant: 'general' | 'client';
     onLoginClick?: () => void;
     onBellClick?: () => void;
-    onCartClick?: () => void;
 }
 
-const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onCartClick }) =>
-{
+const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) => {
+    const { cart } = useCart();
+
     const [showPopup, setShowPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
+    const onCartClick = () => {
+        console.log(`Nombre d'éléments dans le cart : ${cart.length}`);
+
+        const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+        console.log(`Nombre total d'articles dans le cart : ${totalItems}`);
+    };
+
     // Fermer en cliquant en dehors
-    useEffect(() =>
-    {
-        const handleClickOutside = (e: MouseEvent) =>
-        {
-            if (popupRef.current && !popupRef.current.contains(e.target as Node))
-            {
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
                 setShowPopup(false);
             }
         };
@@ -35,8 +39,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (variant === 'general')
-    {
+    if (variant === 'general') {
         return (
             <header className="sticky top-0 z-50 px-4 sm:px-24 py-2.5 bg-yellow-400 border-b border-black">
                 <div className="flex items-center justify-between w-full">
@@ -54,8 +57,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                 </div>
             </header>
         );
-    } else if (variant === 'client')
-    {
+    } else if (variant === 'client') {
         return (
             <header className="sticky top-0 z-50 px-4 sm:px-24 py-2.5 bg-yellow-400 border-b border-black">
                 <div className="max-w-[1440px] mx-auto flex flex-wrap sm:flex-nowrap justify-between items-center">
@@ -68,11 +70,11 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
 
                     {/* Barre de recherche */}
                     <div className="rounded-2xl shadow-lg transition-all duration-300">
-                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher" onClick={() => { }} />
+                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher" onClick={() => {}} />
                     </div>
 
                     {/* Section droite */}
-                    <div className="w-full sm:w-52 flex justify-between items-center px-[5px] mt-2 sm:mt-0">
+                    <div className="  flex  items-center ">
                         <div className="flex items-end gap-2">
                             <button className="w-10 h-10 cursor-pointer" onClick={onBellClick}>
                                 <BellIcon className="w-full h-full" />
@@ -89,7 +91,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
                         </div>
-                        <div className="relative" ref={popupRef}>
+                        <div ref={popupRef}>
                             <img
                                 src="https://placehold.co/69x73"
                                 alt="avatar"

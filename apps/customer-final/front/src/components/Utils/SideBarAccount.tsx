@@ -8,34 +8,31 @@ interface AccountSidebarProps {
     onClose: () => void;
 }
 
-const AccountSidebar: React.FC<AccountSidebarProps> = () => {
+const AccountSidebar: React.FC<AccountSidebarProps> = ({ onClose }) => {
     const navigate = useNavigate();
 
-    const sections = [
-        {
-            items: [
-                { icon: '/images/archive.svg', label: 'Mes commandes', center: false },
-                { icon: '/images/heart.svg', label: 'Favoris', center: false },
-                { icon: '/images/users.svg', label: 'Parrainage', center: false },
-            ],
-        },
-        {
-            items: [{ icon: null, label: 'Déconnexion', center: true }],
-        },
-        {
-            items: [
-                { icon: null, label: 'Ajoutez votre restaurant', center: false },
-                { icon: null, label: 'Devenez coursier-partenaire', center: false },
-            ],
-        },
-    ];
-
-    // Fonction qui redirige vers /dashboard/account
+    // Handlers de navigation
     const handleAccountClick = () => {
         navigate('/dashboard/account');
     };
     const handleOrderClick = () => {
         navigate('/dashboard/order');
+    };
+    const handleFavoritesClick = () => {
+        navigate('/dashboard/favorites');
+    };
+    const handleParrainageClick = () => {
+        navigate('/dashboard/sponsorship');
+    };
+    const handleDeconnexionClick = () => {
+        // Action de déconnexion, ou navigation
+        console.log('Déconnexion');
+    };
+    const handleAddRestaurantClick = () => {
+        navigate('/add-restaurant');
+    };
+    const handleBecomeCourierClick = () => {
+        navigate('/become-courier');
     };
 
     return (
@@ -50,28 +47,45 @@ const AccountSidebar: React.FC<AccountSidebarProps> = () => {
 
             <hr className="border-black mb-6" />
 
-            {/* Sections de navigation */}
-            {sections.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="mb-6">
-                    <ul className="flex flex-col gap-4 text-xl">
-                        {section.items.map(({ icon, label, center }, idx) => (
-                            <li key={idx}>
-                                {center ? (
-                                    <div className="flex justify-center opacity-50">
-                                        <ClickableText text={label} onClick={handleAccountClick} />
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-3 opacity-50">
-                                        {icon && <img src={icon} alt={`${label} icon`} className="w-6 h-6 object-contain" />}
-                                        <ClickableText text={label} onClick={handleOrderClick} />
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                    {sectionIdx < sections.length - 1 && <hr className="my-4 border-black" />}
+            {/* SECTION 1 */}
+            <div className="mb-6 flex flex-col gap-4 text-xl">
+                {/* Mes commandes */}
+                <div className="flex items-center gap-3 opacity-50">
+                    <img src="/images/archive.svg" alt="Mes commandes icon" className="w-6 h-6 object-contain" />
+                    <ClickableText text="Mes commandes" onClick={handleOrderClick} />
                 </div>
-            ))}
+                {/* Favoris */}
+                <div className="flex items-center gap-3 opacity-50">
+                    <img src="/images/heart.svg" alt="Favoris icon" className="w-6 h-6 object-contain" />
+                    <ClickableText text="Favoris" onClick={handleFavoritesClick} />
+                </div>
+                {/* Parrainage */}
+                <div className="flex items-center gap-3 opacity-50">
+                    <img src="/images/users.svg" alt="Parrainage icon" className="w-6 h-6 object-contain" />
+                    <ClickableText text="Parrainage" onClick={handleParrainageClick} />
+                </div>
+            </div>
+
+            <hr className="my-4 border-black" />
+
+            {/* SECTION 2 */}
+            <div className="mb-6 flex justify-center">
+                <div className="opacity-50">
+                    <ClickableText text="Déconnexion" onClick={handleDeconnexionClick} />
+                </div>
+            </div>
+
+            <hr className="my-4 border-black" />
+
+            {/* SECTION 3 */}
+            <div className="flex flex-col gap-4 text-xl">
+                <div className="flex items-center justify-start opacity-50">
+                    <ClickableText text="Ajoutez votre restaurant" onClick={handleAddRestaurantClick} />
+                </div>
+                <div className="flex items-center justify-start opacity-50">
+                    <ClickableText text="Devenez coursier-partenaire" onClick={handleBecomeCourierClick} />
+                </div>
+            </div>
         </div>
     );
 };
