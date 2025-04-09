@@ -9,43 +9,52 @@ import CategorySectionList from '../../components/List/CategorySectionList';
 import { IArticles } from '../../models/interfaces/IRestaurant/IArticles';
 import { IMenu } from '../../models/interfaces/IRestaurant/IMenu';
 
-interface CategoryContent {
+interface CategoryContent
+{
     articles?: IArticles[];
     menus?: IMenu[];
 }
 
-const Restaurant: React.FC = () => {
+const Restaurant: React.FC = () =>
+{
     const location = useLocation();
-    const restaurant = location.state as IRestaurant;
+    const lRestaurant = location.state as IRestaurant;
 
-    if (!restaurant) {
+    if (!lRestaurant)
+    {
         return <div>Aucun restaurant trouvé.</div>;
     }
 
-    const groupedContent: Record<string, CategoryContent> = {};
+    const lGroupedContent: Record<string, CategoryContent> = {};
 
     // Regrouper les menus
-    restaurant.menu.forEach((menuItem) => {
+    lRestaurant.menu.forEach((menuItem) =>
+    {
         const category = menuItem.categorie || 'Autres';
-        if (!groupedContent[category]) {
-            groupedContent[category] = {};
+        if (!lGroupedContent[category])
+        {
+            lGroupedContent[category] = {};
         }
-        if (!groupedContent[category].menus) {
-            groupedContent[category].menus = [];
+        if (!lGroupedContent[category].menus)
+        {
+            lGroupedContent[category].menus = [];
         }
-        groupedContent[category].menus!.push(menuItem);
+        lGroupedContent[category].menus!.push(menuItem);
     });
 
     // Regrouper les articles
-    restaurant.articles.forEach((article) => {
+    lRestaurant.articles.forEach((article) =>
+    {
         const category = article.category || 'Autres';
-        if (!groupedContent[category]) {
-            groupedContent[category] = {};
+        if (!lGroupedContent[category])
+        {
+            lGroupedContent[category] = {};
         }
-        if (!groupedContent[category].articles) {
-            groupedContent[category].articles = [];
+        if (!lGroupedContent[category].articles)
+        {
+            lGroupedContent[category].articles = [];
         }
-        groupedContent[category].articles!.push(article);
+        lGroupedContent[category].articles!.push(article);
     });
 
     return (
@@ -53,7 +62,7 @@ const Restaurant: React.FC = () => {
             <div className="flex-1 bg-[#E4DBC7] p-8">
                 {/* Section Bannière & Infos Restaurant */}
                 <section className="mb-12">
-                    <img className="w-full h-56 object-contain shadow-md border-b border-black" src="https://placehold.co/1128x232" alt="Restaurant Banner" />
+                    <img className="w-full h-56 object-contain shadow-md border-b border-black" src={lRestaurant.banniere ? '/images/restaurants/bannieres/' + lRestaurant.banniere : "https://placehold.co/1128x232"} alt="Restaurant Banner" />
                     <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4">
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
                             <div className="flex items-center gap-2">
@@ -62,16 +71,16 @@ const Restaurant: React.FC = () => {
                                 </div>
                                 <span className="text-black text-base font-semibold font-['Inter']">4.5 Etoiles</span>
                             </div>
-                            <span className="text-black text-base font-normal font-['Inter']">{restaurant.location.address}</span>
+                            <span className="text-black text-base font-normal font-['Inter']">{lRestaurant.location.address}</span>
                             <span className="text-black text-base font-normal font-['Inter']">Distance</span>
-                            <span className="text-black text-base font-normal font-['Inter']">{restaurant.delivery_options.delivery_fee} €</span>
+                            <span className="text-black text-base font-normal font-['Inter']">{lRestaurant.delivery_options.delivery_fee} €</span>
                         </div>
                     </div>
                 </section>
 
                 {/* Section Catégories / Articles & Menus */}
                 <section>
-                    <CategorySectionList categories={groupedContent} />
+                    <CategorySectionList categories={lGroupedContent} />
                 </section>
             </div>
         </RestaurantLayout>

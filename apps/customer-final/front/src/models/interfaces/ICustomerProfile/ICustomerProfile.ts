@@ -1,6 +1,7 @@
 import { IAddresses } from './IAddresses';
 import { IPaymentMethods } from './IPaymentMethods';
 import { IPreferences } from './IPreferences';
+import { IFavories } from './IFavories';
 
 export interface ICustomerProfile {
   _id: string;
@@ -13,6 +14,7 @@ export interface ICustomerProfile {
   preferences: IPreferences;
   created_at?: Date;
   updated_at?: Date;
+  favories: IFavories[];
   createdAt?: Date;
   updatedAt?: Date;
 }

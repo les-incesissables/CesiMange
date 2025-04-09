@@ -3,8 +3,9 @@ import { Document } from 'mongoose';
 import { IAddresses } from './IAddresses';
 import { IPaymentMethods } from './IPaymentMethods';
 import { IPreferences } from './IPreferences';
+import { IFavories } from './IFavories';
 
-export interface ICustomerProfile extends Document {
+export interface IUserProfile extends Document {
   user_id?: number;
   first_name: string;
   last_name: string;
@@ -14,6 +15,7 @@ export interface ICustomerProfile extends Document {
   preferences: IPreferences;
   created_at?: Date;
   updated_at?: Date;
+  favories: IFavories[];
   createdAt?: Date;
   updatedAt?: Date;
 }

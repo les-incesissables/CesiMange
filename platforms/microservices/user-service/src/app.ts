@@ -14,10 +14,11 @@ import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { CustomerProfileController } from './controllers/customer_profiles/CustomerProfileController';
-import { CustomerProfileMetier } from './metier/customer_profiles/CustomerProfileMetier';
+
 
 import * as dotenv from 'dotenv';
+import { UserProfileController } from './controllers/user_profiles/UserProfileController';
+import { UserProfileMetier } from './metier/user_profiles/UserProfileMetier';
 
 const isDocker = process.env.DOCKER_ENV === 'true';
 
@@ -63,11 +64,10 @@ console.log('Connecting to', process.env.CONNECTION_STRING);
 console.log('DB name is', process.env.MONGO_DB_NAME);
 console.log('Docker use : ', isDocker);
 
-//const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
-const customerProfileController = new CustomerProfileController(new CustomerProfileMetier());
-//const restaurantController = new RestaurantController(new RestaurantMetier());
-//const orderMetier = new OrderController(new OrderMetier());
-app.use('/user-profiles', customerProfileController.getRouter());
+
+const userProfileController = new UserProfileController(new UserProfileMetier());
+
+app.use('/user-profiles', userProfileController.getRouter());
 
 //app.use('/api/resto', restaurantController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());

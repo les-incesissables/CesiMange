@@ -1,36 +1,43 @@
-﻿import React from 'react';
+﻿import React, { useEffect } from 'react';
 import HomeLayout from '../layout/HomeLayout';
 import CategorieList from '../components/List/CategorieList';
 import RestaurantList from '../components/List/RestaurantList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { LocalMiddleware } from '../../../local-middleware/src/middleware/LocalMiddleware';
 import { IRestaurant } from '../models/interfaces/IRestaurant/IRestaurant';
+import { useSearch } from '../components/Utils/SearchContext';
 
 const localMiddleware = new LocalMiddleware();
 const LIMIT = 10;
 
 const Home: React.FC = () =>
 {
-    const {
-        data,
-        isLoading,
-        isError,
-        hasNextPage,
-        fetchNextPage,
-        isFetchingNextPage,
-    } = useInfiniteQuery({
-        queryKey: ['restaurants'],
-        queryFn: ({ pageParam = 1 }) => localMiddleware.callLocalApi(() =>
-            localMiddleware.RestoRepo.fetchAll(pageParam, LIMIT)
-        ),
-        getNextPageParam: (lastPage) => lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null,
-        initialPageParam: 1,
+    const { searchTerm } = useSearch();
+    const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage, refetch } = useInfiniteQuery({
+        queryKey: ['restaurants', searchTerm],
+        queryFn: ({ pageParam = 1 }) =>
+        {
+            const lRestaurantCritere = {
+                nameLike: searchTerm
+            };
+            return localMiddleware.callLocalApi(() => localMiddleware.RestoRepo.getItems(lRestaurantCritere, pageParam, LIMIT));
+        },
+        getNextPageParam: (lastPage) => (lastPage.data[1].hasNext ? lastPage.data[1].page + 1 : null),
+        initialPageParam: 1
     });
+
+    useEffect(() =>
+    {
+        if (searchTerm)
+        {
+            refetch();
+        }
+    }, [searchTerm, refetch]);
 
     if (isLoading) return <div>Chargement...</div>;
     if (isError) return <div>Erreur</div>;
 
-    const allRestaurants = data?.pages.flatMap(page => page.data[0] as IRestaurant[]) ?? [];
+    const allRestaurants = data?.pages.flatMap((page) => page.data[0] as IRestaurant[]) ?? [];
     const currentPage = data?.pages[data.pages.length - 1].data[1].page || 1;
 
     return (
@@ -52,11 +59,7 @@ const Home: React.FC = () =>
                             : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]'
                         }`}
                 >
-                    {isFetchingNextPage
-                        ? 'Chargement...'
-                        : hasNextPage
-                            ? 'Charger plus →'
-                            : 'Plus de restaurants'}
+                    {isFetchingNextPage ? 'Chargement...' : hasNextPage ? 'Charger plus →' : 'Plus de restaurants'}
                 </button>
             </div>
         </HomeLayout>

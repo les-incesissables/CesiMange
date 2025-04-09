@@ -2,7 +2,8 @@
 
 import { IGatewayConfig } from './interfaces/IGatewayConfig';
 
-export function loadGatewayConfig(): IGatewayConfig {
+export function loadGatewayConfig(): IGatewayConfig
+{
     const defaultConfig: IGatewayConfig = {
         port: Number(process.env.GATEWAY_PORT) || 3000,
         services: [
@@ -107,6 +108,29 @@ export function loadGatewayConfig(): IGatewayConfig {
                 routeName: 'orders',
                 BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4004') + '/orders',
                 enabled: true,
+                protectedRoutes: [
+                    {
+                        path: '/:id',
+                        methods: ['DELETE'],
+                        ownershipCheck: {
+                            paramName: 'id',
+                            matchField: 'sub',
+                        },
+                    },
+                    {
+                        path: '/',
+                        methods: ['GET'],
+                    },
+                    {
+                        path: '/:id',
+                        methods: ['GET'],
+                    },
+                    {
+                        path: '/admin',
+                        methods: ['GET'],
+                        allowedRoles: ['admin'],
+                    },
+                ],
             },
         ],
     };

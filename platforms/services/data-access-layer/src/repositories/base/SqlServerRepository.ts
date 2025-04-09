@@ -88,7 +88,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
     /**
      * S'assure que la connexion est établie avant d'exécuter une opération
      */
-    protected async ensureConnection(): Promise<Repository<DTO>> {
+    async ensureConnection(): Promise<Repository<DTO>> {
         if (!this._isConnected || !this._repository) {
             await this.initialize();
         }

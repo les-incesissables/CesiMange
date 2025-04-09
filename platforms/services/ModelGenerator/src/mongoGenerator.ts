@@ -25,7 +25,7 @@ const config = {
 const serviceConfigs = [
     {
         serviceName: 'user-service',
-        collections: ['customer_profiles'],
+        collections: ['user_profiles'],
         outputDir: !config.front ? '../../microservices/user-service/src/models/' : lFrontPath,
         metierDir: '../../microservices/user-service/src/metier/',
         controllerDir: '../../microservices/user-service/src/controllers/'
@@ -390,7 +390,7 @@ function generateInterfaceContent(className: string, schema: CollectionSchema, i
 // Fonction pour initialiser les dossiers d'un service
 function initializeServiceFolders(serviceConfig: typeof serviceConfigs[0]): void
 {
-    const { outputDir, metierDir } = serviceConfig;
+    const { outputDir } = serviceConfig;
 
     // Initialiser le dossier des modèles
     if (config.cleanOutputDir && fs.existsSync(outputDir))
@@ -452,7 +452,7 @@ function initializeControllerFolder(controllerDir: string): void
     if (fs.existsSync(controllerDir))
     {
         // Nettoyer en préservant le dossier base
-        cleanDirectory(controllerDir, config.protectedFolders);
+        //cleanDirectory(controllerDir, config.protectedFolders);
         console.log(`Répertoire des contrôleurs nettoyé: ${controllerDir} (en préservant ${config.protectedFolders.join(', ')})`);
     }
     ensureDirectoryExists(controllerDir);
@@ -469,7 +469,7 @@ function initializeMetierFolder(metierDir: string): void
     if (fs.existsSync(metierDir))
     {
         // Nettoyer en préservant le dossier base
-        cleanDirectory(metierDir, config.protectedFolders);
+        //cleanDirectory(metierDir, config.protectedFolders);
         console.log(`Répertoire métier nettoyé: ${metierDir} (en préservant ${config.protectedFolders.join(', ')})`);
     }
     ensureDirectoryExists(metierDir);
@@ -552,19 +552,31 @@ async function generateModels(pFront: boolean = false): Promise<void>
                     for (const [nestedName, nestedSchema] of nestedSchemas)
                     {
                         const nestedClassName = nestedName.substring(1); // Enlever le "I" initial
-                        const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
                         const nestedInterfaceFilePath = path.join(interfaceEntityDir, `${nestedName}.ts`);
-                        fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
-                        console.log(`  Interface imbriquée générée: ${nestedInterfaceFilePath}`);
+
+                        // Vérifier si le fichier existe déjà
+                        if (!fs.existsSync(nestedInterfaceFilePath))
+                        {
+                            const nestedInterfaceContent = generateInterfaceContent(nestedClassName, nestedSchema, true);
+                            fs.writeFileSync(nestedInterfaceFilePath, nestedInterfaceContent);
+                            console.log(`  Interface imbriquée générée: ${nestedInterfaceFilePath}`);
+                        } else
+                        {
+                            console.log(`  L'interface imbriquée existe déjà: ${nestedInterfaceFilePath} (conservée)`);
+                        }
                     }
 
-
-
                     // Générer le fichier d'interface principal
-                    const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
                     const interfaceFilePath = path.join(interfaceEntityDir, `${interfaceName}.ts`);
-                    fs.writeFileSync(interfaceFilePath, interfaceContent);
-                    console.log(`  Interface principale générée: ${interfaceFilePath}`);
+                    if (!fs.existsSync(interfaceFilePath))
+                    {
+                        const interfaceContent = generateInterfaceContent(className, mainSchema, pFront);
+                        fs.writeFileSync(interfaceFilePath, interfaceContent);
+                        console.log(`  Interface principale générée: ${interfaceFilePath}`);
+                    } else
+                    {
+                        console.log(`  L'interface principale existe déjà: ${interfaceFilePath} (conservée)`);
+                    }
 
                     if (!pFront)
                     {
@@ -573,10 +585,16 @@ async function generateModels(pFront: boolean = false): Promise<void>
                         ensureDirectoryExists(metierEntityDir);
 
                         // Générer le fichier métier
-                        const metierContent = generateMetierContent(className, collectionName);
                         const metierFilePath = path.join(metierEntityDir, `${className}Metier.ts`);
-                        fs.writeFileSync(metierFilePath, metierContent);
-                        console.log(`  Métier généré: ${metierFilePath}`);
+                        if (!fs.existsSync(metierFilePath))
+                        {
+                            const metierContent = generateMetierContent(className, collectionName);
+                            fs.writeFileSync(metierFilePath, metierContent);
+                            console.log(`  Métier généré: ${metierFilePath}`);
+                        } else
+                        {
+                            console.log(`  Le fichier métier existe déjà: ${metierFilePath} (conservé)`);
+                        }
 
                         // Générer le fichier contrôleur si le dossier est spécifié
                         if (serviceConfig.controllerDir)
@@ -585,10 +603,16 @@ async function generateModels(pFront: boolean = false): Promise<void>
                             const controllerEntityDir = path.join(serviceConfig.controllerDir, collectionName);
                             ensureDirectoryExists(controllerEntityDir);
 
-                            const controllerContent = generateControllerContent(className, collectionName);
                             const controllerFilePath = path.join(controllerEntityDir, `${className}Controller.ts`);
-                            fs.writeFileSync(controllerFilePath, controllerContent);
-                            console.log(`  Contrôleur généré: ${controllerFilePath}`);
+                            if (!fs.existsSync(controllerFilePath))
+                            {
+                                const controllerContent = generateControllerContent(className, collectionName);
+                                fs.writeFileSync(controllerFilePath, controllerContent);
+                                console.log(`  Contrôleur généré: ${controllerFilePath}`);
+                            } else
+                            {
+                                console.log(`  Le fichier contrôleur existe déjà: ${controllerFilePath} (conservé)`);
+                            }
                         }
                     }
 

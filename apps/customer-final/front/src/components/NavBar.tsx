@@ -64,7 +64,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
 
                     {/* Barre de recherche */}
                     <div className="rounded-2xl shadow-lg transition-all duration-300">
-                        <SearchBar textInput="Chercher un restaurant" textButton="Rechercher" />
+                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher" onClick={() => {}} />
                     </div>
 
                     {/* Section droite */}

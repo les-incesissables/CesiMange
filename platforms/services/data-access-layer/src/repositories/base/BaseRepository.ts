@@ -15,7 +15,7 @@ import { EDatabaseType } from "../../enums/EDatabaseType";
 export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository<DTO, CritereDTO>
 {
     //#region Attributes
-    protected _config: IRepositoryConfig;
+    private _config: IRepositoryConfig;
     private _repository: AbstractDbRepository<DTO, CritereDTO>;
     //#endregion
 
@@ -51,15 +51,21 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
             throw new Error(e);
         }
     }
+
     //#endregion
 
     //#region Methods
+
+    public async initialize(): Promise<void>
+    {
+        return await this._repository.initialize();
+    }
 
     /**
      * Obtenir tous les éléments selon des critères
      * @param pCritereDTO - Critères de recherche
      */
-    async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
+    public async getItems(pCritereDTO: CritereDTO): Promise<DTO[]>
     {
         return await this._repository.getItems(pCritereDTO);
     }
@@ -68,7 +74,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Obtenir un élément par critères
      * @param pCritereDTO - Critères identifiant l'élément
      */
-    async getItem(pCritereDTO: CritereDTO): Promise<DTO>
+    public async getItem(pCritereDTO: CritereDTO): Promise<DTO>
     {
         return await this._repository.getItem(pCritereDTO);
     }
@@ -77,7 +83,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Créer un nouvel élément
      * @param pDTO - Données pour la création
      */
-    async createItem(pDTO: DTO): Promise<DTO>
+    public async createItem(pDTO: DTO): Promise<DTO>
     {
         return await this._repository.createItem(pDTO);
     }
@@ -87,7 +93,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * @param pDTO - Données pour la mise à jour
      * @param pCritereDTO - Critères identifiant l'élément à mettre à jour
      */
-    async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
+    public async updateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
     {
         return await this._repository.updateItem(pDTO, pCritereDTO);
     }
@@ -96,7 +102,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Supprimer un élément
      * @param pCritereDTO - Critères pour la suppression
      */
-    async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
+    public async deleteItem(pCritereDTO: CritereDTO): Promise<boolean>
     {
         return await this._repository.deleteItem(pCritereDTO);
     }
@@ -105,7 +111,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
      * Vérifier si un élément existe selon des critères
      * @param pCritereDTO - Critères de recherche
      */
-    async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
+    public async itemExists(pCritereDTO: CritereDTO): Promise<boolean>
     {
         return await this._repository.itemExists(pCritereDTO);
     }
@@ -113,7 +119,7 @@ export abstract class BaseRepository<DTO, CritereDTO> implements IBaseRepository
     /**
      * Ferme la connexion à la base de données
      */
-    async disconnect(): Promise<void>
+    public async disconnect(): Promise<void>
     {
         await this._repository.disconnect();
     }
