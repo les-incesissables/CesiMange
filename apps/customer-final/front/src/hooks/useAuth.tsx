@@ -9,6 +9,8 @@ import { useLocation, useNavigate } from 'react-router';
 import { AuthContext, AuthContextType } from '../context/AuthContext';
 import { SocketContext, ISocketContext } from '../context/SocketContext';
 
+import { localMiddlewareInstance } from 'customer-final-middleware';
+
 // --- Interfaces pour les entrées ---
 export interface LoginInput {
     email: string;
@@ -94,12 +96,19 @@ const useAuth = (): UseAuthReturn => {
             } else {
                 setHasError(false);
             }
-            const response = await API.post('auth/login', {
+
+            let lCritere = {
                 email: inputs.email,
                 password_hash: inputs.password,
+            };
+
+            const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
+                return await localMiddlewareInstance.AuthRepo.login(lCritere);
             });
-            if (response.status === 200) {
-                setConnexion(response);
+
+            console.log('Réponse de connexion:', lResponse);
+            if (lResponse.status === 'success') {
+                setConnexion(lResponse);
             }
         } catch (err) {
             setIsSubmitted(true);
@@ -109,7 +118,7 @@ const useAuth = (): UseAuthReturn => {
 
     // Connexion via OAuth
     const loginByOauth = async (tokenId: string, type: string): Promise<void> => {
-        const response = await API.post('users/loginByOauth', { tokenId, type });
+        const response = await API.post('auth/loginByOauth', { tokenId, type });
         if (response.status === 200) {
             setIsSubmitted(true);
             setHasError(false);
