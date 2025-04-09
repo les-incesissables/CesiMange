@@ -1,6 +1,6 @@
 import { BaseMetier } from '../../../../../services/base-classes/src/metier/base/BaseMetier';
-import { ServiceBroker } from '../../../../../services/message-broker-service/src/service-broker';
 import { KafkaConfig } from 'kafkajs';
+import { IRestaurant } from '../../models/interfaces/IRestaurant/IRestaurant';
 
 import { EEventType } from 'message-broker-service/enums/EEventType';
 import { ServiceBroker } from 'message-broker-service/service-broker';
@@ -17,7 +17,7 @@ export class RestaurantMetier extends BaseMetier<IRestaurant, Partial<IRestauran
         // Configuration Kafka pour le ServiceBroker
         const kafkaConfig: KafkaConfig = {
             clientId: 'restaurant-service',
-            brokers: ['localhost:9092'],
+            brokers: ['kafka:9092'],
         };
 
         this.serviceBroker = new ServiceBroker(kafkaConfig);
