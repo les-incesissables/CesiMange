@@ -44,7 +44,7 @@ const Home: React.FC = () => {
                 <RestaurantList restaurants={allRestaurants} />
 
                 <div className="flex items-center justify-center gap-4 my-8">
-                    <span className="px-6 py-2 bg-stone-300 border border-black rounded-[20px] text-black font-['Inter'] font-bold shadow-[0px_4px_4px_rgba(0,0,0,0.25)] outline outline-1 outline-black outline-offset-[-1px]">
+                    <span className="px-6 py-2 bg-stone-300 border border-black rounded-[20px] text-black font-['Inter'] font-bold shadow-[0px_4px_4px_rgba(0,0,0,0.25)] outline-1 outline-black outline-offset-[-1px]">
                         Page {currentPage}
                     </span>
 
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
                         ${
                             !hasNextPage
                                 ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
-                                : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline outline-1 outline-black outline-offset-[-1px]'
+                                : 'bg-yellow-400 text-black hover:bg-yellow-500 hover:shadow-md outline-1 outline-black outline-offset-[-1px]'
                         }`}
                     >
                         {isFetchingNextPage ? 'Chargement...' : hasNextPage ? 'Charger plus →' : 'Plus de restaurants'}

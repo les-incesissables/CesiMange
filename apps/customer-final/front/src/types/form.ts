@@ -2,11 +2,9 @@
 
 // Interfaces pour les formulaires d'inscription / authentification
 export interface SignUpFormValues {
-    firstname: string;
-    lastname: string;
     email: string;
     password: string;
-    passwordConfirm?: string | null;
+    passwordConfirm: string;
     cguConsent: boolean;
     typeInscription?: string | null;
 }
@@ -15,8 +13,6 @@ export interface InputsConnexion {
     email: string;
     password: string;
     passwordConfirm?: string | null;
-    firstname: string;
-    lastname: string;
     typeInscription?: string | null;
 }
 
@@ -33,9 +29,7 @@ export interface ForgotPasswordInput {
 export interface SignUpInput {
     email: string;
     password: string;
-    confirm: string;
-    firstname: string;
-    lastname: string;
+    passwordConfirm: string;
     typeInscription?: string | null;
 }
 
@@ -58,4 +52,8 @@ export interface PasswordStrengthInfo {
     contains: string[];
     length: number;
     allowed: boolean;
+}
+
+export interface ForgotPasswordInput {
+    email: string;
 }

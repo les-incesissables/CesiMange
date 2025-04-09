@@ -40,22 +40,20 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     const { authState } = useContext(AuthContext);
 
     // Extraction des méthodes d'authentification via votre hook useAuth
-    const { isSubmitted, isForgotSubmitted, isSignupSubmitted, hasError, errorMsg, login, forgotPassword, signUp } = UseAuth();
+    const { isSubmitted, isForgotSubmitted, isSignupSubmitted, hasError, login, forgotPassword, signUp } = UseAuth();
 
     // État local pour la gestion des données de connexion
     const [inputsConnexion, setInputsConnexion] = useState<InputsConnexion>({
         email: '',
         password: '',
         passwordConfirm: '',
-        firstname: '',
-        lastname: '',
         typeInscription: 'customer',
     });
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isForgot, setIsForgot] = useState<boolean>(false);
     const [isSignup, setIsSignup] = useState<boolean>(false);
     const [strongPwd, setStrongPwd] = useState<PSInfo | null>(null);
-    const [typeInscription, setTypeInscription] = useState<string | null>(null);
+    //const [typeInscription, setTypeInscription] = useState<string | null>(null);
 
     // Référence pour le bouton Google (si besoin)
     const ggRef = useRef<HTMLDivElement>(null);
@@ -275,32 +273,6 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                     {isSignupSubmitted && authState.isLogged && <Alert type="success" message="Vous avez créé un compte !" />}
                     {hasError && isSignupSubmitted && !authState.isLogged && <Alert type="danger" message="Un compte existe déjà avec cette adresse email" />}
                     <form className="mt-2 m-0" autoComplete="off">
-                        <div className="w-full mt-2 mb-6">
-                            <label className="text-sm">Inscription en tant que :</label>
-                            {/* Ici vous pouvez insérer un sélecteur personnalisé */}
-                        </div>
-                        <div className="flex w-full flex-col">
-                            <div className="relative z-0 w-full mb-2 group flex flex-col gap-1">
-                                <label className="">Prénom*</label>
-                                <input
-                                    className="w-full rounded-full border-2 border-gray-300 bg-white py-2 px-6 pr-14 text-lg outline-1 outline-black focus:outline-none focus:border-blue-500"
-                                    placeholder=" "
-                                    type="text"
-                                    {...register('firstname')}
-                                />
-                                {errors.firstname && <span className="mt-0 text-sm text-danger">{errors.firstname.message}</span>}
-                            </div>
-                            <div className="relative z-0 w-full mb-2 group flex flex-col gap-1">
-                                <label className="">Nom*</label>
-                                <input
-                                    className="w-full rounded-full border-2 border-gray-300 bg-white py-2 px-6 pr-14 text-lg outline-1 outline-black focus:outline-none focus:border-blue-500"
-                                    placeholder=" "
-                                    type="text"
-                                    {...register('lastname')}
-                                />
-                                {errors.lastname && <span className="mt-0 text-sm text-danger">{errors.lastname.message}</span>}
-                            </div>
-                        </div>
                         <div className="relative z-0 w-full mb-2 group">
                             <label htmlFor="floating_email" className="input_labelFloating">
                                 Adresse email*
