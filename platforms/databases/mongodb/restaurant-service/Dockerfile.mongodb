@@ -17,3 +17,4 @@ EXPOSE 27017
 
 # Utiliser votre script d'entrypoint personnalisé
 ENTRYPOINT ["/entrypoint.sh"]
+

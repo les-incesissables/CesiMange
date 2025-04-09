@@ -1,17 +1,22 @@
 #!/bin/bash
 
-# Redémarrer en mode foreground pour garder le conteneur actif
+# Démarrer MongoDB en arrière-plan avec journalisation détaillée
+mongod --bind_ip_all --fork --logpath /var/log/mongod.log --setParameter enableLocalhostAuthBypass=1
+
+sleep 10
+
+# Importer les données avec journalisation
+echo "Début de l'import des données..."
+mongoimport --host 127.0.0.1 --db restaurant-service --collection restaurants \
+    --file /docker-entrypoint-initdb.d/restaurant-service.restaurants.json --jsonArray --verbose
+
+mongoimport --host 127.0.0.1 --db restaurant-service --collection promotions \
+    --file /docker-entrypoint-initdb.d/restaurant-service.promotions.json --jsonArray --verbose
+
+mongoimport --host 127.0.0.1 --db restaurant-service --collection reviews \
+    --file /docker-entrypoint-initdb.d/restaurant-service.reviews.json --jsonArray --verbose
+
+# Arrêt propre et redémarrage en foreground
+echo "Redémarrage en mode persistant..."
+mongod --shutdown
 exec mongod --bind_ip_all
-
-# Attendre que MongoDB soit vraiment prêt
-sleep 5  # Attente initiale pour le démarrage
-until mongo --eval "db.adminCommand({ping: 1})" >/dev/null 2>&1; do
-    echo "En attente de MongoDB..."
-    sleep 2
-done
-
-# Importer les données
-mongoimport --host localhost --db restaurant-service --collection restaurants --file /docker-entrypoint-initdb.d/restaurant-service.restaurants.json
-mongoimport --host localhost --db restaurant-service --collection promotions --file /docker-entrypoint-initdb.d/restaurant-service.promotions.json
-mongoimport --host localhost --db restaurant-service --collection reviews --file /docker-entrypoint-initdb.d/restaurant-service.reviews.json
-
