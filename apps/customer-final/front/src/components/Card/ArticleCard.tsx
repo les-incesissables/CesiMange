@@ -1,15 +1,20 @@
 'use client';
 import React from 'react';
 import { IArticles } from '../../models/interfaces/IRestaurant/IArticles';
+import { useCart } from '../../context/CartContext';
 
-interface ArticleCardProps
-{
+interface ArticleCardProps {
     article: IArticles;
     onAdd?: () => void;
 }
 
-const ArticleCard: React.FC<ArticleCardProps> = ({ article, onAdd }) =>
-{
+const ArticleCard: React.FC<ArticleCardProps> = ({ article, onAdd }) => {
+    const { addArticleToCart } = useCart();
+
+    const handleAdd = () => {
+        console.log('a');
+        addArticleToCart(article);
+    };
     return (
         <div className="w-44 p-5 bg-white rounded-[20px] inline-flex flex-col justify-start items-center gap-4 overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200">
             <img className="w-32 h-32 rounded-[20px] object-cover" src={'/images/articles/' + article.image} alt={article.name} />
@@ -18,7 +23,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, onAdd }) =>
                 <div className="w-full flex items-center justify-between">
                     <div className="text-black text-base font-normal font-['Inter']">{article.price} €</div>
                     <button
-                        onClick={onAdd}
+                        onClick={handleAdd}
                         data-state="Default"
                         className="h-8 w-8 bg-lime-500 hover:bg-lime-800 rounded-full flex justify-center items-center transition-colors duration-200"
                     >
