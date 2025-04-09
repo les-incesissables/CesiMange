@@ -6,6 +6,24 @@ import InputBox from '../../components/Utils/input';
 import Button from '../../components/Buttons/Button';
 
 const DashBoardSponsorship: React.FC = () => {
+    // Pour cet exemple, le code de parrainage est "aaaa".
+    // Vous pouvez le récupérer depuis l'API, le store, etc.
+    const codeParrainage = 'aaaa';
+
+    // Fonction pour copier le code
+    const handleCopy = () => {
+        navigator.clipboard
+            .writeText(codeParrainage)
+            .then(() => {
+                // Optionnel : afficher un toast ou message de succès
+                console.log('Code copié !');
+            })
+            .catch((err) => {
+                // Optionnel : gérer l'erreur
+                console.error('Erreur lors de la copie :', err);
+            });
+    };
+
     return (
         <DashBoardLayout>
             <div className="w-full min-h-screen px-12 pt-12 bg-[#E4DBC7] flex flex-col gap-10 overflow-y-auto">
@@ -18,13 +36,15 @@ const DashBoardSponsorship: React.FC = () => {
                 {/* Contenu principal */}
                 <div className="flex flex-col items-center gap-5 pb-12">
                     {/* Section "Code de parrainage" + stats */}
-                    <section className="rounded-[20px] outline-1 outline-black p-6 flex flex-col md:flex-row items-center gap-12">
+                    <section className="rounded-[20px] outline outline-1 outline-black p-6 flex flex-col md:flex-row items-center gap-12">
                         {/* Bloc code de parrainage */}
                         <div className="flex flex-col items-center gap-5">
                             <h2 className="text-center text-black text-2xl font-normal font-['Inter']">Code de parrainage</h2>
-                            <InputBox />
+                            {/* Champ en lecture seule avec la valeur */}
+                            <InputBox readOnly value={codeParrainage} />
+
                             <div>
-                                <Button text="Copier" />
+                                <Button text="Copier" onClick={handleCopy} />
                             </div>
                         </div>
 

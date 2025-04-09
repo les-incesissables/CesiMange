@@ -3,7 +3,7 @@ import React from 'react';
 
 const LeftSidebar: React.FC = () => {
     return (
-        <aside className="sticky top-16 w-80 h-[calc(100vh-4rem)] p-6 py-12 border-r flex flex-col gap-6 overflow-y-auto">
+        <aside className="sticky top-16 w-80 h-[calc(100vh-4rem)] p-6 py-12 border-r hidden sm:flex flex-col gap-6 overflow-y-auto">
             <div className="overflow-y-auto bg-gray-200 border p-5 rounded-2xl flex flex-col gap-6">
                 <h2 className="text-xl font-bold text-gray-800 underline text-center">Keyword</h2>
 

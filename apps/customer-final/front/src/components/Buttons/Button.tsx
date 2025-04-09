@@ -10,10 +10,23 @@ interface TriStateButtonProps {
 
 const Button: React.FC<TriStateButtonProps> = ({ text = 'button', selected = false, onClick, bg = 'bg-black' }) => {
     // Classes de base pour le bouton
-    const baseClasses = 'group h-9 px-4 py-4 rounded-[20px] inline-flex justify-center items-center gap-2.5 transition-all duration-300';
+    const baseClasses = `
+    group
+    h-9 sm:h-10
+    w-full sm:w-auto
+    px-3 sm:px-4
+    py-2 sm:py-3
+    rounded-[20px]
+    inline-flex
+    justify-center
+    items-center
+    gap-2.5
+    transition-all
+    duration-300
+  `;
 
     // Définition des classes de fond et de texte selon l'état sélectionné ou non
-    const defaultBg = bg;
+    const defaultBg = bg; // Couleur de fond par défaut (ex: bg-black)
     const defaultText = 'text-white';
     const hoverBg = 'hover:bg-yellow-400';
 
@@ -25,8 +38,20 @@ const Button: React.FC<TriStateButtonProps> = ({ text = 'button', selected = fal
     const hoverClass = selected ? '' : hoverBg;
 
     return (
-        <button onClick={onClick} className={`${baseClasses} ${bgClass} ${hoverClass} w-full`}>
-            <div className={`flex w-full justify-center text-base font-bold font-['Inter'] ${textClass} transition-all duration-300 group-hover:text-black`}>
+        <button onClick={onClick} className={`${baseClasses} ${bgClass} ${hoverClass}`}>
+            <div
+                className={`
+          flex w-full sm:w-auto
+          justify-center
+          text-sm sm:text-base
+          font-bold
+          font-['Inter']
+          ${textClass}
+          transition-all
+          duration-300
+          group-hover:text-black
+        `}
+            >
                 {text}
             </div>
         </button>

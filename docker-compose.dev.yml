@@ -114,7 +114,6 @@ services:
             - ./platforms/databases/mongodb/restaurant-service/seed:/docker-entrypoint-initdb.d
         networks:
             - api_network
-
     mssql-auth:
         build:
             context: ./platforms/databases/sqlserver/auth-service

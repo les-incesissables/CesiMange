@@ -9,11 +9,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Restaurant from './pages/single/Restaurant';
 import DashBoardAccount from './pages/DashBoard/DashBoardAccount';
 import DashboardOrder from './pages/DashBoard/DashBoardOrder';
-import { SocketProvider } from './context/SocketContext';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/Utils/ProtectedRoute';
 import DashBoardFavorites from './pages/DashBoard/DashboardFavorites';
 import DashBoardSponsorship from './pages/DashBoard/DashboardSponsorShip';
+import { CartProvider } from './context/CartContext';
+import AuthProvider from './context/AuthContext';
+import ProtectedRoute from './components/Utils/ProtectedRoute';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -30,14 +30,14 @@ const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <SocketProvider>
-                    <AuthProvider>
+        <BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <CartProvider>
                         <Routes>
                             <Route path="/" element={<Welcome />} />
-                            <Route path="/home" element={<Home />} />
-                            <Route path="/restaurants/:id" element={<Restaurant />} />
+                            <Route path="/home" element={<Home />}></Route>
+                            <Route path="/restaurants/:id" element={<Restaurant />}></Route>
 
                             <Route path="dashboard">
                                 <Route
@@ -47,7 +47,7 @@ if (!rootElement.innerHTML) {
                                             <DashBoardAccount />
                                         </ProtectedRoute>
                                     }
-                                />
+                                ></Route>
                                 <Route
                                     path="order"
                                     element={
@@ -55,7 +55,7 @@ if (!rootElement.innerHTML) {
                                             <DashboardOrder />
                                         </ProtectedRoute>
                                     }
-                                />
+                                ></Route>
                                 <Route
                                     path="favorites"
                                     element={
@@ -63,7 +63,7 @@ if (!rootElement.innerHTML) {
                                             <DashBoardFavorites />
                                         </ProtectedRoute>
                                     }
-                                />
+                                ></Route>
                                 <Route
                                     path="sponsorship"
                                     element={
@@ -71,12 +71,12 @@ if (!rootElement.innerHTML) {
                                             <DashBoardSponsorship />
                                         </ProtectedRoute>
                                     }
-                                />
+                                ></Route>
                             </Route>
                         </Routes>
-                    </AuthProvider>
-                </SocketProvider>
-            </BrowserRouter>
-        </QueryClientProvider>,
+                    </CartProvider>
+                </AuthProvider>
+            </QueryClientProvider>
+        </BrowserRouter>,
     );
 }

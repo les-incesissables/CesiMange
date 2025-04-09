@@ -40,44 +40,50 @@ const DashBoardAccount: React.FC = () => {
                 <p>Voulez-vous vraiment supprimer votre compte CesiMange ?</p>
             </Modal>
 
-            <div className="w-full min-h-screen bg-[#E4DBC7] px-12 pt-12 flex flex-col gap-10 overflow-y-auto">
+            <div className="w-full min-h-screen bg-[#E4DBC7] px-2 lg:px-12 pt-8 sm:pt-12 flex flex-col gap-6 sm:gap-10 overflow-y-auto">
                 {/* Titre de la page */}
-                <div className="flex flex-col gap-5">
-                    <h1 className="text-4xl font-bold text-black font-['Inter']">Mon Compte</h1>
+                <div className="flex flex-col gap-2 sm:gap-5">
+                    <h1 className="text-3xl sm:text-4xl font-bold text-black font-['Inter']">Mon Compte</h1>
                     <hr className="border-black/50" />
                 </div>
 
-                {/* Contenu principal */}
-                <div className="flex flex-col items-center gap-12 pb-12">
-                    {/* Bloc Nom */}
-                    <div className="w-[800px] flex justify-between items-center">
-                        <label className="flex-1 p-2.5 text-black text-2xl font-normal font-['Inter']">Username</label>
-                        <InputBox />
+                {/* Conteneur principal */}
+                <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8 pb-12">
+                    {/* Nom */}
+                    <div className="w-full flex flex-col lg:flex-row gap-2 lg:gap-4 items-start">
+                        <label className="text-black text-2xl font-normal font-['Inter'] w-full sm:w-1/3">Username</label>
+                        <div className="w-full sm:w-2/3">
+                            <InputBox />
+                        </div>
                     </div>
 
-                    {/* Bloc Adresses mail */}
-                    <div className="w-[800px] flex justify-between items-center">
-                        <label className="flex-1 p-2.5 text-black text-2xl font-normal font-['Inter']">Adresse mail</label>
-                        <InputBox />
+                    {/* Adresse mail */}
+                    <div className="w-full flex flex-col lg:flex-row gap-2 lg:gap-4 items-start">
+                        <label className="text-black text-2xl font-normal font-['Inter'] w-full sm:w-1/3">Adresse mail</label>
+                        <div className="w-full sm:w-2/3">
+                            <InputBox />
+                        </div>
                     </div>
 
-                    {/* Bloc Numéro de téléphone */}
-                    <div className="w-[800px] flex justify-between items-center">
-                        <label className="flex-1 p-2.5 text-black text-2xl font-normal font-['Inter']">Numéro de téléphone</label>
-                        <InputBox />
+                    {/* Numéro de téléphone */}
+                    <div className="w-full flex flex-col lg:flex-row gap-2 lg:gap-4 items-start">
+                        <label className="text-black text-2xl font-normal font-['Inter'] w-full sm:w-1/3">Numéro de téléphone</label>
+                        <div className="w-full sm:w-2/3">
+                            <InputBox />
+                        </div>
                     </div>
 
-                    {/* Bloc Photo de profil */}
-                    <div className="w-[800px] flex justify-between items-center">
-                        <div className="flex flex-col gap-3">
+                    {/* Photo de profil */}
+                    <div className="w-full flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center justify-between">
+                        <div className="flex flex-col gap-3 w-full sm:w-1/3">
                             <label className="text-black text-2xl font-normal font-['Inter']">Photo de profil</label>
                             <Button text="Changer de logo" />
                         </div>
                         <img className="w-32 h-32 rounded-[5px] border border-black object-cover" src="https://placehold.co/130x130" alt="avatar" />
                     </div>
 
-                    {/* Bouton Validation */}
-                    <div className="justify-center">
+                    {/* Boutons */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
                         <Button text="Valider les changements" />
                     </div>
                     {/* Bouton Supprimer le compte */}
