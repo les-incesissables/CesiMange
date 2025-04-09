@@ -75,7 +75,7 @@ services:
             - SA_PASSWORD=ProdPassword123!
             - ACCEPT_EULA=Y
             - MSSQL_UID=10001
-        user: '10001:0'
+        user: 'root'
         networks:
             - api_network
 
