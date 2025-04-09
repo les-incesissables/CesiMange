@@ -8,7 +8,7 @@ export interface SignUpFormValues {
     password: string;
     passwordConfirm?: string | null;
     cguConsent: boolean;
-    typeInscription: string;
+    typeInscription?: string | null;
 }
 
 export interface InputsConnexion {
@@ -17,7 +17,7 @@ export interface InputsConnexion {
     passwordConfirm?: string | null;
     firstname: string;
     lastname: string;
-    typeInscription: string;
+    typeInscription?: string | null;
 }
 
 // Interfaces pour le hook d'authentification
@@ -36,7 +36,7 @@ export interface SignUpInput {
     confirm: string;
     firstname: string;
     lastname: string;
-    typeInscription: string;
+    typeInscription?: string | null;
 }
 
 export interface UseAuthReturn {

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import LoginButton from './Buttons/LoginButton';
 import ClickableText from './Buttons/ClickableText';
@@ -7,6 +7,7 @@ import SearchBar from './Utils/SearchBar';
 import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
+import { AuthContext } from '../context/AuthContext';
 
 interface HeaderProps {
     variant: 'general' | 'client';
@@ -16,6 +17,8 @@ interface HeaderProps {
 }
 
 const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onCartClick }) => {
+    const { authState } = useContext(AuthContext);
+
     const [showPopup, setShowPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +46,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                     {/* Menu à droite */}
                     <div className="flex items-center gap-20">
                         <ClickableText text="Devenir partenaire" />
-                        <LoginButton text="Se connecter" onClick={onLoginClick} />
+                        {authState.isLogged ? <div>test</div> : <LoginButton text="Se connecter" onClick={onLoginClick} />}
                     </div>
                 </div>
             </header>

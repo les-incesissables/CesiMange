@@ -11,7 +11,7 @@ const validationSchema: ObjectSchema<SignUpFormValues> = yup.object().shape({
     lastname: yup.string().nullable().required('Le nom est requis'),
     email: yup.string().email('Email invalide').required("L'email est requis"),
     password: yup.string().min(8, 'Le mot de passe doit faire au moins 8 caractères').required('Le mot de passe est requis'),
-    typeInscription: yup.string().required("Le type d'inscription est requis"),
+    typeInscription: yup.string().nullable(),
     passwordConfirm: yup
         .string()
         .oneOf([yup.ref('password')], 'Les mots de passe ne correspondent pas')

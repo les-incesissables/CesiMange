@@ -1,20 +1,15 @@
 // src/hooks/useAuth.tsx
-
-import { useState, useContext, useEffect } from 'react';
-
-// API
+import { useState, useContext, useEffect, useCallback } from 'react';
 import API from '../api/axios.config';
-
-// LIBS
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router';
 
 // CONTEXTS
 import { AuthContext, AuthContextType } from '../context/AuthContext';
 import { SocketContext, ISocketContext } from '../context/SocketContext';
-import { useLocation, useNavigate } from 'react-router';
-// --- Interfaces pour les entrées des différentes actions ---
 
+// --- Interfaces pour les entrées ---
 export interface LoginInput {
     email: string;
     password: string;
@@ -30,10 +25,10 @@ export interface SignUpInput {
     passwordConfirm?: string | null;
     firstname: string;
     lastname: string;
-    typeInscription: string;
+    typeInscription?: string | null;
 }
 
-// Interface décrivant les valeurs retournées par le hook.
+// Interface retournée par le hook
 export interface UseAuthReturn {
     isSubmitted: boolean;
     isForgotSubmitted: boolean;
@@ -41,10 +36,10 @@ export interface UseAuthReturn {
     hasError: boolean;
     errorMsg: string;
     logout: () => void;
-    login: (inputsConnexion: LoginInput) => Promise<boolean | void>;
+    login: (inputs: LoginInput) => Promise<boolean | void>;
     loginByOauth: (tokenId: string, type: string) => Promise<void>;
-    forgotPassword: (inputsConnexion: ForgotPasswordInput) => Promise<boolean | void>;
-    signUp: (inputsConnexion: SignUpInput) => Promise<boolean | void>;
+    forgotPassword: (inputs: ForgotPasswordInput) => Promise<boolean | void>;
+    signUp: (inputs: SignUpInput) => Promise<boolean | void>;
     reload: () => void;
 }
 
@@ -57,32 +52,42 @@ const useAuth = (): UseAuthReturn => {
     const [errorMsg, setErrorMsg] = useState<string>('');
 
     // CONTEXTS
-    const [authState, setAuthState, refresh] = useContext<AuthContextType>(AuthContext);
+    const { authState, setAuthState, refresh } = useContext<AuthContextType>(AuthContext);
     const socket = useContext<ISocketContext>(SocketContext);
 
     // HOOKS ROUTING
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Vérification au montage : si la session est expirée, on se déconnecte.
+    // Vérifie le token CSRF et déclenche logout si absent
+    const checkXsrfToken = (): boolean => {
+        const xsrfToken = localStorage.getItem('xsrfToken');
+        if (!xsrfToken) {
+            console.warn('Token CSRF manquant, déclenchement du logout.');
+            logout();
+            return false;
+        }
+        return true;
+    };
+
+    // Vérification initiale de la session : si le token ou la session est expiré, déconnecte
     useEffect(() => {
         const currentTime = moment();
         const timeSessionStr = localStorage.getItem('timeSession');
         const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
-
-        if (localStorage.getItem('user') && (currentTime.isAfter(timeSession, 'minute') || !timeSessionStr)) {
+        if (!localStorage.getItem('user') || currentTime.isAfter(timeSession)) {
             logout();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Fonction de connexion via email et mot de passe.
-    const login = async (inputsConnexion: LoginInput): Promise<boolean | void> => {
+    // Fonction de connexion via email/mot de passe
+    const login = async (inputs: LoginInput): Promise<boolean | void> => {
         console.log('login dans useAuth');
         try {
             const mailformat = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
-            if (!inputsConnexion.email.match(mailformat)) {
-                console.log('ya une erreur');
+            if (!inputs.email.match(mailformat)) {
+                console.log('Erreur de format email');
                 setHasError(true);
                 setIsSubmitted(true);
                 return false;
@@ -90,8 +95,8 @@ const useAuth = (): UseAuthReturn => {
                 setHasError(false);
             }
             const response = await API.post('auth/login', {
-                email: inputsConnexion.email,
-                password_hash: inputsConnexion.password,
+                email: inputs.email,
+                password_hash: inputs.password,
             });
             if (response.status === 200) {
                 setConnexion(response);
@@ -112,36 +117,34 @@ const useAuth = (): UseAuthReturn => {
         }
     };
 
-    // Stocke les informations de connexion en cas de succès
+    // Stocke la connexion suite à une réponse réussie, met à jour immédiatement authState
     const setConnexion = (response: any): void => {
         if (response.data.error) {
             setIsSubmitted(true);
         } else {
-            /*  if (response.data.token) {
-                localStorage.setItem('user', JSON.stringify(response.data));
-                // On convertit la date en chaîne pour le stockage
-                localStorage.setItem('timeSession', moment().add(150, 'days').toString());
-            } */
             if (response.data.xsrfToken) {
+                localStorage.setItem('user', JSON.stringify(response.data));
                 localStorage.setItem('xsrfToken', JSON.stringify(response.data.xsrfToken));
-                // On convertit la date en chaîne pour le stockage
+                // Définir la validité de la session pour 1 jour
                 localStorage.setItem('timeSession', moment().add(1, 'days').toString());
             }
-
-            if (response.data) {
-                console.log(response.data);
-            }
+            console.log('Réponse de connexion:', response.data);
             setIsSubmitted(true);
             setHasError(false);
-            refresh();
+            // Mise à jour immédiate de l'état d'authentification
+            setAuthState(() => ({ me: response.data, isLogged: true }));
+            // Vérifie que le token est présent et appelle refresh
+            if (checkXsrfToken()) {
+                refresh();
+            }
         }
     };
 
     // Demande de réinitialisation du mot de passe
-    const forgotPassword = async (inputsConnexion: ForgotPasswordInput): Promise<boolean | void> => {
+    const forgotPassword = async (inputs: ForgotPasswordInput): Promise<boolean | void> => {
         try {
             const response = await API.post('users/forgotPassword', {
-                email: inputsConnexion.email,
+                email: inputs.email,
             });
             if (response.status === 200) {
                 toast('Un email de réinitialisation vous a été envoyé', { type: 'success' });
@@ -161,22 +164,21 @@ const useAuth = (): UseAuthReturn => {
     };
 
     // Création d'un compte
-    const signUp = async (inputsConnexion: SignUpInput): Promise<boolean | void> => {
+    const signUp = async (inputs: SignUpInput): Promise<boolean | void> => {
         try {
             setIsSignupSubmitted(true);
-            const response = await API.post('users/register', {
-                email: inputsConnexion.email,
-                password: inputsConnexion.password,
-                passwordConfirm: inputsConnexion.passwordConfirm,
-                firstname: inputsConnexion.firstname,
-                lastname: inputsConnexion.lastname,
-                typeInscription: inputsConnexion.typeInscription,
+            //if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
+            console.log('signup');
+            const response = await API.post('auth/register', {
+                email: inputs.email,
+                password_hash: inputs.password,
+                passwordConfirm: inputs.passwordConfirm,
+                firstname: inputs.firstname,
+                username: inputs.lastname,
+                typeInscription: inputs.typeInscription,
             });
             if (response.status === 201) {
-                /*  if (!isMobile()) {
-          toast('Vous avez créé un compte SkillsMarket !', { type: 'success' });
-        } */
-                await login(inputsConnexion);
+                await login(inputs);
                 return true;
             } else {
                 toast('Une erreur est survenue', { type: 'error' });
@@ -194,15 +196,18 @@ const useAuth = (): UseAuthReturn => {
     const logout = (): void => {
         localStorage.removeItem('user');
         localStorage.removeItem('timeSession');
+        localStorage.removeItem('xsrfToken');
 
-        setAuthState({
-            ...authState,
-            me: null,
-            isLogged: false,
+        // Mise à jour de authState immédiatement
+        setAuthState((prev) => ({ ...prev, me: null, isLogged: false }));
+
+        // Si un utilisateur était connecté, notifier le serveur via le socket
+        setAuthState((prev) => {
+            if (prev.me?.id) {
+                socket.send('userLogout', { id: prev.me.id });
+            }
+            return { ...prev, me: null, isLogged: false };
         });
-
-        // On envoie le message de déconnexion via le socket.
-        socket.send('userLogout', { id: authState?.me?.id });
         socket.off('userConnect');
         toast('Vous êtes déconnecté(e)', { type: 'success' });
 
@@ -210,7 +215,7 @@ const useAuth = (): UseAuthReturn => {
         reload();
     };
 
-    // Recharge la page en naviguant sur l'URL actuelle.
+    // Recharge la page
     const reload = (): void => {
         navigate(location.pathname + location.search);
     };

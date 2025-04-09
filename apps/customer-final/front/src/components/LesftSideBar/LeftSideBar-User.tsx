@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import ClickableText from '../Buttons/ClickableText';
+import useAuth from '../../hooks/useAuth';
 
 interface OptionItemProps {
     icon: string;
@@ -18,6 +19,8 @@ const OptionItem: React.FC<OptionItemProps> = ({ icon, label, seleted = false })
 };
 
 const LeftSideBarUser: React.FC = () => {
+    const { logout } = useAuth();
+
     return (
         <aside className="w-80 h-screen sticky top-0 px-8 py-8 border-r border-black flex flex-col gap-8 overflow-y-auto bg-[#E4DBC7]">
             {/* Titre du compte */}
@@ -41,7 +44,7 @@ const LeftSideBarUser: React.FC = () => {
             </div>
 
             {/* Bouton Déconnexion */}
-            <div className="flex justify-center">
+            <div onClick={logout} className="flex justify-center">
                 <ClickableText text="Déconnexion" />
             </div>
         </aside>

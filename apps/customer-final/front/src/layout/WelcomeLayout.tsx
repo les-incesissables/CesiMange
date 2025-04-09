@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useContext, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import NavBar from '../components/NavBar';
 import Modal from '../components/Utils/Modal';
@@ -13,7 +13,7 @@ const WelcomeLayout: React.FC<WelcomeLayoutProps> = ({ children }) => {
     /*     const [isLoginOpen, setIsModalOpen] = useState(false);
     const [isSignupOpen, setOpen] = useState(false); */
     //CONTEXTS
-    const [authState] = useContext(AuthContext);
+    const { authState } = useContext(AuthContext);
 
     const [isConnexionOpen, setIsConnexionOpen] = useState(false);
     const [modalConfirmLabel, setModalConfirmLabel] = useState('Valider');
@@ -24,6 +24,10 @@ const WelcomeLayout: React.FC<WelcomeLayoutProps> = ({ children }) => {
     function onLogged(status: any) {
         setIsLogged(status);
     }
+
+    useEffect(() => {
+        console.log('isLogged', isLogged);
+    }, [isLogged]);
 
     const onConfirm = !isLogged
         ? {
