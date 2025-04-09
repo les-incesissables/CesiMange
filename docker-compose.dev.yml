@@ -130,7 +130,7 @@ services:
             - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
             - ./platforms/databases/sqlserver/auth-service/seed:/init-sql
         environment:
-            - SA_PASSWORD=password123!
+            - SA_PASSWORD=MyPass123!
             - ACCEPT_EULA=Y
             - MSSQL_UID=10001
         user: 'root'
