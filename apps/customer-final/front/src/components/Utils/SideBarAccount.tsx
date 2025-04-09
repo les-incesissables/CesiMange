@@ -8,7 +8,7 @@ interface AccountSidebarProps {
     onClose: () => void;
 }
 
-const AccountSidebar: React.FC<AccountSidebarProps> = ({ onClose }) => {
+const AccountSidebar: React.FC<AccountSidebarProps> = () => {
     const navigate = useNavigate();
 
     const sections = [

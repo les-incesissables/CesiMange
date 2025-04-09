@@ -1,15 +1,32 @@
 'use client';
 import React, { useState } from 'react';
 import Button from '../Buttons/Button';
+import { useSearch } from './SearchContext';
 
-interface SearchBarProps {
-    onClick?: () => void;
-    textInput: string;
+
+interface SearchBarProps
+{
+    placeHolder: string;
     textButton: string;
+    onClick?: (term: string) => void; // Callback optionnel avec le terme
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onClick, textInput, textButton }) => {
-    const [searchText, setSearchText] = useState('');
+const SearchBar: React.FC<SearchBarProps> = ({ placeHolder, textButton, onClick }) =>
+{
+    const [inputValue, setInputValue] = useState('');
+    const { setSearchTerm } = useSearch();
+
+    const handleSearch = () =>
+    {
+        const trimmedValue = inputValue.trim();
+        setSearchTerm(trimmedValue); // 1. Met à jour le contexte
+        onClick?.(trimmedValue);     // 2. Exécute le callback si fourni
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) =>
+    {
+        if (e.key === 'Enter') handleSearch();
+    };
 
     return (
         <div className="w-full max-w mx-auto h-12 p-2.5 bg-white rounded-[20px] outline outline-1 outline-offset-[-1px] outline-black/50 inline-flex justify-between items-center">
@@ -19,13 +36,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClick, textInput, textButton })
                 </div>
                 <input
                     type="text"
-                    placeholder={textInput}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
+                    placeholder={placeHolder}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="bg-transparent outline-none text-black/50 text-xl font-normal font-['Inter'] flex-1"
                 />
             </div>
-            <Button text={textButton} onClick={onClick} />
+            <Button text={textButton} onClick={handleSearch} />
         </div>
     );
 };

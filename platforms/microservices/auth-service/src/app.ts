@@ -49,6 +49,10 @@ app.use(helmet());
  */
 app.use(morgan('dev'));
 
+console.log('Connecting to', process.env.AUTH_SERVICE_URL);
+console.log('DB name is', process.env.DB_NAME);
+console.log('Docker use : ', isDocker);
+
 const lAuthController = new AuthUsersController(new AuthUsersMetier());
 //const restaurantController = new RestaurantController(new RestaurantMetier());
 //const orderMetier = new OrderController(new OrderMetier());
@@ -58,12 +62,11 @@ app.use('/auth', lAuthController.getRouter());
 //app.use('/api/order', orderMetier.getRouter());
 
 // Gestion des erreurs
-app.use((req, res) =>
-{
+app.use((req, res) => {
     res.status(404).json({
         code: 404,
-        status: "Error",
-        message: "Route not found.",
+        status: 'Error',
+        message: 'Route not found.',
         data: null,
     });
 });
@@ -75,4 +78,3 @@ const port = 4001;
 app.listen(port, () => {
     console.log(`App is listening on port ${port}`);
 });
-

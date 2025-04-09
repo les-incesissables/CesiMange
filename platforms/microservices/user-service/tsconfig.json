@@ -5,7 +5,8 @@
             "@base-classes": ["../../services/base-classes/src/index"],
             "@base-classes/*": ["../../services/base-classes/src/*"],
             "@data-access-layer": ["../../services/data-access-layer/src/index"],
-            "@data-access-layer/*": ["../../services/data-access-layer/src/*"]
+            "@data-access-layer/*": ["../../services/data-access-layer/src/*"],
+            "message-broker-service/*": ["../../services/message-broker-service/src/*"]
         },
         "moduleResolution": "node",
         "target": "ES2020",
