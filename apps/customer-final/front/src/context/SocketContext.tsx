@@ -39,7 +39,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     // Fonction pour établir la connexion
     const connect = (): void => {
-        IO.current = socketIOClient(serverUrl, { transports: ['polling', 'websocket'] });
+        //IO.current = socketIOClient(serverUrl, { transports: ['polling', 'websocket'] });
     };
 
     // Fonction pour se déconnecter
