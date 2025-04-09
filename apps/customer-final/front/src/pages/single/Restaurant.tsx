@@ -9,49 +9,40 @@ import CategorySectionList from '../../components/List/CategorySectionList';
 import { IArticles } from '../../models/interfaces/IRestaurant/IArticles';
 import { IMenu } from '../../models/interfaces/IRestaurant/IMenu';
 
-interface CategoryContent
-{
+interface CategoryContent {
     articles?: IArticles[];
     menus?: IMenu[];
 }
 
-const Restaurant: React.FC = () =>
-{
+const Restaurant: React.FC = () => {
     const location = useLocation();
     const lRestaurant = location.state as IRestaurant;
 
-    if (!lRestaurant)
-    {
+    if (!lRestaurant) {
         return <div>Aucun restaurant trouvé.</div>;
     }
 
     const lGroupedContent: Record<string, CategoryContent> = {};
 
     // Regrouper les menus
-    lRestaurant.menu.forEach((menuItem) =>
-    {
+    lRestaurant.menu.forEach((menuItem) => {
         const category = menuItem.categorie || 'Autres';
-        if (!lGroupedContent[category])
-        {
+        if (!lGroupedContent[category]) {
             lGroupedContent[category] = {};
         }
-        if (!lGroupedContent[category].menus)
-        {
+        if (!lGroupedContent[category].menus) {
             lGroupedContent[category].menus = [];
         }
         lGroupedContent[category].menus!.push(menuItem);
     });
 
     // Regrouper les articles
-    lRestaurant.articles.forEach((article) =>
-    {
+    lRestaurant.articles.forEach((article) => {
         const category = article.category || 'Autres';
-        if (!lGroupedContent[category])
-        {
+        if (!lGroupedContent[category]) {
             lGroupedContent[category] = {};
         }
-        if (!lGroupedContent[category].articles)
-        {
+        if (!lGroupedContent[category].articles) {
             lGroupedContent[category].articles = [];
         }
         lGroupedContent[category].articles!.push(article);
@@ -62,7 +53,11 @@ const Restaurant: React.FC = () =>
             <div className="flex-1 bg-[#E4DBC7] p-8">
                 {/* Section Bannière & Infos Restaurant */}
                 <section className="mb-12">
-                    <img className="w-full h-56 object-contain shadow-md border-b border-black" src={lRestaurant.banniere ? '/images/restaurants/bannieres/' + lRestaurant.banniere : "https://placehold.co/1128x232"} alt="Restaurant Banner" />
+                    <img
+                        className="w-full h-56 object-contain shadow-md border-b border-black"
+                        src={lRestaurant.banniere ? '/images/restaurants/bannieres/' + lRestaurant.banniere : 'https://placehold.co/1128x232'}
+                        alt="Restaurant Banner"
+                    />
                     <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4">
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
                             <div className="flex items-center gap-2">

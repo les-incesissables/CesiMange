@@ -9,11 +9,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Restaurant from './pages/single/Restaurant';
 import DashBoardAccount from './pages/DashBoard/DashBoardAccount';
 import DashboardOrder from './pages/DashBoard/DashBoardOrder';
-import { SocketProvider } from './context/SocketContext';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/Utils/ProtectedRoute';
 import DashBoardFavorites from './pages/DashBoard/DashboardFavorites';
 import DashBoardSponsorship from './pages/DashBoard/DashboardSponsorShip';
+import { CartProvider } from './context/CartContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -30,53 +28,20 @@ const rootElement = document.getElementById('root')!;
 if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <SocketProvider>
-                    <AuthProvider>
-                        <Routes>
-                            <Route path="/" element={<Welcome />} />
-                            <Route path="/home" element={<Home />} />
-                            <Route path="/restaurants/:id" element={<Restaurant />} />
-
-                            <Route path="dashboard">
-                                <Route
-                                    path="account"
-                                    element={
-                                        <ProtectedRoute>
-                                            <DashBoardAccount />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                <Route
-                                    path="order"
-                                    element={
-                                        <ProtectedRoute>
-                                            <DashboardOrder />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                <Route
-                                    path="favorites"
-                                    element={
-                                        <ProtectedRoute>
-                                            <DashBoardFavorites />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                                <Route
-                                    path="sponsorship"
-                                    element={
-                                        <ProtectedRoute>
-                                            <DashBoardSponsorship />
-                                        </ProtectedRoute>
-                                    }
-                                />
-                            </Route>
-                        </Routes>
-                    </AuthProvider>
-                </SocketProvider>
-            </BrowserRouter>
-        </QueryClientProvider>,
+        <BrowserRouter>
+            <CartProvider>
+                <QueryClientProvider client={queryClient}>
+                    <Routes>
+                        <Route path="/" element={<Welcome />} />
+                        <Route path="/home" element={<Home />}></Route>
+                        <Route path="/restaurants/:id" element={<Restaurant />}></Route>
+                        <Route path="/dashboard/account" element={<DashBoardAccount />}></Route>
+                        <Route path="/dashboard/order" element={<DashboardOrder />}></Route>
+                        <Route path="/dashboard/favorites" element={<DashBoardFavorites />}></Route>
+                        <Route path="/dashboard/sponsorship" element={<DashBoardSponsorship />}></Route>
+                    </Routes>
+                </QueryClientProvider>
+            </CartProvider>
+        </BrowserRouter>,
     );
 }

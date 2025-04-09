@@ -1,5 +1,5 @@
 // src/hooks/useAuth.tsx
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import API from '../api/axios.config';
 import { toast } from 'react-toastify';
 import moment from 'moment';
@@ -10,25 +10,7 @@ import { AuthContext, AuthContextType } from '../context/AuthContext';
 import { SocketContext, ISocketContext } from '../context/SocketContext';
 
 import { localMiddlewareInstance } from 'customer-final-middleware';
-
-// --- Interfaces pour les entrées ---
-export interface LoginInput {
-    email: string;
-    password: string;
-}
-
-export interface ForgotPasswordInput {
-    email: string;
-}
-
-export interface SignUpInput {
-    email: string;
-    password: string;
-    passwordConfirm?: string | null;
-    firstname: string;
-    lastname: string;
-    typeInscription?: string | null;
-}
+import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
 
 // Interface retournée par le hook
 export interface UseAuthReturn {
@@ -178,15 +160,15 @@ const useAuth = (): UseAuthReturn => {
             setIsSignupSubmitted(true);
             //if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
             console.log('signup');
-            const response = await API.post('auth/register', {
-                email: inputs.email,
-                password_hash: inputs.password,
-                passwordConfirm: inputs.passwordConfirm,
-                firstname: inputs.firstname,
-                username: inputs.lastname,
-                typeInscription: inputs.typeInscription,
+            const response = await localMiddlewareInstance.callLocalApi(async () => {
+                // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
+                return await localMiddlewareInstance.AuthRepo.register({
+                    email: inputs.email,
+                    password_hash: inputs.password,
+                    passwordConfirm: inputs.passwordConfirm,
+                });
             });
-            if (response.status === 201) {
+            if (response.status === 'success') {
                 await login(inputs);
                 return true;
             } else {
@@ -203,25 +185,31 @@ const useAuth = (): UseAuthReturn => {
 
     // Déconnexion
     const logout = (): void => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('timeSession');
-        localStorage.removeItem('xsrfToken');
-
-        // Mise à jour de authState immédiatement
-        setAuthState((prev) => ({ ...prev, me: null, isLogged: false }));
-
-        // Si un utilisateur était connecté, notifier le serveur via le socket
-        setAuthState((prev) => {
-            if (prev.me?.id) {
-                socket.send('userLogout', { id: prev.me.id });
-            }
-            return { ...prev, me: null, isLogged: false };
-        });
-        socket.off('userConnect');
-        toast('Vous êtes déconnecté(e)', { type: 'success' });
-
-        refresh();
-        reload();
+        localMiddlewareInstance
+            .callLocalApi(async () => {
+                return await localMiddlewareInstance.AuthRepo.logout();
+            })
+            .then((lResponse) => {
+                if (lResponse.status === 'success') {
+                    // Supprimez les éléments de session
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('timeSession');
+                    localStorage.removeItem('xsrfToken');
+                }
+                // Mettez à jour l'état d'authentification
+                setAuthState({ ...authState, me: null, isLogged: false });
+                // Notifiez le serveur via le socket
+                if (authState.me?.id) {
+                    socket.send('userLogout', { id: authState.me.id });
+                }
+                socket.off('userConnect');
+                toast('Vous êtes déconnecté(e)', { type: 'success' });
+                refresh();
+                reload();
+            })
+            .catch((error) => {
+                console.error('Erreur lors du logout via middleware :', error);
+            });
     };
 
     // Recharge la page

@@ -1,0 +1,408 @@
+[{
+  "_id": {
+    "$oid": "67f4243ee322d19c6859ac82"
+  },
+  "name": "Le Bistrot Parisien",
+  "description": "Cuisine française traditionnelle dans un cadre élégant",
+  "location": {
+    "address": "15 rue de la Paix",
+    "city": "Paris",
+    "postal_code": "75002",
+    "country": "France",
+    "coordinates": [
+      2.3364,
+      48.8666
+    ]
+  },
+  "cuisine_types": [
+    "française",
+    "gastronomique",
+    "traditionnelle"
+  ],
+  "phone": "+33123456789",
+  "website": "https://bistrotparisien.fr",
+  "hours": {
+    "monday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "tuesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "wednesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "thursday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "friday": [
+      "11:30-14:30",
+      "19:00-23:00"
+    ],
+    "saturday": [
+      "11:30-15:00",
+      "19:00-23:00"
+    ],
+    "sunday": [
+      "12:00-15:00"
+    ]
+  },
+  "owner_id": 12,
+  "status": "closed",
+  "rating": 4.7,
+  "delivery_options": {
+    "delivery_fee": 3.99,
+    "min_order_amount": 15,
+    "estimated_delivery_time": 30
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-08T19:23:16.666Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-08T19:23:16.667Z"
+  },
+  "banniere": "ban.jpg",
+  "logo": "2.png",
+  "menu": [
+    {
+      "name": "Menu maxibestof",
+      "categorie": "Menu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxibestof noa",
+      "categorie": "MEnu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        },
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxicharrif",
+      "categorie": "Menu charrif",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": ""
+        }
+      ]
+    }
+  ],
+  "articles": [
+    {
+      "name": "Bruschetta",
+      "description": "Pain grillé à l'ail avec tomates fraîches, basilic et huile d'olive",
+      "price": 6.9,
+      "image": "mochi-dessert.png",
+      "category": "Entrées",
+      "tags": [
+        "végétarien"
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "nutritional_info": {
+        "calories": 220,
+        "protein": 5,
+        "carbs": 26,
+        "fat": 12
+      },
+      "available": true
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f598227846b4d6c7dcac21"
+  },
+  "name": "Le Bistrot Parisien",
+  "description": "Cuisine française traditionnelle dans un cadre élégant",
+  "location": {
+    "address": "15 rue de la Paix",
+    "city": "Paris",
+    "postal_code": "75002",
+    "country": "France",
+    "coordinates": [
+      2.3364,
+      48.8666
+    ]
+  },
+  "cuisine_types": [
+    "française",
+    "gastronomique",
+    "traditionnelle"
+  ],
+  "phone": "+33123456789",
+  "website": "https://bistrotparisien.fr",
+  "hours": {
+    "monday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "tuesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "wednesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "thursday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "friday": [
+      "11:30-14:30",
+      "19:00-23:00"
+    ],
+    "saturday": [
+      "11:30-15:00",
+      "19:00-23:00"
+    ],
+    "sunday": [
+      "12:00-15:00"
+    ]
+  },
+  "owner_id": 12,
+  "status": "closed",
+  "rating": 4.7,
+  "delivery_options": {
+    "delivery_fee": 3.99,
+    "min_order_amount": 15,
+    "estimated_delivery_time": 30
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-08T19:23:16.666Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-08T19:23:16.667Z"
+  },
+  "banniere": "ban.jpg",
+  "logo": "2.png",
+  "menu": [
+    {
+      "name": "Menu maxibestof",
+      "categorie": "Menu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxibestof noa",
+      "categorie": "MEnu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        },
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxicharrif",
+      "categorie": "Menu charrif",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": ""
+        }
+      ]
+    }
+  ],
+  "articles": [
+    {
+      "name": "Bruschetta",
+      "description": "Pain grillé à l'ail avec tomates fraîches, basilic et huile d'olive",
+      "price": 6.9,
+      "image": "mochi-dessert.png",
+      "category": "Entrées",
+      "tags": [
+        "végétarien"
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "nutritional_info": {
+        "calories": 220,
+        "protein": 5,
+        "carbs": 26,
+        "fat": 12
+      },
+      "available": true
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f598247846b4d6c7dcac22"
+  },
+  "name": "Le Bistrot Parisien",
+  "description": "Cuisine française traditionnelle dans un cadre élégant",
+  "location": {
+    "address": "15 rue de la Paix",
+    "city": "Paris",
+    "postal_code": "75002",
+    "country": "France",
+    "coordinates": [
+      2.3364,
+      48.8666
+    ]
+  },
+  "cuisine_types": [
+    "française",
+    "gastronomique",
+    "traditionnelle"
+  ],
+  "phone": "+33123456789",
+  "website": "https://bistrotparisien.fr",
+  "hours": {
+    "monday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "tuesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "wednesday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "thursday": [
+      "11:30-14:30",
+      "19:00-22:30"
+    ],
+    "friday": [
+      "11:30-14:30",
+      "19:00-23:00"
+    ],
+    "saturday": [
+      "11:30-15:00",
+      "19:00-23:00"
+    ],
+    "sunday": [
+      "12:00-15:00"
+    ]
+  },
+  "owner_id": 12,
+  "status": "closed",
+  "rating": 4.7,
+  "delivery_options": {
+    "delivery_fee": 3.99,
+    "min_order_amount": 15,
+    "estimated_delivery_time": 30
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-08T19:23:16.666Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-08T19:23:16.667Z"
+  },
+  "banniere": "ban.jpg",
+  "logo": "2.png",
+  "menu": [
+    {
+      "name": "Menu maxibestof",
+      "categorie": "Menu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxibestof noa",
+      "categorie": "MEnu burger",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        },
+        {
+          "name": "bKFHxtCO",
+          "image": "mochi.jpg"
+        }
+      ]
+    },
+    {
+      "name": "MEnu maxicharrif",
+      "categorie": "Menu charrif",
+      "price": 10.5,
+      "image": "menu1.png",
+      "articles": [
+        {
+          "name": "bKFHxtCO",
+          "image": ""
+        }
+      ]
+    }
+  ],
+  "articles": [
+    {
+      "name": "Bruschetta",
+      "description": "Pain grillé à l'ail avec tomates fraîches, basilic et huile d'olive",
+      "price": 6.9,
+      "image": "mochi-dessert.png",
+      "category": "Entrées",
+      "tags": [
+        "végétarien"
+      ],
+      "allergens": [
+        "gluten"
+      ],
+      "nutritional_info": {
+        "calories": 220,
+        "protein": 5,
+        "carbs": 26,
+        "fat": 12
+      },
+      "available": true
+    }
+  ]
+}]

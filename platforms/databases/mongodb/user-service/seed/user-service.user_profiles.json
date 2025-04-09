@@ -1,0 +1,292 @@
+[{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a406"
+  },
+  "user_id": 201,
+  "first_name": "Marie",
+  "last_name": "Dubois",
+  "profile_picture": "marie_profile.jpg",
+  "addresses": [
+    {
+      "name": "Domicile",
+      "street": "24 Rue de Rivoli",
+      "city": "Paris",
+      "postal_code": "75004",
+      "country": "France",
+      "coordinates": [
+        2.3508,
+        48.8563
+      ],
+      "is_default": true
+    },
+    {
+      "name": "Bureau",
+      "street": "15 Avenue des Champs-Élysées",
+      "city": "Paris",
+      "postal_code": "75008",
+      "country": "France",
+      "coordinates": [
+        2.3081,
+        48.8698
+      ],
+      "is_default": false
+    }
+  ],
+  "payment_methods": [
+    {
+      "provider": "Visa",
+      "last_four": "4242",
+      "expiry_date": "04/26",
+      "card_type": "credit",
+      "token": "tok_visa_4242",
+      "is_default": true
+    }
+  ],
+  "preferences": {
+    "favorite_cuisines": [
+      "japonaise",
+      "italienne"
+    ],
+    "dietary_restrictions": [
+      "vegetarian_friendly"
+    ],
+    "notifications": {
+      "email": true,
+      "push": true,
+      "sms": false
+    }
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "favories": [
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    },
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a407"
+  },
+  "user_id": 202,
+  "first_name": "Thomas",
+  "last_name": "Martin",
+  "profile_picture": "thomas_profile.jpg",
+  "addresses": [
+    {
+      "name": "Domicile",
+      "street": "8 Rue Montorgueil",
+      "city": "Paris",
+      "postal_code": "75002",
+      "country": "France",
+      "coordinates": [
+        2.3466,
+        48.8651
+      ],
+      "is_default": true
+    }
+  ],
+  "payment_methods": [
+    {
+      "provider": "Mastercard",
+      "last_four": "5555",
+      "expiry_date": "09/25",
+      "card_type": "debit",
+      "token": "tok_mastercard_5555",
+      "is_default": true
+    }
+  ],
+  "preferences": {
+    "favorite_cuisines": [
+      "française",
+      "asiatique"
+    ],
+    "dietary_restrictions": [],
+    "notifications": {
+      "email": true,
+      "push": true,
+      "sms": true
+    }
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "favories": [
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    },
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a408"
+  },
+  "user_id": 203,
+  "first_name": "Sophie",
+  "last_name": "Petit",
+  "profile_picture": "sophie_profile.jpg",
+  "addresses": [
+    {
+      "name": "Domicile",
+      "street": "36 Boulevard Saint-Germain",
+      "city": "Paris",
+      "postal_code": "75005",
+      "country": "France",
+      "coordinates": [
+        2.3413,
+        48.8515
+      ],
+      "is_default": true
+    }
+  ],
+  "payment_methods": [
+    {
+      "provider": "American Express",
+      "last_four": "0005",
+      "expiry_date": "12/24",
+      "card_type": "credit",
+      "token": "tok_amex_0005",
+      "is_default": true
+    }
+  ],
+  "preferences": {
+    "favorite_cuisines": [
+      "méditerranéenne",
+      "française"
+    ],
+    "dietary_restrictions": [
+      "gluten_free"
+    ],
+    "notifications": {
+      "email": true,
+      "push": false,
+      "sms": false
+    }
+  },
+  "created_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-01T15:06:49.999Z"
+  },
+  "favories": [
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    },
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f1680d3d41bded06cb6b75"
+  },
+  "createdAt": {
+    "$date": "2025-04-05T17:27:41.232Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-05T17:27:41.232Z"
+  },
+  "first_name": "Charif",
+  "last_name": "LeBGGGGGG",
+  "profile_picture": "marie_profile.jpg",
+  "addresses": [
+    {
+      "name": "Domicile",
+      "street": "24 Rue de Rivoli",
+      "city": "Paris",
+      "postal_code": "75004",
+      "country": "France",
+      "coordinates": [
+        2.3508,
+        48.8563
+      ],
+      "is_default": true
+    },
+    {
+      "name": "Bureau",
+      "street": "15 Avenue des Champs-Élysées",
+      "city": "Paris",
+      "postal_code": "75008",
+      "country": "France",
+      "coordinates": [
+        2.3081,
+        48.8698
+      ],
+      "is_default": false
+    }
+  ],
+  "payment_methods": [
+    {
+      "provider": "Visa",
+      "last_four": "4242",
+      "expiry_date": "04/26",
+      "card_type": "credit",
+      "token": "tok_visa_4242",
+      "is_default": true
+    }
+  ],
+  "preferences": {
+    "favorite_cuisines": [
+      "japonaise",
+      "italienne"
+    ],
+    "dietary_restrictions": [
+      "vegetarian_friendly"
+    ],
+    "notifications": {
+      "email": true,
+      "push": true,
+      "sms": false
+    }
+  },
+  "favories": [
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    },
+    {
+      "$resto_id": "67ec010a4babd715ae06a406"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f5871fd123eac15610e498"
+  },
+  "createdAt": {
+    "$date": "2025-04-08T20:29:19.998Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-08T20:29:19.998Z"
+  },
+  "user_id": 9,
+  "first_name": "",
+  "last_name": "",
+  "profile_picture": "",
+  "addresses": [],
+  "payment_methods": [],
+  "preferences": {
+    "favorite_cuisines": [],
+    "dietary_restrictions": [],
+    "notifications": {
+      "email": false,
+      "push": false,
+      "sms": false
+    }
+  },
+  "favories": []
+}]

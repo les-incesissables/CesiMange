@@ -4,6 +4,8 @@ services:
             context: .
             dockerfile: platforms/microservices/auth-service/Dockerfile.dev
         container_name: auth-service
+        depends_on:
+            - mssql-auth-service
         ports:
             - '4001:4001'
         environment:
@@ -27,6 +29,8 @@ services:
             context: .
             dockerfile: platforms/microservices/user-service/Dockerfile.dev
         container_name: user-service
+        depends_on:
+            - mongodb-user
         ports:
             - '4002:4002'
         environment:
@@ -48,6 +52,8 @@ services:
             context: .
             dockerfile: platforms/microservices/restaurant-service/Dockerfile.dev
         container_name: restaurant-service
+        depends_on:
+            - mongodb-restaurant
         ports:
             - '4003:4003'
         environment:
@@ -88,7 +94,6 @@ services:
             context: ./platforms/databases/mongodb/user-service
             dockerfile: Dockerfile.mongodb
         container_name: db-mongodb-user
-        user: "1000:1000"
         ports:
             - '27018:27017'
         volumes:
@@ -104,13 +109,11 @@ services:
         container_name: db-mongodb-restaurant
         ports:
             - '27019:27017'
-        user: "1000:1000"
         volumes:
             - ./platforms/databases/mongodb/restaurant-service/data:/data/db
             - ./platforms/databases/mongodb/restaurant-service/seed:/docker-entrypoint-initdb.d
         networks:
             - api_network
-
     mssql-auth-service:
         build:
             context: ./platforms/databases/sqlserver/auth-service
@@ -124,7 +127,7 @@ services:
             - ./platforms/databases/sqlserver/auth-service/secrets:/var/opt/mssql/secrets
             - ./platforms/databases/sqlserver/auth-service/seed:/init-sql
         environment:
-            - SA_PASSWORD=ProdPassword123!
+            - SA_PASSWORD=MyPass123!
             - ACCEPT_EULA=Y
             - MSSQL_UID=10001
         user: 'root'
