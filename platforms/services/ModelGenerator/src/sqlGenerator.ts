@@ -4,36 +4,35 @@ import { DataSource } from 'typeorm';
 require('dotenv').config();
 
 /**
- * Script de génération automatique de DTOs et Entités à partir de SQL Server
- * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Création
- * @author Modifié pour ajouter la génération d'entités, métiers et contrôleurs
- * @author Modifié pour préserver les fichiers modifiés manuellement
+ * Script de gï¿½nï¿½ration automatique de DTOs et Entitï¿½s ï¿½ partir de SQL Server
+ * @author Mahmoud Charif - CESIMANGE-118 - 31/03/2025 - Crï¿½ation
+ * @author Modifiï¿½ pour ajouter la gï¿½nï¿½ration d'entitï¿½s, mï¿½tiers et contrï¿½leurs
+ * @author Modifiï¿½ pour prï¿½server les fichiers modifiï¿½s manuellement
  */
 
-// Configuration des services et des tables associées
+// Configuration des services et des tables associï¿½es
 const serviceConfigs = [
     {
         serviceName: 'auth-service',
         tables: ['T_AUTH_USERS', 'T_TRANSACTIONS'],
         outputDir: '../../microservices/auth-service/src/models/',
         metierDir: '../../microservices/auth-service/src/metier/',
-        controllerDir: '../../microservices/auth-service/src/controllers/'
-    }
+        controllerDir: '../../microservices/auth-service/src/controllers/',
+    },
 ];
 
-// Configuration générale
+// Configuration gï¿½nï¿½rale
 const config = {
     excludedFields: ['CreatedAt', 'UpdatedAt', 'DeletedAt'],
     excludedTables: ['__EFMigrationsHistory', 'sysdiagrams'],
     cleanOutputDir: false,
     protectedFolders: ['base'],
     generatorSignature: '\\* @author (Entity|DTO|Metier|Controller) Generator',
-    overwriteExistingFiles: false
+    overwriteExistingFiles: false,
 };
 
 // Types et interfaces pour l'analyse
-interface ColumnInfo
-{
+interface ColumnInfo {
     name: string;
     dataType: string;
     isNullable: boolean;
@@ -42,85 +41,71 @@ interface ColumnInfo
     isPrimaryKey: boolean;
 }
 
-interface TableSchema
-{
+interface TableSchema {
     columns: ColumnInfo[];
     primaryKeys: string[];
 }
 
-// Fonction pour s'assurer qu'un répertoire existe
-function ensureDirectoryExists(dirPath: string): void
-{
-    if (!fs.existsSync(dirPath))
-    {
+// Fonction pour s'assurer qu'un rï¿½pertoire existe
+function ensureDirectoryExists(dirPath: string): void {
+    if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
-// Fonction pour nettoyer un répertoire tout en préservant certains dossiers
-function cleanDirectory(dirPath: string, protectedFolders: string[] = []): void
-{
+// Fonction pour nettoyer un rï¿½pertoire tout en prï¿½servant certains dossiers
+function cleanDirectory(dirPath: string, protectedFolders: string[] = []): void {
     if (!fs.existsSync(dirPath)) return;
 
     const items = fs.readdirSync(dirPath);
 
-    for (const item of items)
-    {
+    for (const item of items) {
         const itemPath = path.join(dirPath, item);
         const isDirectory = fs.statSync(itemPath).isDirectory();
 
-        if (isDirectory)
-        {
-            if (!protectedFolders.includes(item))
-            {
+        if (isDirectory) {
+            if (!protectedFolders.includes(item)) {
                 fs.rmSync(itemPath, { recursive: true, force: true });
             }
-        } else
-        {
+        } else {
             fs.unlinkSync(itemPath);
         }
     }
 }
 
-// Fonction pour vérifier si un fichier a été modifié manuellement
-function isFileModifiedManually(filePath: string): boolean
-{
+// Fonction pour vï¿½rifier si un fichier a ï¿½tï¿½ modifiï¿½ manuellement
+function isFileModifiedManually(filePath: string): boolean {
     if (!fs.existsSync(filePath)) return false;
 
     const fileContent = fs.readFileSync(filePath, 'utf8');
 
-    // Vérifier si le contenu contient la signature du générateur
+    // Vï¿½rifier si le contenu contient la signature du gï¿½nï¿½rateur
     const generatorRegex = /\* @author (Entity|DTO|Metier|Controller) Generator/;
     const hasGeneratorSignature = generatorRegex.test(fileContent);
 
-    // Si le fichier contient notre signature mais a été modifié après sa génération initiale
-    if (hasGeneratorSignature)
-    {
+    // Si le fichier contient notre signature mais a ï¿½tï¿½ modifiï¿½ aprï¿½s sa gï¿½nï¿½ration initiale
+    if (hasGeneratorSignature) {
         const creationDateMatch = fileContent.match(/@author (?:Entity|DTO|Metier|Controller) Generator - ([0-9TZ:.+-]+) - Creation/);
-        if (creationDateMatch && creationDateMatch[1])
-        {
+        if (creationDateMatch && creationDateMatch[1]) {
             const creationDate = new Date(creationDateMatch[1]);
             const modificationDate = fs.statSync(filePath).mtime;
 
-            // Si le fichier a été modifié après sa génération initiale d'au moins 5 minutes
-            // (pour éviter les faux positifs liés au délai entre génération et écriture sur disque)
+            // Si le fichier a ï¿½tï¿½ modifiï¿½ aprï¿½s sa gï¿½nï¿½ration initiale d'au moins 5 minutes
+            // (pour ï¿½viter les faux positifs liï¿½s au dï¿½lai entre gï¿½nï¿½ration et ï¿½criture sur disque)
             const fiveMinutes = 5 * 60 * 1000;
             return modificationDate.getTime() > creationDate.getTime() + fiveMinutes;
         }
     }
 
-    // Si pas de signature ou format inattendu, considérer comme modifié manuellement
+    // Si pas de signature ou format inattendu, considï¿½rer comme modifiï¿½ manuellement
     return true;
 }
 
-// Fonction pour écrire un fichier en vérifiant s'il a été modifié manuellement
-function writeFileIfNotModified(filePath: string, content: string): boolean
-{
-    if (!config.overwriteExistingFiles && fs.existsSync(filePath))
-    {
-        if (isFileModifiedManually(filePath))
-        {
-            console.log(`  Fichier préservé (modifié manuellement): ${filePath}`);
+// Fonction pour ï¿½crire un fichier en vï¿½rifiant s'il a ï¿½tï¿½ modifiï¿½ manuellement
+function writeFileIfNotModified(filePath: string, content: string): boolean {
+    if (!config.overwriteExistingFiles && fs.existsSync(filePath)) {
+        if (isFileModifiedManually(filePath)) {
+            console.log(`  Fichier prï¿½servï¿½ (modifiï¿½ manuellement): ${filePath}`);
             return false;
         }
     }
@@ -130,9 +115,8 @@ function writeFileIfNotModified(filePath: string, content: string): boolean
 }
 
 // Fonction pour convertir le nom d'une table en nom de classe (PascalCase)
-function tableNameToClassName(name: string): string
-{
-    // Enlever le préfixe T_ si présent
+function tableNameToClassName(name: string): string {
+    // Enlever le prï¿½fixe T_ si prï¿½sent
     const nameWithoutPrefix = name.startsWith('T_') ? name.substring(2) : name;
 
     // Enlever le "s" final pour les pluriels si applicable
@@ -141,37 +125,35 @@ function tableNameToClassName(name: string): string
     // Convertir en PascalCase
     return singularName
         .split(/[-_]/)
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
         .join('');
 }
 
 // Fonction pour convertir un nom de colonne en camelCase
-function columnNameToCamelCase(name: string): string
-{
+function columnNameToCamelCase(name: string): string {
     return name.charAt(0).toLowerCase() + name.slice(1);
 }
 
 // Fonction pour convertir un type SQL en type TypeScript
-function sqlTypeToTypeScript(sqlType: string, isNullable: boolean): string
-{
+function sqlTypeToTypeScript(sqlType: string, isNullable: boolean): string {
     const typeMap: Record<string, string> = {
-        'int': 'number',
-        'bigint': 'number',
-        'smallint': 'number',
-        'tinyint': 'number',
-        'bit': 'boolean',
-        'decimal': 'number',
-        'numeric': 'number',
-        'money': 'number',
-        'float': 'number',
-        'datetime': 'Date',
-        'date': 'Date',
-        'char': 'string',
-        'varchar': 'string',
-        'text': 'string',
-        'nchar': 'string',
-        'nvarchar': 'string',
-        'uniqueidentifier': 'string'
+        int: 'number',
+        bigint: 'number',
+        smallint: 'number',
+        tinyint: 'number',
+        bit: 'boolean',
+        decimal: 'number',
+        numeric: 'number',
+        money: 'number',
+        float: 'number',
+        datetime: 'Date',
+        date: 'Date',
+        char: 'string',
+        varchar: 'string',
+        text: 'string',
+        nchar: 'string',
+        nvarchar: 'string',
+        uniqueidentifier: 'string',
     };
 
     const tsType = typeMap[sqlType.toLowerCase()] || 'any';
@@ -179,11 +161,9 @@ function sqlTypeToTypeScript(sqlType: string, isNullable: boolean): string
 }
 
 // Fonction pour analyser la structure d'une table
-async function analyzeTable(tableName: string, dataSource: DataSource): Promise<TableSchema>
-{
-    try
-    {
-        // Récupérer les colonnes de la table
+async function analyzeTable(tableName: string, dataSource: DataSource): Promise<TableSchema> {
+    try {
+        // Rï¿½cupï¿½rer les colonnes de la table
         const columns = await dataSource.query(`
             SELECT 
                 c.COLUMN_NAME as name,
@@ -209,43 +189,36 @@ async function analyzeTable(tableName: string, dataSource: DataSource): Promise<
                 c.ORDINAL_POSITION
         `);
 
-        if (!columns || columns.length === 0)
-        {
+        if (!columns || columns.length === 0) {
             console.log(`  La table ${tableName} n'existe pas ou est vide.`);
             return { columns: [], primaryKeys: [] };
         }
 
-        const primaryKeys = columns
-            .filter((col: ColumnInfo) => col.isPrimaryKey)
-            .map((col: ColumnInfo) => col.name);
+        const primaryKeys = columns.filter((col: ColumnInfo) => col.isPrimaryKey).map((col: ColumnInfo) => col.name);
 
         return {
             columns,
-            primaryKeys
+            primaryKeys,
         };
-    } catch (error)
-    {
+    } catch (error) {
         console.error(`Erreur lors de l'analyse de la table ${tableName}:`, error);
         throw error;
     }
 }
 
-// Fonction pour générer une entité TypeORM
-function generateEntityContent(className: string, tableName: string, schema: TableSchema): string
-{
+// Fonction pour gï¿½nï¿½rer une entitï¿½ TypeORM
+function generateEntityContent(className: string, tableName: string, schema: TableSchema): string {
     let content = `import { Entity, Column, PrimaryColumn, ObjectLiteral, PrimaryGeneratedColumn } from "typeorm";\n\n`;
     content += `/**\n`;
-    content += ` * Entité TypeORM pour la table SQL Server ${tableName}\n`;
+    content += ` * Entitï¿½ TypeORM pour la table SQL Server ${tableName}\n`;
     content += ` * @author Entity Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
     content += `@Entity("${tableName}")\n`;
     content += `export class ${className} implements ObjectLiteral\n{\n`;
 
-    // Ajouter les propriétés avec décorateurs TypeORM
-    schema.columns.forEach(column =>
-    {
-        if (!config.excludedFields.includes(column.name))
-        {
+    // Ajouter les propriï¿½tï¿½s avec dï¿½corateurs TypeORM
+    schema.columns.forEach((column) => {
+        if (!config.excludedFields.includes(column.name)) {
             const camelCaseName = columnNameToCamelCase(column.name);
 
             content += `    /**\n`;
@@ -253,40 +226,33 @@ function generateEntityContent(className: string, tableName: string, schema: Tab
             if (column.maxLength) content += `     * @maxLength ${column.maxLength}\n`;
             content += `     */\n`;
 
-            // Générer le décorateur TypeORM approprié
-            if (column.isPrimaryKey)
-            {
-                if (column.name.toLowerCase().includes('id') && column.dataType.toLowerCase().includes('int'))
-                {
+            // Gï¿½nï¿½rer le dï¿½corateur TypeORM appropriï¿½
+            if (column.isPrimaryKey) {
+                if (column.name.toLowerCase().includes('id') && column.dataType.toLowerCase().includes('int')) {
                     content += `    @PrimaryGeneratedColumn()\n`;
-                } else
-                {
+                } else {
                     content += `    @PrimaryColumn()\n`;
                 }
-            } else
-            {
+            } else {
                 content += `    @Column(`;
 
-                // Options pour le décorateur Column
+                // Options pour le dï¿½corateur Column
                 const options = [];
-                if (column.dataType.toLowerCase().includes('char') && column.maxLength)
-                {
+                if (column.dataType.toLowerCase().includes('char') && column.maxLength) {
                     options.push(`length: ${column.maxLength}`);
                 }
-                if (!column.isNullable)
-                {
+                if (!column.isNullable) {
                     options.push(`nullable: false`);
                 }
 
-                if (options.length > 0)
-                {
+                if (options.length > 0) {
                     content += `{ ${options.join(', ')} }`;
                 }
 
                 content += `)\n`;
             }
 
-            // Générer la propriété avec | undefined
+            // Gï¿½nï¿½rer la propriï¿½tï¿½ avec | undefined
             content += `    ${camelCaseName}?: ${sqlTypeToTypeScript(column.dataType, column.isNullable)};\n\n`;
         }
     });
@@ -295,33 +261,29 @@ function generateEntityContent(className: string, tableName: string, schema: Tab
     return content;
 }
 
-// Fonction pour générer le contenu du fichier CritereDTO
-function generateCritereDTOContent(className: string, schema: TableSchema): string
-{
+// Fonction pour gï¿½nï¿½rer le contenu du fichier CritereDTO
+function generateCritereDTOContent(className: string, schema: TableSchema): string {
     let content = `import { ObjectLiteral } from "typeorm";\n`;
-    content += `import { BaseCritereDTO } from "../../../../../../services/data-access-layer/src/models/base/BaseCritereDTO";\n\n`
+    content += `import { BaseCritereDTO } from "../../../../../../services/data-access-layer/src/models/base/BaseCritereDTO";\n\n`;
     content += `/**\n`;
-    content += ` * CritereDTO pour la recherche d'entités SQL Server ${className}\n`;
+    content += ` * CritereDTO pour la recherche d'entitï¿½s SQL Server ${className}\n`;
     content += ` * @author DTO Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
     content += `export class ${className}CritereDTO extends BaseCritereDTO implements ObjectLiteral\n{\n`;
 
-    // Ajouter les propriétés pour la recherche
-    schema.columns.forEach(column =>
-    {
-        if (!config.excludedFields.includes(column.name))
-        {
+    // Ajouter les propriï¿½tï¿½s pour la recherche
+    schema.columns.forEach((column) => {
+        if (!config.excludedFields.includes(column.name)) {
             const tsType = sqlTypeToTypeScript(column.dataType, true);
             const camelCaseName = columnNameToCamelCase(column.name);
 
             content += `    /**\n`;
-            content += `     * Critère de recherche pour ${camelCaseName}\n`;
+            content += `     * Critï¿½re de recherche pour ${camelCaseName}\n`;
             content += `     */\n`;
             content += `    ${camelCaseName}?: ${tsType} | undefined;\n\n`;
 
-            // Pour les chaînes, ajouter une recherche par Like
-            if (column.dataType.toLowerCase().includes('char') || column.dataType.toLowerCase() === 'text')
-            {
+            // Pour les chaï¿½nes, ajouter une recherche par Like
+            if (column.dataType.toLowerCase().includes('char') || column.dataType.toLowerCase() === 'text') {
                 content += `    /**\n`;
                 content += `     * Recherche avec LIKE pour ${camelCaseName}\n`;
                 content += `     */\n`;
@@ -329,10 +291,11 @@ function generateCritereDTOContent(className: string, schema: TableSchema): stri
             }
 
             // Pour les nombres et dates, ajouter des plages
-            if ((['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
-                column.dataType.toLowerCase().includes('date')) &&
-                !column.name.toLowerCase().includes('id'))
-            {
+            if (
+                (['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
+                    column.dataType.toLowerCase().includes('date')) &&
+                !column.name.toLowerCase().includes('id')
+            ) {
                 content += `    /**\n`;
                 content += `     * Valeur minimale pour ${camelCaseName}\n`;
                 content += `     */\n`;
@@ -350,14 +313,13 @@ function generateCritereDTOContent(className: string, schema: TableSchema): stri
     return content;
 }
 
-// Fonction pour générer le contenu du fichier métier
-function generateMetierContent(className: string, schema: TableSchema): string
-{
+// Fonction pour gï¿½nï¿½rer le contenu du fichier mï¿½tier
+function generateMetierContent(className: string, schema: TableSchema): string {
     let content = `import { ${className} } from "../../models/entities/${className.toLowerCase()}/${className}";\n`;
     content += `import { ${className}CritereDTO } from "../../models/entities/${className.toLowerCase()}/${className}CritereDTO";\n`;
     content += `import { BaseMetier } from "../../../../../services/base-classes/src/metier/base/BaseMetier";\n\n`;
     content += `/**\n`;
-    content += ` * Métier pour l'entité ${className}\n`;
+    content += ` * Mï¿½tier pour l'entitï¿½ ${className}\n`;
     content += ` * @author Metier Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
     content += `export class ${className}Metier extends BaseMetier<${className}, ${className}CritereDTO> {\n`;
@@ -368,14 +330,13 @@ function generateMetierContent(className: string, schema: TableSchema): string
     return content;
 }
 
-// Fonction pour générer le contenu du fichier contrôleur
-function generateControllerContent(className: string, schema: TableSchema): string
-{
+// Fonction pour gï¿½nï¿½rer le contenu du fichier contrï¿½leur
+function generateControllerContent(className: string, schema: TableSchema): string {
     let content = `import { ${className} } from "../../models/entities/${className.toLowerCase()}/${className}";\n`;
     content += `import { ${className}CritereDTO } from "../../models/entities/${className.toLowerCase()}/${className}CritereDTO";\n`;
     content += `import { BaseController } from "../../../../../services/base-classes/src/controllers/base/BaseController";\n\n`;
     content += `/**\n`;
-    content += ` * Contrôleur pour l'entité ${className}\n`;
+    content += ` * Contrï¿½leur pour l'entitï¿½ ${className}\n`;
     content += ` * @author Controller Generator - ${new Date().toISOString()} - Creation\n`;
     content += ` */\n`;
     content += `export class ${className}Controller extends BaseController<${className}, ${className}CritereDTO> {\n\n`;
@@ -386,174 +347,150 @@ function generateControllerContent(className: string, schema: TableSchema): stri
     return content;
 }
 
-// Fonction principale pour générer les DTOs, entités, métiers et contrôleurs
-async function generateDTOs(): Promise<void>
-{
+// Fonction principale pour gï¿½nï¿½rer les DTOs, entitï¿½s, mï¿½tiers et contrï¿½leurs
+async function generateDTOs(): Promise<void> {
     let dataSource: DataSource | null = null;
 
-    try
-    {
-        console.log('Démarrage de la génération des DTOs, Entités, Métiers et Contrôleurs pour SQL Server...');
+    try {
+        console.log('Dï¿½marrage de la gï¿½nï¿½ration des DTOs, Entitï¿½s, Mï¿½tiers et Contrï¿½leurs pour SQL Server...');
 
-        // Connexion à SQL Server avec TypeORM
+        // Connexion ï¿½ SQL Server avec TypeORM
         dataSource = new DataSource({
-            type: "mssql",
-            host: process.env.DB_SERVER,
-            port: parseInt(process.env.DB_PORT || "1433"),
+            type: 'mssql',
+            host: process.env.DB_SERVER || 'mssql-auth',
+            port: parseInt(process.env.DB_PORT || '1433'),
             database: process.env.DB_NAME,
             username: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
             options: {
-                encrypt: process.env.DB_ENCRYPT === 'true'
+                encrypt: process.env.DB_ENCRYPT === 'true',
             },
             extra: {
                 trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
-                connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || "30000")
-            }
+                connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '30000'),
+            },
         });
 
         await dataSource.initialize();
-        console.log("Connexion SQL Server établie");
+        console.log('Connexion SQL Server ï¿½tablie');
 
-        // Récupérer toutes les tables disponibles
+        // Rï¿½cupï¿½rer toutes les tables disponibles
         const tables = await dataSource.query(`
             SELECT TABLE_NAME as name
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE'
         `);
 
-        const allTables = tables
-            .map((t: { name: string }) => t.name)
-            .filter((name: string) => !config.excludedTables.includes(name));
+        const allTables = tables.map((t: { name: string }) => t.name).filter((name: string) => !config.excludedTables.includes(name));
 
-        console.log(`${allTables.length} tables trouvées après filtrage initial.`);
+        console.log(`${allTables.length} tables trouvï¿½es aprï¿½s filtrage initial.`);
 
-        // Pour chaque service configuré
-        for (const serviceConfig of serviceConfigs)
-        {
-            if (serviceConfig.tables.length === 0)
-            {
-                console.log(`\nAucune table configurée pour le service: ${serviceConfig.serviceName}, ignoré.`);
+        // Pour chaque service configurï¿½
+        for (const serviceConfig of serviceConfigs) {
+            if (serviceConfig.tables.length === 0) {
+                console.log(`\nAucune table configurï¿½e pour le service: ${serviceConfig.serviceName}, ignorï¿½.`);
                 continue;
             }
 
             console.log(`\nTraitement du service: ${serviceConfig.serviceName}`);
 
-            // Nettoyer les dossiers si nécessaire et créer la structure
+            // Nettoyer les dossiers si nï¿½cessaire et crï¿½er la structure
             const { outputDir, metierDir, controllerDir } = serviceConfig;
 
-            if (config.cleanOutputDir)
-            {
-                if (fs.existsSync(outputDir))
-                {
+            if (config.cleanOutputDir) {
+                if (fs.existsSync(outputDir)) {
                     cleanDirectory(outputDir, config.protectedFolders);
                 }
-                if (fs.existsSync(metierDir))
-                {
+                if (fs.existsSync(metierDir)) {
                     cleanDirectory(metierDir, config.protectedFolders);
                 }
-                if (fs.existsSync(controllerDir))
-                {
+                if (fs.existsSync(controllerDir)) {
                     cleanDirectory(controllerDir, config.protectedFolders);
                 }
             }
 
-            // Créer les répertoires principaux
+            // Crï¿½er les rï¿½pertoires principaux
             ensureDirectoryExists(outputDir);
             ensureDirectoryExists(metierDir);
             ensureDirectoryExists(controllerDir);
 
-            // Créer un dossier entities pour les DTOs et critères
+            // Crï¿½er un dossier entities pour les DTOs et critï¿½res
             const entitiesDir = path.join(outputDir, 'entities');
             ensureDirectoryExists(entitiesDir);
 
-            // Créer les dossiers base pour les classes de base
+            // Crï¿½er les dossiers base pour les classes de base
             ensureDirectoryExists(path.join(metierDir, 'base'));
             ensureDirectoryExists(path.join(controllerDir, 'base'));
 
             // Filtrer les tables pour ce service
-            const serviceTables = allTables.filter((name: string) =>
-                serviceConfig.tables.includes(name)
-            );
+            const serviceTables = allTables.filter((name: string) => serviceConfig.tables.includes(name));
 
-            console.log(`${serviceTables.length} tables associées à ce service.`);
+            console.log(`${serviceTables.length} tables associï¿½es ï¿½ ce service.`);
 
             // Traiter chaque table pour ce service
-            for (const tableName of serviceTables)
-            {
+            for (const tableName of serviceTables) {
                 console.log(`Analyse de la table: ${tableName}`);
 
                 const schema = await analyzeTable(tableName, dataSource);
 
-                if (schema.columns.length > 0)
-                {
+                if (schema.columns.length > 0) {
                     const className = tableNameToClassName(tableName);
 
-                    // === 1. Création des fichiers Entity et CritereDTO ===
-                    // Créer un sous-dossier pour chaque modèle dans entities
+                    // === 1. Crï¿½ation des fichiers Entity et CritereDTO ===
+                    // Crï¿½er un sous-dossier pour chaque modï¿½le dans entities
                     const modelDir = path.join(entitiesDir, className.toLowerCase());
                     ensureDirectoryExists(modelDir);
 
-                    // Générer le fichier Entity
+                    // Gï¿½nï¿½rer le fichier Entity
                     const entityContent = generateEntityContent(className, tableName, schema);
                     const entityFilePath = path.join(modelDir, `${className}.ts`);
-                    if (writeFileIfNotModified(entityFilePath, entityContent))
-                    {
-                        console.log(`  Entity généré: ${entityFilePath}`);
+                    if (writeFileIfNotModified(entityFilePath, entityContent)) {
+                        console.log(`  Entity gï¿½nï¿½rï¿½: ${entityFilePath}`);
                     }
 
-                    // Générer le fichier CritereDTO
+                    // Gï¿½nï¿½rer le fichier CritereDTO
                     const critereDtoContent = generateCritereDTOContent(className, schema);
                     const critereDtoFilePath = path.join(modelDir, `${className}CritereDTO.ts`);
-                    if (writeFileIfNotModified(critereDtoFilePath, critereDtoContent))
-                    {
-                        console.log(`  CritereDTO généré: ${critereDtoFilePath}`);
+                    if (writeFileIfNotModified(critereDtoFilePath, critereDtoContent)) {
+                        console.log(`  CritereDTO gï¿½nï¿½rï¿½: ${critereDtoFilePath}`);
                     }
 
-                    // === 2. Création des fichiers Metier ===
+                    // === 2. Crï¿½ation des fichiers Metier ===
                     const metierClassDir = path.join(metierDir, className.toLowerCase());
                     ensureDirectoryExists(metierClassDir);
 
                     const metierContent = generateMetierContent(className, schema);
                     const metierFilePath = path.join(metierClassDir, `${className}Metier.ts`);
-                    if (writeFileIfNotModified(metierFilePath, metierContent))
-                    {
-                        console.log(`  Metier généré: ${metierFilePath}`);
+                    if (writeFileIfNotModified(metierFilePath, metierContent)) {
+                        console.log(`  Metier gï¿½nï¿½rï¿½: ${metierFilePath}`);
                     }
 
-                    // === 3. Création des fichiers Controller ===
+                    // === 3. Crï¿½ation des fichiers Controller ===
                     const controllerClassDir = path.join(controllerDir, className.toLowerCase());
                     ensureDirectoryExists(controllerClassDir);
 
                     const controllerContent = generateControllerContent(className, schema);
                     const controllerFilePath = path.join(controllerClassDir, `${className}Controller.ts`);
-                    if (writeFileIfNotModified(controllerFilePath, controllerContent))
-                    {
-                        console.log(`  Controller généré: ${controllerFilePath}`);
+                    if (writeFileIfNotModified(controllerFilePath, controllerContent)) {
+                        console.log(`  Controller gï¿½nï¿½rï¿½: ${controllerFilePath}`);
                     }
-
-                } else
-                {
-                    console.log(`  Aucun fichier généré pour ${tableName} (table vide ou structure non détectée).`);
+                } else {
+                    console.log(`  Aucun fichier gï¿½nï¿½rï¿½ pour ${tableName} (table vide ou structure non dï¿½tectï¿½e).`);
                 }
             }
         }
 
-        console.log('\nGénération des DTOs, Entités, Métiers et Contrôleurs terminée avec succès pour tous les services!');
-
-    } catch (error)
-    {
-        console.error('Erreur lors de la génération des fichiers:', error);
-    } finally
-    {
+        console.log('\nGï¿½nï¿½ration des DTOs, Entitï¿½s, Mï¿½tiers et Contrï¿½leurs terminï¿½e avec succï¿½s pour tous les services!');
+    } catch (error) {
+        console.error('Erreur lors de la gï¿½nï¿½ration des fichiers:', error);
+    } finally {
         // Fermer la connexion DataSource
-        if (dataSource && dataSource.isInitialized)
-        {
+        if (dataSource && dataSource.isInitialized) {
             await dataSource.destroy();
-            console.log('Déconnecté de SQL Server');
+            console.log('Dï¿½connectï¿½ de SQL Server');
         }
     }
 }
 
-// Exécuter la génération
+// Exï¿½cuter la gï¿½nï¿½ration
 generateDTOs();

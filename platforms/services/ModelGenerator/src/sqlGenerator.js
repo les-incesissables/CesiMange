@@ -1,50 +1,89 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
+'use strict';
+var __createBinding =
+    (this && this.__createBinding) ||
+    (Object.create
+        ? function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              var desc = Object.getOwnPropertyDescriptor(m, k);
+              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                  desc = {
+                      enumerable: true,
+                      get: function () {
+                          return m[k];
+                      },
+                  };
+              }
+              Object.defineProperty(o, k2, desc);
+          }
+        : function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              o[k2] = m[k];
+          });
+var __setModuleDefault =
+    (this && this.__setModuleDefault) ||
+    (Object.create
+        ? function (o, v) {
+              Object.defineProperty(o, 'default', { enumerable: true, value: v });
+          }
+        : function (o, v) {
+              o['default'] = v;
+          });
+var __importStar =
+    (this && this.__importStar) ||
+    (function () {
+        var ownKeys = function (o) {
+            ownKeys =
+                Object.getOwnPropertyNames ||
+                function (o) {
+                    var ar = [];
+                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                    return ar;
+                };
+            return ownKeys(o);
         };
-        return ownKeys(o);
+        return function (mod) {
+            if (mod && mod.__esModule) return mod;
+            var result = {};
+            if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+            __setModuleDefault(result, mod);
+            return result;
+        };
+    })();
+var __awaiter =
+    (this && this.__awaiter) ||
+    function (thisArg, _arguments, P, generator) {
+        function adopt(value) {
+            return value instanceof P
+                ? value
+                : new P(function (resolve) {
+                      resolve(value);
+                  });
+        }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) {
+                try {
+                    step(generator.next(value));
+                } catch (e) {
+                    reject(e);
+                }
+            }
+            function rejected(value) {
+                try {
+                    step(generator['throw'](value));
+                } catch (e) {
+                    reject(e);
+                }
+            }
+            function step(result) {
+                result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+            }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
     };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const typeorm_1 = require("typeorm");
+Object.defineProperty(exports, '__esModule', { value: true });
+const fs = __importStar(require('fs'));
+const path = __importStar(require('path'));
+const typeorm_1 = require('typeorm');
 require('dotenv').config();
 /**
  * Script de g�n�ration automatique de DTOs et Entit�s � partir de SQL Server
@@ -59,8 +98,8 @@ const serviceConfigs = [
         tables: ['T_AUTH_USERS', 'T_TRANSACTIONS'],
         outputDir: '../../microservices/auth-service/src/models/',
         metierDir: '../../microservices/auth-service/src/metier/',
-        controllerDir: '../../microservices/auth-service/src/controllers/'
-    }
+        controllerDir: '../../microservices/auth-service/src/controllers/',
+    },
 ];
 // Configuration g�n�rale
 const config = {
@@ -69,7 +108,7 @@ const config = {
     cleanOutputDir: false,
     protectedFolders: ['base'],
     generatorSignature: '\\* @author (Entity|DTO|Metier|Controller) Generator',
-    overwriteExistingFiles: false
+    overwriteExistingFiles: false,
 };
 // Fonction pour s'assurer qu'un r�pertoire existe
 function ensureDirectoryExists(dirPath) {
@@ -79,8 +118,7 @@ function ensureDirectoryExists(dirPath) {
 }
 // Fonction pour nettoyer un r�pertoire tout en pr�servant certains dossiers
 function cleanDirectory(dirPath, protectedFolders = []) {
-    if (!fs.existsSync(dirPath))
-        return;
+    if (!fs.existsSync(dirPath)) return;
     const items = fs.readdirSync(dirPath);
     for (const item of items) {
         const itemPath = path.join(dirPath, item);
@@ -89,16 +127,14 @@ function cleanDirectory(dirPath, protectedFolders = []) {
             if (!protectedFolders.includes(item)) {
                 fs.rmSync(itemPath, { recursive: true, force: true });
             }
-        }
-        else {
+        } else {
             fs.unlinkSync(itemPath);
         }
     }
 }
 // Fonction pour v�rifier si un fichier a �t� modifi� manuellement
 function isFileModifiedManually(filePath) {
-    if (!fs.existsSync(filePath))
-        return false;
+    if (!fs.existsSync(filePath)) return false;
     const fileContent = fs.readFileSync(filePath, 'utf8');
     // V�rifier si le contenu contient la signature du g�n�rateur
     const generatorRegex = /\* @author (Entity|DTO|Metier|Controller) Generator/;
@@ -138,7 +174,7 @@ function tableNameToClassName(name) {
     // Convertir en PascalCase
     return singularName
         .split(/[-_]/)
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
         .join('');
 }
 // Fonction pour convertir un nom de colonne en camelCase
@@ -148,23 +184,23 @@ function columnNameToCamelCase(name) {
 // Fonction pour convertir un type SQL en type TypeScript
 function sqlTypeToTypeScript(sqlType, isNullable) {
     const typeMap = {
-        'int': 'number',
-        'bigint': 'number',
-        'smallint': 'number',
-        'tinyint': 'number',
-        'bit': 'boolean',
-        'decimal': 'number',
-        'numeric': 'number',
-        'money': 'number',
-        'float': 'number',
-        'datetime': 'Date',
-        'date': 'Date',
-        'char': 'string',
-        'varchar': 'string',
-        'text': 'string',
-        'nchar': 'string',
-        'nvarchar': 'string',
-        'uniqueidentifier': 'string'
+        int: 'number',
+        bigint: 'number',
+        smallint: 'number',
+        tinyint: 'number',
+        bit: 'boolean',
+        decimal: 'number',
+        numeric: 'number',
+        money: 'number',
+        float: 'number',
+        datetime: 'Date',
+        date: 'Date',
+        char: 'string',
+        varchar: 'string',
+        text: 'string',
+        nchar: 'string',
+        nvarchar: 'string',
+        uniqueidentifier: 'string',
     };
     const tsType = typeMap[sqlType.toLowerCase()] || 'any';
     return tsType;
@@ -202,15 +238,12 @@ function analyzeTable(tableName, dataSource) {
                 console.log(`  La table ${tableName} n'existe pas ou est vide.`);
                 return { columns: [], primaryKeys: [] };
             }
-            const primaryKeys = columns
-                .filter((col) => col.isPrimaryKey)
-                .map((col) => col.name);
+            const primaryKeys = columns.filter((col) => col.isPrimaryKey).map((col) => col.name);
             return {
                 columns,
-                primaryKeys
+                primaryKeys,
             };
-        }
-        catch (error) {
+        } catch (error) {
             console.error(`Erreur lors de l'analyse de la table ${tableName}:`, error);
             throw error;
         }
@@ -226,24 +259,21 @@ function generateEntityContent(className, tableName, schema) {
     content += `@Entity("${tableName}")\n`;
     content += `export class ${className} implements ObjectLiteral\n{\n`;
     // Ajouter les propri�t�s avec d�corateurs TypeORM
-    schema.columns.forEach(column => {
+    schema.columns.forEach((column) => {
         if (!config.excludedFields.includes(column.name)) {
             const camelCaseName = columnNameToCamelCase(column.name);
             content += `    /**\n`;
             content += `     * ${camelCaseName}\n`;
-            if (column.maxLength)
-                content += `     * @maxLength ${column.maxLength}\n`;
+            if (column.maxLength) content += `     * @maxLength ${column.maxLength}\n`;
             content += `     */\n`;
             // G�n�rer le d�corateur TypeORM appropri�
             if (column.isPrimaryKey) {
                 if (column.name.toLowerCase().includes('id') && column.dataType.toLowerCase().includes('int')) {
                     content += `    @PrimaryGeneratedColumn()\n`;
-                }
-                else {
+                } else {
                     content += `    @PrimaryColumn()\n`;
                 }
-            }
-            else {
+            } else {
                 content += `    @Column(`;
                 // Options pour le d�corateur Column
                 const options = [];
@@ -275,7 +305,7 @@ function generateCritereDTOContent(className, schema) {
     content += ` */\n`;
     content += `export class ${className}CritereDTO extends BaseCritereDTO implements ObjectLiteral\n{\n`;
     // Ajouter les propri�t�s pour la recherche
-    schema.columns.forEach(column => {
+    schema.columns.forEach((column) => {
         if (!config.excludedFields.includes(column.name)) {
             const tsType = sqlTypeToTypeScript(column.dataType, true);
             const camelCaseName = columnNameToCamelCase(column.name);
@@ -291,9 +321,11 @@ function generateCritereDTOContent(className, schema) {
                 content += `    ${camelCaseName}Like?: string | undefined;\n\n`;
             }
             // Pour les nombres et dates, ajouter des plages
-            if ((['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
-                column.dataType.toLowerCase().includes('date')) &&
-                !column.name.toLowerCase().includes('id')) {
+            if (
+                (['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'money', 'float', 'real'].includes(column.dataType.toLowerCase()) ||
+                    column.dataType.toLowerCase().includes('date')) &&
+                !column.name.toLowerCase().includes('id')
+            ) {
                 content += `    /**\n`;
                 content += `     * Valeur minimale pour ${camelCaseName}\n`;
                 content += `     */\n`;
@@ -348,31 +380,29 @@ function generateDTOs() {
             console.log('D�marrage de la g�n�ration des DTOs, Entit�s, M�tiers et Contr�leurs pour SQL Server...');
             // Connexion � SQL Server avec TypeORM
             dataSource = new typeorm_1.DataSource({
-                type: "mssql",
-                host: process.env.DB_SERVER,
-                port: parseInt(process.env.DB_PORT || "1433"),
+                type: 'mssql',
+                host: process.env.DB_SERVER || 'mssql-auth',
+                port: parseInt(process.env.DB_PORT || '1433'),
                 database: process.env.DB_NAME,
                 username: process.env.DB_USER,
                 password: process.env.DB_PASSWORD,
                 options: {
-                    encrypt: process.env.DB_ENCRYPT === 'true'
+                    encrypt: process.env.DB_ENCRYPT === 'true',
                 },
                 extra: {
                     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
-                    connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || "30000")
-                }
+                    connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '30000'),
+                },
             });
             yield dataSource.initialize();
-            console.log("Connexion SQL Server �tablie");
+            console.log('Connexion SQL Server �tablie');
             // R�cup�rer toutes les tables disponibles
             const tables = yield dataSource.query(`
             SELECT TABLE_NAME as name
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE'
         `);
-            const allTables = tables
-                .map((t) => t.name)
-                .filter((name) => !config.excludedTables.includes(name));
+            const allTables = tables.map((t) => t.name).filter((name) => !config.excludedTables.includes(name));
             console.log(`${allTables.length} tables trouv�es apr�s filtrage initial.`);
             // Pour chaque service configur�
             for (const serviceConfig of serviceConfigs) {
@@ -445,18 +475,15 @@ function generateDTOs() {
                         if (writeFileIfNotModified(controllerFilePath, controllerContent)) {
                             console.log(`  Controller g�n�r�: ${controllerFilePath}`);
                         }
-                    }
-                    else {
+                    } else {
                         console.log(`  Aucun fichier g�n�r� pour ${tableName} (table vide ou structure non d�tect�e).`);
                     }
                 }
             }
             console.log('\nG�n�ration des DTOs, Entit�s, M�tiers et Contr�leurs termin�e avec succ�s pour tous les services!');
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Erreur lors de la g�n�ration des fichiers:', error);
-        }
-        finally {
+        } finally {
             // Fermer la connexion DataSource
             if (dataSource && dataSource.isInitialized) {
                 yield dataSource.destroy();

@@ -51,7 +51,7 @@ export class SqlServerRepository<DTO extends ObjectLiteral, CritereDTO extends B
                 if (!this._dataSource) {
                     this._dataSource = new DataSource({
                         type: 'mssql',
-                        host: process.env.DB_SERVER,
+                        host: process.env.DB_SERVER || 'mssql-auth',
                         port: parseInt(process.env.DB_PORT || '1433'),
                         database: process.env.DB_NAME,
                         username: process.env.DB_USER,
