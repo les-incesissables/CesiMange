@@ -4,7 +4,8 @@ import { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 export function applyRequestInterceptor(client: AxiosInstance): void {
     client.interceptors.request.use(
         (config: InternalAxiosRequestConfig) => {
-            const xsrfToken = localStorage.getItem('xsrfToken');
+            //const xsrfToken = localStorage.getItem('xsrfToken');
+            const xsrfToken = null;
             if (xsrfToken) {
                 config.headers['x-xsrf-token'] = xsrfToken;
             }

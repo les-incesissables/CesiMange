@@ -1,12 +1,45 @@
 'use client';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import DashBoardLayout from '../../layout/DashBoardLayout';
 import Button from '../../components/Buttons/Button';
 import InputBox from '../../components/Utils/input';
+import useAuth from '../../hooks/useAuth';
+import Modal from '../../components/Utils/Modal';
+
+import { localMiddlewareInstance } from 'customer-final-middleware';
+import { AuthContext } from '../../context/AuthContext';
 
 const DashBoardAccount: React.FC = () => {
+    const { authState } = useContext(AuthContext);
+
+    const [openConfirmDeleteAccount, setOpenConfirmDeleteAccount] = useState<boolean>(false);
+
+    const { logout } = useAuth();
+
+    const handleDeleteAccount = (): void => {
+        setOpenConfirmDeleteAccount(false);
+
+        //console.log(authState);
+        /*  const response = await localMiddlewareInstance.callLocalApi(async () => {
+            // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
+            return await localMiddlewareInstance.AuthRepo.deleteAuthAccount();
+        }); */
+    };
+
     return (
         <DashBoardLayout>
+            <Modal
+                title="Supprimer mon compte"
+                isOpen={openConfirmDeleteAccount}
+                onClose={() => setOpenConfirmDeleteAccount(false)}
+                onConfirm={{
+                    label: 'Supprimer',
+                    onClick: handleDeleteAccount,
+                }}
+            >
+                <p>Voulez-vous vraiment supprimer votre compte CesiMange ?</p>
+            </Modal>
+
             <div className="w-full min-h-screen bg-[#E4DBC7] px-12 pt-12 flex flex-col gap-10 overflow-y-auto">
                 {/* Titre de la page */}
                 <div className="flex flex-col gap-5">
@@ -49,7 +82,7 @@ const DashBoardAccount: React.FC = () => {
                     </div>
                     {/* Bouton Supprimer le compte */}
                     <div className="justify-center">
-                        <Button text="Supprimer le compte" bg="bg-red-600" />
+                        <Button onClick={() => setOpenConfirmDeleteAccount(true)} text="Supprimer le compte" bg="bg-red-600" />
                     </div>
                 </div>
             </div>

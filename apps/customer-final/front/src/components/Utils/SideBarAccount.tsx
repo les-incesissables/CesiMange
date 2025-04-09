@@ -20,7 +20,7 @@ const AccountSidebar: React.FC<AccountSidebarProps> = () => {
             ],
         },
         {
-            items: [{ icon: null, label: 'Déconnexion', center: true }],
+            items: [{ icon: null, label: 'Paramètres', center: true }],
         },
         {
             items: [

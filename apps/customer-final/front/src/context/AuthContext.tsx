@@ -1,9 +1,9 @@
 // src/context/AuthContext.tsx
-import { createContext, useState, useContext, useCallback, useEffect, ReactNode, Dispatch, SetStateAction, FC } from 'react';
+import { createContext, useState, useCallback, useEffect, ReactNode, Dispatch, SetStateAction, FC } from 'react';
 import moment from 'moment';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router';
-import { SocketContext, ISocketContext } from './SocketContext';
+//import { SocketContext, ISocketContext } from './SocketContext';
 import { toast } from 'react-toastify';
 
 // ----- INTERFACES ----- //
@@ -59,7 +59,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     moment.suppressDeprecationWarnings = true;
 
     // Récupération du contexte Socket (pour notification serveur)
-    const socket = useContext<ISocketContext>(SocketContext);
+    //const socket = useContext<ISocketContext>(SocketContext);
 
     // Hooks de routing
     const navigate = useNavigate();
@@ -165,18 +165,18 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         // Notifier le serveur via socket s'il y avait un utilisateur connecté
         setAuthState((prev) => {
             if (prev.me?.id) {
-                socket.send('userLogout', { id: prev.me.id });
+                //socket.send('userLogout', { id: prev.me.id });
             }
             return { ...prev, me: null, isLogged: false };
         });
-        socket.send('userLogout', { id: authState?.me?.id });
-        socket.off('userConnect');
+        //socket.send('userLogout', { id: authState?.me?.id });
+        //socket.off('userConnect');
         toast('Vous êtes déconnecté(e)', { type: 'success' });
 
         // Déclenche refresh (qui lance le refetch) et recharge la page
         refresh();
         reload();
-    }, [socket, refresh]);
+    }, [refresh]);
 
     // Fonction pour recharger la page
     const reload = useCallback((): void => {
