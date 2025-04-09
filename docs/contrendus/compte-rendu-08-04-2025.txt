@@ -1,4 +1,4 @@
-COMPTE-RENDU DU 08/04/2025
+COMPTE-RENDU DU 09/04/2025
 
 ###NOM###Mahmoud Charif
 ###MATIN###TICKET : CESIMANGE-145 & 143
@@ -8,4 +8,19 @@ Mise en place de contrendu journalier
 
 Ajout du order service et mise a jour de la bdd avec yannick + creation du dashboard / pagination useQuery => Infinit Query
 Ajout d'images pour les restaurants
+
+###NOM###Faik
+###MATIN###Mise en place de l'authentification coté client
+Gestion du docker (correction des erreur de chemin et de build + gestion des connection inter container)
+###APRESMIDI###Mise en place de l'authentification coté client
+Gestion du docker (correction des erreur de chemin et de build + gestion des connection inter container)
+
+###NOM###Noa Jelsch
+###MATIN###- Réglage des Dockerfile des microservices pour leur utilisation dans Kubernetes,
+- Réglage du Docker compose
+###APRESMIDI###
+
+###NOM###Yannick
+###MATIN###Convertion des maquettes Figma en typescript + gestion des menu et articles + mise a jour de la base de données
+###APRESMIDI###Convertion des maquettes Figma en typescript + gestion des menu et articles + mise a jour de la base de données
 

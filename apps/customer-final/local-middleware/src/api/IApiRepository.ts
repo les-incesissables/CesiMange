@@ -1,9 +1,10 @@
 // src/api/IApiRepository.ts
 
-export interface IApiRepository<T> {
-    fetchAll(page?: number, limit?: number): Promise<T[]>;
-    fetchById(id: string): Promise<T>;
-    create(data: T): Promise<T>;
-    update(id: string, data: Partial<T>): Promise<T>;
-    delete(id: string): Promise<void>;
+export interface IApiRepository<DTO, CritereDTO>
+{
+    getItems(pCritereDTO: CritereDTO, page?: number, limit?: number): Promise<DTO[]>;
+    getItem(id: string): Promise<DTO>;
+    createItem(data: DTO): Promise<DTO>;
+    updateItem(id: string, data: Partial<DTO>): Promise<DTO>;
+    deleteItem(id: string): Promise<void>;
 }

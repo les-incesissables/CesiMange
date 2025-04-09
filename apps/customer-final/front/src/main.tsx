@@ -11,6 +11,7 @@ import DashBoardAccount from './pages/DashBoard/DashBoardAccount';
 import DashboardOrder from './pages/DashBoard/DashBoardOrder';
 import DashBoardFavorites from './pages/DashBoard/DashboardFavorites';
 import DashBoardSponsorship from './pages/DashBoard/DashboardSponsorShip';
+import { CartProvider } from './context/CartContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -28,17 +29,19 @@ if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
         <BrowserRouter>
-            <QueryClientProvider client={queryClient}>
-                <Routes>
-                    <Route path="/" element={<Welcome />} />
-                    <Route path="/home" element={<Home />}></Route>
-                    <Route path="/restaurants/:id" element={<Restaurant />}></Route>
-                    <Route path="/dashboard/account" element={<DashBoardAccount />}></Route>
-                    <Route path="/dashboard/order" element={<DashboardOrder />}></Route>
-                    <Route path="/dashboard/favorites" element={<DashBoardFavorites />}></Route>
-                    <Route path="/dashboard/sponsorship" element={<DashBoardSponsorship />}></Route>
-                </Routes>
-            </QueryClientProvider>
+            <CartProvider>
+                <QueryClientProvider client={queryClient}>
+                    <Routes>
+                        <Route path="/" element={<Welcome />} />
+                        <Route path="/home" element={<Home />}></Route>
+                        <Route path="/restaurants/:id" element={<Restaurant />}></Route>
+                        <Route path="/dashboard/account" element={<DashBoardAccount />}></Route>
+                        <Route path="/dashboard/order" element={<DashboardOrder />}></Route>
+                        <Route path="/dashboard/favorites" element={<DashBoardFavorites />}></Route>
+                        <Route path="/dashboard/sponsorship" element={<DashBoardSponsorship />}></Route>
+                    </Routes>
+                </QueryClientProvider>
+            </CartProvider>
         </BrowserRouter>,
     );
 }

@@ -1,6 +1,6 @@
 // src/http/ApiClient.ts
 
-import axios, { AxiosInstance, AxiosResponse, CancelTokenSource } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelTokenSource } from 'axios';
 import { API_CONFIG } from '../config/apiConfig';
 import { applyRequestInterceptor } from '../interceptors/requestInterceptor';
 import { applyResponseInterceptor } from '../interceptors/responseInterceptor';
@@ -21,8 +21,9 @@ export class ApiProxy {
         applyResponseInterceptor(this.client);
     }
 
-    public async get<T = unknown>(endpoint: string, params: Record<string, unknown> = {}): Promise<AxiosResponse<T>> {
-        return this.client.get<T>(endpoint, { params });
+    public async get<DTO = unknown>(endpoint: string, params: Record<string, unknown> = {}, pCritere?: any): Promise<AxiosResponse<DTO>> {
+        const lConfig: AxiosRequestConfig = { params: params, data: pCritere };
+        return this.client.get<DTO>(endpoint, lConfig);
     }
 
     public async post<T = unknown>(endpoint: string, data: unknown): Promise<AxiosResponse<T>> {

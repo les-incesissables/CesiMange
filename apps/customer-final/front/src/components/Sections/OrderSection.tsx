@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import SimpleCard from '../Card/SimpleCard';
 
 interface OrderItem {
     imageUrl: string;
@@ -15,7 +14,7 @@ interface OrderSectionProps {
     items?: OrderItem[];
 }
 
-const OrderSection: React.FC<OrderSectionProps> = ({ restaurantName, restaurantAvatar = 'https://placehold.co/60x60', date, price, items }) => {
+const OrderSection: React.FC<OrderSectionProps> = ({ restaurantName, restaurantAvatar = 'https://placehold.co/60x60', date, price }) => {
     return (
         <div className="w-[901px] h-80 px-5 pt-2.5 pb-5 bg-[#E4DBC7] rounded-[20px] outline-1 outline-offset-[-1px] outline-black inline-flex flex-col gap-2.5 overflow-hidden">
             {/* Header */}

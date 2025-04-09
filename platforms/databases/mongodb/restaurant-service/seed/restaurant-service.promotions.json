@@ -1,0 +1,98 @@
+[{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a40f"
+  },
+  "code": "BIENVENUE10",
+  "description": "10% de réduction sur votre première commande",
+  "discount_type": "percentage",
+  "discount_value": 10,
+  "min_order_value": 15,
+  "max_discount": 20,
+  "restaurant_id": null,
+  "cuisine_types": [],
+  "usage_limit": 1000,
+  "usage_count": 456,
+  "start_date": {
+    "$date": "2025-03-02T15:06:49.999Z"
+  },
+  "end_date": {
+    "$date": "2025-05-31T15:06:49.999Z"
+  },
+  "active": true,
+  "first_time_only": true,
+  "created_at": {
+    "$date": "2025-03-02T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-03-02T15:06:49.999Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a411"
+  },
+  "code": "SUSHI15",
+  "description": "15€ de réduction pour les commandes de plus de 50€",
+  "discount_type": "fixed_amount",
+  "discount_value": 15,
+  "min_order_value": 50,
+  "max_discount": null,
+  "restaurant_id": {
+    "$oid": "67ec010a4babd715ae06a401"
+  },
+  "cuisine_types": [
+    "japonaise",
+    "sushi",
+    "asiatique"
+  ],
+  "usage_limit": 200,
+  "usage_count": 45,
+  "start_date": {
+    "$date": "2025-03-27T15:06:49.999Z"
+  },
+  "end_date": {
+    "$date": "2025-04-26T15:06:49.999Z"
+  },
+  "active": true,
+  "first_time_only": false,
+  "created_at": {
+    "$date": "2025-03-27T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-03-27T15:06:49.999Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a410"
+  },
+  "code": "PIZZANIGHT",
+  "description": "Livraison gratuite pour les pizzas le vendredi soir",
+  "discount_type": "free_delivery",
+  "discount_value": 0,
+  "min_order_value": 20,
+  "max_discount": null,
+  "restaurant_id": {
+    "$oid": "67ec010a4babd715ae06a402"
+  },
+  "cuisine_types": [
+    "pizza",
+    "italienne"
+  ],
+  "usage_limit": 500,
+  "usage_count": 123,
+  "start_date": {
+    "$date": "2025-03-17T15:06:49.999Z"
+  },
+  "end_date": {
+    "$date": "2025-05-16T15:06:49.999Z"
+  },
+  "active": true,
+  "first_time_only": false,
+  "created_at": {
+    "$date": "2025-03-17T15:06:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-03-17T15:06:49.999Z"
+  }
+}]

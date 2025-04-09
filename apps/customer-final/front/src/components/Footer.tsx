@@ -29,13 +29,13 @@ const Footer: React.FC = () => {
                                 <div className="w-full text-black text-xl font-bold font-['Inter'] underline text-left">Suivez-nous</div>
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 relative opacity-50 overflow-hidden">
-                                        <div className="w-5 h-8 absolute left-[11.67px] top-[3.33px] outline outline-4 outline-offset-[-2px] outline-Icon-Default-Default" />
+                                        <img src="/images/facebook.svg" />
                                     </div>
                                     <div className="w-10 h-10 relative opacity-50 overflow-hidden">
-                                        <div className="w-8 h-8 absolute left-[3.33px] top-[3.33px] outline outline-4 outline-offset-[-2px] outline-Icon-Default-Default" />
+                                        <img src="/images/instagram.svg" />
                                     </div>
                                     <div className="w-10 h-10 relative opacity-50 overflow-hidden">
-                                        <div className="w-8 h-8 absolute left-[3.33px] top-[3.33px] outline outline-4 outline-offset-[-2px] outline-Icon-Default-Default" />
+                                        <img src="/images/linkedin.svg" />
                                     </div>
                                 </div>
                             </div>

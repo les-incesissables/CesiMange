@@ -7,17 +7,29 @@ import SearchBar from './Utils/SearchBar';
 import AccountSidebar from './Utils/SideBarAccount';
 import { Link } from 'react-router';
 import { BellIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
+import { useCart } from '../context/CartContext';
+import CartPopup from './CartPopUp';
 
 interface HeaderProps {
     variant: 'general' | 'client';
     onLoginClick?: () => void;
     onBellClick?: () => void;
-    onCartClick?: () => void;
 }
 
-const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onCartClick }) => {
+const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) => {
+    const { cart } = useCart();
+
     const [showPopup, setShowPopup] = useState(false);
+    const [showCartPopup, setShowCartPopup] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
+
+    const onCartClick = () => {
+        setShowCartPopup(true);
+        console.log(`Nombre d'éléments dans le cart : ${cart.length}`);
+
+        const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+        console.log(`Nombre total d'articles dans le cart : ${totalItems}`);
+    };
 
     // Fermer en cliquant en dehors
     useEffect(() => {
@@ -61,11 +73,11 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
 
                     {/* Barre de recherche */}
                     <div className="rounded-2xl shadow-lg transition-all duration-300">
-                        <SearchBar textInput="Chercher un restaurant" textButton="Rechercher"/>
+                        <SearchBar placeHolder="Chercher un restaurant" textButton="Rechercher" onClick={() => {}} />
                     </div>
 
                     {/* Section droite */}
-                    <div className="w-full sm:w-52 flex justify-between items-center px-[5px] mt-2 sm:mt-0">
+                    <div className="  flex  items-center ">
                         <div className="flex items-end gap-2">
                             <button className="w-10 h-10 cursor-pointer" onClick={onBellClick}>
                                 <BellIcon className="w-full h-full" />
@@ -81,8 +93,9 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick, onC
                             <div data-size="Large" className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
                                 <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
                             </div>
+                            {showCartPopup && <CartPopup onClose={() => setShowCartPopup(false)} />}
                         </div>
-                        <div className="relative" ref={popupRef}>
+                        <div ref={popupRef}>
                             <img
                                 src="https://placehold.co/69x73"
                                 alt="avatar"

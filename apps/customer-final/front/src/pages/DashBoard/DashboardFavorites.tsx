@@ -1,13 +1,26 @@
 'use client';
 import React from 'react';
 import DashBoardLayout from '../../layout/DashBoardLayout';
-import RestaurantList from '../../components/List/RestaurantList';
+import FavoriteRestaurantCardList from '../../components/List/FavoritesCardRestoList';
 
 const DashBoardFavorites: React.FC = () => {
     return (
         <DashBoardLayout>
-            <div className="self-stretch h-[846px] px-12 pt-12 bg--Beige-clair inline-flex flex-col justify-start items-start gap-10 overflow-hidden">
-                {/* <RestaurantList /> */}
+            {/* Conteneur principal */}
+            <div className="w-full min-h-screen px-12 pt-12 bg-[#E4DBC7] flex flex-col gap-10 overflow-y-auto">
+                {/* Titre de la page */}
+                <div className="flex flex-col gap-5">
+                    <h1 className="text-4xl font-bold text-black font-['Inter']">Mes favoris</h1>
+                    <hr className="border-black" />
+                </div>
+
+                {/* Conteneur des favoris */}
+                <div className="flex-1 pb-12">
+                    <div className="w-full flex flex-wrap gap-6 justify-start items-start">
+                        {/* Exemple de cartes statiques */}
+                        {/* <FavoriteRestaurantCardList /> */}
+                    </div>
+                </div>
             </div>
         </DashBoardLayout>
     );

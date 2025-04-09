@@ -1,8 +1,12 @@
 FROM mongo:latest
 
-# Copier le dossier seed dans /docker-entrypoint-initdb.d/ pour l'initialisation
+# Copier les fichiers d'initialisation
 COPY seed/ /docker-entrypoint-initdb.d/
 
-EXPOSE 27017
+# Copier et préparer le script (sans dos2unix)
+COPY entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
-CMD ["mongod"]
+EXPOSE 27017
+ENTRYPOINT ["/entrypoint.sh"]

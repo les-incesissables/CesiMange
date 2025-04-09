@@ -1,0 +1,32 @@
+[{
+  "_id": {
+    "$oid": "67ec010a4babd715ae06a40e"
+  },
+  "customer_id": 201,
+  "order_id": {
+    "$oid": "67ec010a4babd715ae06a40b"
+  },
+  "restaurant_id": {
+    "$oid": "67ec010a4babd715ae06a400"
+  },
+  "driver_id": 301,
+  "rating": 5,
+  "food_rating": 5,
+  "delivery_rating": 5,
+  "comment": "Excellente expérience ! Le bœuf bourguignon était parfait et le livreur très professionnel.",
+  "photos": [
+    "review_photo1.jpg"
+  ],
+  "reply": {
+    "text": "Merci beaucoup pour votre retour, nous sommes ravis que vous ayez apprécié notre cuisine !",
+    "date": {
+      "$date": "2025-04-01T14:36:49.999Z"
+    }
+  },
+  "created_at": {
+    "$date": "2025-04-01T14:26:49.999Z"
+  },
+  "updated_at": {
+    "$date": "2025-04-01T14:36:49.999Z"
+  }
+}]

@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { BaseMetier } from '../../metier/base/BaseMetier';
 import { BaseCritereDTO } from '../../../../data-access-layer/src/models/base/BaseCritereDTO';
-
 export class BaseController<DTO, CritereDTO>
 {
     protected Router: Router;
@@ -17,7 +16,7 @@ export class BaseController<DTO, CritereDTO>
     protected initializeRoutes(): void
     {
         // GET / - Récupérer tous les éléments
-        this.Router.get('/', this.getAllItems);
+        this.Router.get('/', this.getItems);
 
         // GET /:id - Récupérer un élément par son ID
         this.Router.get('/:id', this.getItem);
@@ -37,7 +36,7 @@ export class BaseController<DTO, CritereDTO>
      * @param req
      * @param res
      */
-    protected getAllItems = async (req: Request, res: Response): Promise<void> =>
+    protected getItems = async (req: Request, res: Response): Promise<void> =>
     {
         try
         {
