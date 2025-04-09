@@ -3,23 +3,24 @@ import React, { useState } from 'react';
 import Button from '../Buttons/Button';
 import { useSearch } from './SearchContext';
 
+
 interface SearchBarProps
 {
     placeHolder: string;
     textButton: string;
-    onClick?: (term: string) => void;
+    onClick?: (term: string) => void; // Callback optionnel avec le terme
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ placeHolder, textButton, onClick }) =>
 {
     const [inputValue, setInputValue] = useState('');
-    const { triggerSearch } = useSearch();
+    const { setSearchTerm } = useSearch();
 
     const handleSearch = () =>
     {
         const trimmedValue = inputValue.trim();
-        triggerSearch(trimmedValue); // Use triggerSearch instead of setSearchTerm
-        onClick?.(trimmedValue);
+        setSearchTerm(trimmedValue); // 1. Met à jour le contexte
+        onClick?.(trimmedValue);     // 2. Exécute le callback si fourni
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) =>
