@@ -17,6 +17,6 @@ export function applyResponseInterceptor(client: AxiosInstance): void {
                 console.error('Axios setup error:', error.message);
             }
             return Promise.reject(error);
-        }
+        },
     );
 }

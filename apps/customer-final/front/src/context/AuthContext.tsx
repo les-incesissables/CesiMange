@@ -73,22 +73,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     });
 
     // Utilisation de React Query pour récupérer l’utilisateur via le local middleware
-    const meQuery: UseQueryResult<User, Error> = useQuery<User, Error>({
+    const meQuery: UseQueryResult<any, Error> = useQuery<any, Error>({
         queryKey: ['me'],
         queryFn: async () => {
             // Dans cet exemple, on récupère l’objet "user" depuis le localStorage, puis on appelle une méthode du UserRepo.
             const userStr = localStorage.getItem('user');
             if (userStr) {
+                //const userId: string = parsedUser.id.toString();
                 const parsedUser = JSON.parse(userStr);
-                // On suppose que l'id est stocké dans parsedUser.id
-                const userId = parsedUser.id;
-                /*   const result = await localMiddlewareInstance.callLocalApi(async () => {
-                    const lUserProfile = { user_id: userId };
-                    const res = await localMiddlewareInstance.UserRepo.getItems(lUserProfile);
-                    return res;
+
+                /*  const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
+                    return await localMiddlewareInstance.UserRepo.getItems({ user_id: 3 });
                 }); */
-                // On retourne le premier élément du tableau
-                return userId;
+
+                return parsedUser; //
+
+                /*  const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
+                    return await localMiddlewareInstance.UserRepo.getItems({ user_id: userId });
+                });
+
+                console.log(lResponse); */
+
+                //return lReponse; normalement
             }
             return {} as User;
         },
@@ -114,7 +120,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
             const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
 
             if (isUserLogged() && currentTime.isBefore(timeSession)) {
-                console.log('Utilisateur connecté');
                 setAuthState(() => ({ me: meQuery.data, isLogged: true }));
             } else {
                 localStorage.removeItem('user');
@@ -141,17 +146,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     useEffect(() => {
         setMe();
     }, [setMe]);
-
-    // Vérification initiale de la session : si le token est absent ou expiré, déclencher le logout
-    useEffect(() => {
-        const currentTime = moment();
-        const timeSessionStr = localStorage.getItem('timeSession');
-        const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
-        if (!localStorage.getItem('user') || currentTime.isAfter(timeSession)) {
-            logout();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     // Écoute des modifications dans le localStorage pour détecter la suppression du token CSRF
     useEffect(() => {

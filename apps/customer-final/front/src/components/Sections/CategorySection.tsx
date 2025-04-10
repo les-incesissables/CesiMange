@@ -14,7 +14,7 @@ interface CategorySectionProps {
 const CategorySection: React.FC<CategorySectionProps> = ({ category, articles, menus }) => {
     return (
         <section className="mb-8">
-            <h3 className="mb-4 text-black text-2xl font-bold font-['Inter'] underline">{category}</h3>
+            <h3 className="mb-4 text-black text-2xl font-bold font-['Inter'] underline">Catégorie {category}</h3>
             {articles ? <ArticleList articles={articles} /> : menus ? <MenuList menus={menus} /> : null}
         </section>
     );

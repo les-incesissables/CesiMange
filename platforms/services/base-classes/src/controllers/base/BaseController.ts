@@ -1,20 +1,17 @@
 import { Router, Request, Response } from 'express';
 import { BaseMetier } from '../../metier/base/BaseMetier';
 import { BaseCritereDTO } from '../../../../data-access-layer/src/models/base/BaseCritereDTO';
-export class BaseController<DTO, CritereDTO>
-{
+export class BaseController<DTO, CritereDTO> {
     protected Router: Router;
     protected Metier: BaseMetier<DTO, CritereDTO>;
 
-    constructor (pMetier: BaseMetier<DTO, CritereDTO>)
-    {
+    constructor(pMetier: BaseMetier<DTO, CritereDTO>) {
         this.Router = Router();
         this.Metier = pMetier;
         this.initializeRoutes();
     }
 
-    protected initializeRoutes(): void
-    {
+    protected initializeRoutes(): void {
         // GET / - Récupérer tous les éléments
         this.Router.get('/', this.getItems);
 
@@ -36,10 +33,8 @@ export class BaseController<DTO, CritereDTO>
      * @param req
      * @param res
      */
-    protected getItems = async (req: Request, res: Response): Promise<void> =>
-    {
-        try
-        {
+    protected getItems = async (req: Request, res: Response): Promise<void> => {
+        try {
             const lPage = parseInt(req.query.page as string);
             const lLimit = parseInt(req.query.limit as string);
             const lEnhancedLimit = lLimit + 1;
@@ -47,14 +42,12 @@ export class BaseController<DTO, CritereDTO>
             let lCritere: CritereDTO = { ...req.body, page: lPage, limit: lEnhancedLimit } as CritereDTO;
 
             // Validation des données
-            try
-            {
+            try {
                 this.validateGetItems(lCritere);
                 lCritere = this.beforeGetItems(lCritere);
-            } catch (validationError)
-            {
+            } catch (validationError) {
                 res.status(400).json({
-                    error: validationError instanceof Error ? validationError.message : 'Données de recherche invalides'
+                    error: validationError instanceof Error ? validationError.message : 'Données de recherche invalides',
                 });
                 return;
             }
@@ -68,12 +61,11 @@ export class BaseController<DTO, CritereDTO>
 
             const lPagination: BaseCritereDTO = {
                 hasNext: lHasNext,
-                page: lPage
+                page: lPage,
             };
 
             res.status(200).json([lItems, lPagination]);
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'getAllItems');
             res.status(500).json({
                 error: error instanceof Error ? error.message : 'Une erreur inconnue est survenue',
@@ -81,44 +73,31 @@ export class BaseController<DTO, CritereDTO>
         }
     };
 
-    protected getItem = async (pReq: Request, pRes: Response): Promise<void> =>
-    {
-        try
-        {   
+    protected getItem = async (pReq: Request, pRes: Response): Promise<void> => {
+        try {
             let lCritere: CritereDTO;
 
-            if (Object.keys(pReq.params || {}).length > 0)
-                lCritere = pReq.params as unknown as CritereDTO;
-            else
-                lCritere = pReq.body as unknown as CritereDTO;
+            if (Object.keys(pReq.params || {}).length > 0) lCritere = pReq.params as unknown as CritereDTO;
+            else lCritere = pReq.body as unknown as CritereDTO;
 
             // cm - Validation des données
-            try
-            {
+            try {
                 await this.validateGetItem(lCritere);
                 lCritere = this.beforeGetItem(lCritere);
-            } catch (validationError)
-            {
+            } catch (validationError) {
                 pRes.status(400).json({
-                    error: validationError instanceof Error ? validationError.message : 'Identifiant invalide'
+                    error: validationError instanceof Error ? validationError.message : 'Identifiant invalide',
                 });
                 return;
             }
 
             let lItem: DTO = await this.Metier.getItem(lCritere);
-            if (lItem && lItem != {} as DTO)
-            {
+            if (lItem && lItem != ({} as DTO)) {
                 // cm - Action apres la recuperation de l'item
                 lItem = await this.afterGetItem(lItem, pRes);
-                pRes.status(200).json(lItem)
-            }
-            else
-                pRes.status(404).json({ error: 'Élément non trouvé' });
-
-
-
-        } catch (pError)
-        {
+                pRes.status(200).json(lItem);
+            } else pRes.status(404).json({ error: 'Élément non trouvé' });
+        } catch (pError) {
             this.handleError(pError, 'getItem');
             pRes.status(500).json({
                 error: pError instanceof Error ? pError.message : 'Une erreur inconnue est survenue',
@@ -126,21 +105,17 @@ export class BaseController<DTO, CritereDTO>
         }
     };
 
-    protected createItem = async (pReq: Request, pRes: Response): Promise<void> =>
-    {
-        try
-        {
+    protected createItem = async (pReq: Request, pRes: Response): Promise<void> => {
+        try {
             let lItemDTO = pReq.body as DTO;
 
             // Validation des données
-            try
-            {
+            try {
                 await this.validateCreateItem(lItemDTO);
                 lItemDTO = await this.beforeCreateItem(lItemDTO);
-            } catch (validationError)
-            {
+            } catch (validationError) {
                 pRes.status(400).json({
-                    error: validationError instanceof Error ? validationError.message : 'Données invalides pour la création'
+                    error: validationError instanceof Error ? validationError.message : 'Données invalides pour la création',
                 });
                 return;
             }
@@ -150,8 +125,7 @@ export class BaseController<DTO, CritereDTO>
             lCreatedItem = await this.afterCreateItem(lCreatedItem);
 
             pRes.status(201).json(lCreatedItem);
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'createItem');
             pRes.status(500).json({
                 error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la création',
@@ -159,35 +133,29 @@ export class BaseController<DTO, CritereDTO>
         }
     };
 
-    protected updateItem = async (req: Request, res: Response): Promise<void> =>
-    {
-        try
-        {
+    protected updateItem = async (req: Request, res: Response): Promise<void> => {
+        try {
             let itemDTO = req.body as DTO;
             const critere = { id: req.params.id } as unknown as CritereDTO;
 
             // Validation des données
-            try
-            {
+            try {
                 await this.validateUpdateItem(itemDTO, critere);
                 itemDTO = await this.beforeUpdateItem(itemDTO, critere);
-            } catch (validationError)
-            {
+            } catch (validationError) {
                 res.status(400).json({
-                    error: validationError instanceof Error ? validationError.message : 'Données invalides pour la mise à jour'
+                    error: validationError instanceof Error ? validationError.message : 'Données invalides pour la mise à jour',
                 });
                 return;
             }
 
             const updatedItem = await this.Metier.updateItem(itemDTO, critere);
-            if (!updatedItem)
-            {
+            if (!updatedItem) {
                 res.status(404).json({ error: 'Élément non trouvé' });
                 return;
             }
             res.status(200).json(updatedItem);
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'updateItem');
             res.status(500).json({
                 error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la mise à jour',
@@ -195,33 +163,27 @@ export class BaseController<DTO, CritereDTO>
         }
     };
 
-    protected deleteItem = async (req: Request, res: Response): Promise<void> =>
-    {
-        try
-        {
+    protected deleteItem = async (req: Request, res: Response): Promise<void> => {
+        try {
             let lCritere = req.params as unknown as CritereDTO;
 
             // Validation des données
-            try
-            {
+            try {
                 await this.validateDeleteItem(lCritere);
                 lCritere = await this.beforeDeleteItem(lCritere);
-            } catch (validationError)
-            {
+            } catch (validationError) {
                 res.status(400).json({
-                    error: validationError instanceof Error ? validationError.message : 'Identifiant invalide pour la suppression'
+                    error: validationError instanceof Error ? validationError.message : 'Identifiant invalide pour la suppression',
                 });
                 return;
             }
 
             const success = await this.Metier.deleteItem(lCritere);
 
-            if (success)
-                await this.afterDeleteItem(lCritere);
+            if (success) await this.afterDeleteItem(lCritere);
 
             success ? res.status(200).send(success) : res.status(404).json({ error: 'Élément non trouvé' });
-        } catch (error)
-        {
+        } catch (error) {
             this.handleError(error, 'deleteItem');
             res.status(500).json({
                 error: error instanceof Error ? error.message : 'Une erreur est survenue lors de la suppression',
@@ -229,92 +191,75 @@ export class BaseController<DTO, CritereDTO>
         }
     };
 
-    public getRouter(): Router
-    {
+    public getRouter(): Router {
         return this.Router;
     }
 
     /**
      * Gestion des erreurs
      */
-    protected handleError(error: any, methodName: string): void
-    {
+    protected handleError(error: any, methodName: string): void {
         console.error(`Erreur dans ${methodName}:`, error);
         // Logique spécifique de gestion des erreurs
     }
 
-    protected validateGetItems(pCritereDTO: CritereDTO): void
-    {
+    protected validateGetItems(pCritereDTO: CritereDTO): void {
         // À implémenter dans les classes dérivées
     }
 
-    protected async validateGetItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async validateGetItem(pCritereDTO: CritereDTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
 
-    protected async validateCreateItem(pDTO: DTO): Promise<void>
-    {
+    protected async validateCreateItem(pDTO: DTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
 
-    protected async validateUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async validateUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
 
-    protected async validateDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async validateDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
 
-    protected beforeGetItems(pCritereDTO: CritereDTO): CritereDTO
-    {
+    protected beforeGetItems(pCritereDTO: CritereDTO): CritereDTO {
         return pCritereDTO;
     }
 
-    protected beforeGetItem(pCritereDTO: CritereDTO): CritereDTO
-    {
+    protected beforeGetItem(pCritereDTO: CritereDTO): CritereDTO {
         return pCritereDTO;
     }
 
-    protected async beforeCreateItem(pDTO: DTO): Promise<DTO>
-    {
+    protected async beforeCreateItem(pDTO: DTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
+    protected async beforeUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<CritereDTO>
-    {
+    protected async beforeDeleteItem(pCritereDTO: CritereDTO): Promise<CritereDTO> {
         return pCritereDTO;
     }
 
-    protected afterGetItems(pDTOs: DTO[]): DTO[]
-    {
+    protected afterGetItems(pDTOs: DTO[]): DTO[] {
         return pDTOs;
     }
 
-    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO>
-    {
+    protected async afterGetItem(pDTO: DTO, pRes?: Response): Promise<DTO> {
         return pDTO;
     }
 
-    protected async afterCreateItem(pDTO: DTO): Promise<DTO>
-    {
+    protected async afterCreateItem(pDTO: DTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO>
-    {
+    protected async afterUpdateItem(pDTO: DTO, pCritereDTO: CritereDTO): Promise<DTO> {
         return pDTO; // Par défaut, retourne l'objet non modifié
     }
 
-    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void>
-    {
+    protected async afterDeleteItem(pCritereDTO: CritereDTO): Promise<void> {
         // À implémenter dans les classes dérivées
     }
 }

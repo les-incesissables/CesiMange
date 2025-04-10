@@ -34,13 +34,16 @@ export function checkAccess(pService: IServiceDefinition) {
 
         // 3. R�cup�ration et v�rification du token
         const lAuthHeader = req.headers.authorization;
-        console.log('req.headers :', req.headers);
-        console.log('Authorization header:', lAuthHeader);
-        if (!lAuthHeader || !lAuthHeader.startsWith('Bearer ')) {
+
+        let lToken: string;
+
+        if (lAuthHeader && lAuthHeader.startsWith('Bearer ')) {
+            lToken = lAuthHeader.split(' ')[1];
+        } else if (req.cookies && req.cookies['access_token']) {
+            lToken = req.cookies['access_token'];
+        } else {
             return res.status(401).json({ error: 'Token manquant' });
         }
-
-        const lToken = lAuthHeader.split(' ')[1];
 
         try {
             // cm - Verification du token

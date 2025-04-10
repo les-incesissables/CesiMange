@@ -6,8 +6,6 @@ import InputBox from '../../components/Utils/input';
 import Button from '../../components/Buttons/Button';
 
 const DashBoardSponsorship: React.FC = () => {
-    // Pour cet exemple, le code de parrainage est "aaaa".
-    // Vous pouvez le récupérer depuis l'API, le store, etc.
     const codeParrainage = 'aaaa';
 
     // Fonction pour copier le code

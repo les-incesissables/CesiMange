@@ -66,9 +66,9 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     });
 
     // DEBUG : Affiche les erreurs de validation dans la console (pour le dev)
-    useEffect(() => {
+    /*  useEffect(() => {
         console.log('Form errors:', errors);
-    }, [errors]);
+    }, [errors]); */
 
     // Mise à jour du label du bouton modal en fonction du mode du formulaire
     useEffect(() => {
@@ -83,8 +83,6 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
 
     // Notifier le parent dès que l'état "isSubmitted" et "authState.isLogged" sont vrais
     useEffect(() => {
-        console.log('isSubmitted', isSubmitted);
-        console.log('authState.isLogged', authState.isLogged);
         if (isSubmitted && authState.isLogged) {
             props.isLogged(true);
         }
@@ -96,10 +94,6 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
             props.onLogged();
         }
     }, [isSubmitted, authState.isLogged, props]);
-
-    useEffect(() => {
-        console.log(authState.isLogged);
-    }, [authState]);
 
     useEffect(() => {
         onSubmitCallback();
