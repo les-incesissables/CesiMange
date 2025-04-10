@@ -84,7 +84,7 @@ export class BaseController<DTO, CritereDTO>
     protected getItem = async (pReq: Request, pRes: Response): Promise<void> =>
     {
         try
-        {
+        {   
             let lCritere: CritereDTO;
 
             if (Object.keys(pReq.params || {}).length > 0)
@@ -219,7 +219,7 @@ export class BaseController<DTO, CritereDTO>
             if (success)
                 await this.afterDeleteItem(lCritere);
 
-            success ? res.status(204).send() : res.status(404).json({ error: 'Élément non trouvé' });
+            success ? res.status(200).send(success) : res.status(404).json({ error: 'Élément non trouvé' });
         } catch (error)
         {
             this.handleError(error, 'deleteItem');
