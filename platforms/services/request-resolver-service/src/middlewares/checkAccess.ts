@@ -4,144 +4,116 @@ import { IServiceDefinition } from '../interfaces/IServiceDefinition';
 import { AuthJWT } from '../utils/authJWT';
 import { JwtPayload } from 'jsonwebtoken';
 
-export function checkAccess(pService: IServiceDefinition)
-{
-    return (req: Request, res: Response, next: NextFunction) =>
-    {
+export function checkAccess(pService: IServiceDefinition) {
+    return (req: Request, res: Response, next: NextFunction) => {
         let payload: JwtPayload | null;
         const lMethod = req.method.toUpperCase();
 
-        const isMethodMatch = (methods: string[], m: string) =>
-            methods.map(x => x.toUpperCase()).includes(m);
+        const isMethodMatch = (methods: string[], m: string) => methods.map((x) => x.toUpperCase()).includes(m);
 
-        // 1. Vérifie les routes publiques avec matching manuel
-        const lPublicRoute = pService.publicRoutes?.find(route =>
-        {
+        // 1. Vï¿½rifie les routes publiques avec matching manuel
+        const lPublicRoute = pService.publicRoutes?.find((route) => {
             const result = matchRoute(route.path, req);
             return result.match && isMethodMatch(route.methods, lMethod);
         });
         if (lPublicRoute) return next();
 
-        // 2. Vérifie les routes protégées avec matching manuel
-        const lProtectedRoute = pService.protectedRoutes?.find(route =>
-        {
+        // 2. Vï¿½rifie les routes protï¿½gï¿½es avec matching manuel
+        const lProtectedRoute = pService.protectedRoutes?.find((route) => {
             const lResult = matchRoute(route.path, req);
             return lResult.match && isMethodMatch(route.methods, lMethod);
         });
 
-        if (!lProtectedRoute)
-        {
-            return res.status(403).json({ error: 'Route protégée non autorisée' });
+        if (!lProtectedRoute) {
+            return res.status(403).json({ error: 'Route protï¿½gï¿½e non autorisï¿½e' });
         }
 
         // Optionnel : fusionner les params extraits dans req.params
         const lMatchResult = matchRoute(lProtectedRoute.path, req);
         req.params = { ...req.params, ...lMatchResult.params };
 
-        // 3. Récupération et vérification du token
+        // 3. Rï¿½cupï¿½ration et vï¿½rification du token
         const lAuthHeader = req.headers.authorization;
-        if (!lAuthHeader || !lAuthHeader.startsWith('Bearer '))
-        {
+        console.log('req.headers :', req.headers);
+        console.log('Authorization header:', lAuthHeader);
+        if (!lAuthHeader || !lAuthHeader.startsWith('Bearer ')) {
             return res.status(401).json({ error: 'Token manquant' });
         }
 
         const lToken = lAuthHeader.split(' ')[1];
 
-        try
-        {
+        try {
             // cm - Verification du token
             payload = AuthJWT.verifyToken(lToken);
-
-        } catch (err)
-        {
+        } catch (err) {
             return res.status(401).json({ error: 'Token invalide' });
         }
-        if (!payload)
-        {
+        if (!payload) {
             return res.status(401).json({ error: 'Token invalide ou vide' });
         }
 
-        // 4. Vérifie les permissions
-        if (lProtectedRoute.requiredPermissions)
-        {
+        // 4. Vï¿½rifie les permissions
+        if (lProtectedRoute.requiredPermissions) {
             const userPerms = payload.permissions || [];
-            const hasPermission = lProtectedRoute.requiredPermissions.every(p =>
-                userPerms.includes(p)
-            );
-            if (!hasPermission)
-            {
+            const hasPermission = lProtectedRoute.requiredPermissions.every((p) => userPerms.includes(p));
+            if (!hasPermission) {
                 return res.status(403).json({ error: 'Permissions insuffisantes' });
             }
         }
 
-        // 5. Vérifie les rôles
-        if (lProtectedRoute.allowedRoles)
-        {
+        // 5. Vï¿½rifie les rï¿½les
+        if (lProtectedRoute.allowedRoles) {
             const userRoles = payload.roles || [];
-            const hasRole = lProtectedRoute.allowedRoles.some(r =>
-                userRoles.includes(r)
-            );
-            if (!hasRole)
-            {
-                return res.status(403).json({ error: 'Accès réservé aux rôles spécifiques' });
+            const hasRole = lProtectedRoute.allowedRoles.some((r) => userRoles.includes(r));
+            if (!hasRole) {
+                return res.status(403).json({ error: 'Accï¿½s rï¿½servï¿½ aux rï¿½les spï¿½cifiques' });
             }
         }
 
-        if (lProtectedRoute.ownershipCheck)
-        {
+        if (lProtectedRoute.ownershipCheck) {
             const { matchField, paramName } = lProtectedRoute.ownershipCheck;
 
-            if (!matchField || !paramName)
-            {
+            if (!matchField || !paramName) {
                 return res.status(500).json({ message: 'Mauvaise configuration ownershipCheck.' });
             }
 
             const userValue = payload[matchField as keyof typeof payload];
             const paramValue = req.params[paramName];
 
-            if (!userValue || !paramValue)
-            {
-                return res.status(403).json({ message: 'Accès refusé : données manquantes.' });
+            if (!userValue || !paramValue) {
+                return res.status(403).json({ message: 'Accï¿½s refusï¿½ : donnï¿½es manquantes.' });
             }
 
-            if (userValue != paramValue)
-            {
-                return res.status(403).json({ message: 'Accès refusé : vous n’êtes pas propriétaire.' });
+            if (userValue != paramValue) {
+                return res.status(403).json({ message: 'Accï¿½s refusï¿½ : vous nï¿½ï¿½tes pas propriï¿½taire.' });
             }
         }
-
-
 
         next();
     };
 
     /**
-  * Compare le chemin configuré (ex: "/users/:id") avec le chemin effectif (ex: "/users/15")
-  * et extrait les paramètres dynamiques.
-  */
-    function matchRoute(configuredPath: string, req: Request): { match: boolean; params: Record<string, string> }
-    {
+     * Compare le chemin configurï¿½ (ex: "/users/:id") avec le chemin effectif (ex: "/users/15")
+     * et extrait les paramï¿½tres dynamiques.
+     */
+    function matchRoute(configuredPath: string, req: Request): { match: boolean; params: Record<string, string> } {
         const configParts = configuredPath.split('/').filter(Boolean);
         const actualParts = req.path.split('/').filter(Boolean);
 
-        if (configParts.length !== actualParts.length)
-        {
+        if (configParts.length !== actualParts.length) {
             return { match: false, params: {} };
         }
 
         const params: Record<string, string> = {};
 
-        for (let i = 0; i < configParts.length; i++)
-        {
+        for (let i = 0; i < configParts.length; i++) {
             const configSegment = configParts[i];
             const actualSegment = actualParts[i];
 
-            if (configSegment.startsWith(':'))
-            {
+            if (configSegment.startsWith(':')) {
                 const paramName = configSegment.substring(1);
                 params[paramName] = decodeURIComponent(actualSegment);
-            } else if (configSegment !== actualSegment)
-            {
+            } else if (configSegment !== actualSegment) {
                 return { match: false, params: {} };
             }
         }

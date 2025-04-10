@@ -7,23 +7,35 @@ import useAuth from '../../hooks/useAuth';
 import Modal from '../../components/Utils/Modal';
 
 import { localMiddlewareInstance } from 'customer-final-middleware';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext, AuthContextType } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const DashBoardAccount: React.FC = () => {
-    const { authState } = useContext(AuthContext);
+    const { authState } = useContext<AuthContextType>(AuthContext);
 
     const [openConfirmDeleteAccount, setOpenConfirmDeleteAccount] = useState<boolean>(false);
 
     const { logout } = useAuth();
 
-    const handleDeleteAccount = (): void => {
+    const handleDeleteAccount = async (): Promise<void> => {
         setOpenConfirmDeleteAccount(false);
+        console.log('authState in dashboard account :', authState);
+        // Vérification explicite : me?.id doit exister
+        if (authState.isLogged && authState.me && authState.me.id) {
+            console.log('ok');
+            const userId = authState.me.id;
+            const response = await localMiddlewareInstance.callLocalApi(async () => {
+                return await localMiddlewareInstance.AuthRepo.deleteAuthAccount(userId);
+            });
 
-        //console.log(authState);
-        /*  const response = await localMiddlewareInstance.callLocalApi(async () => {
-            // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
-            return await localMiddlewareInstance.AuthRepo.deleteAuthAccount();
-        }); */
+            if (response.status === 'success') {
+                await logout();
+            } else {
+                toast('Une erreur est survenue', { type: 'error' });
+            }
+        } else {
+            toast('Une erreur est survenue', { type: 'error' });
+        }
     };
 
     return (

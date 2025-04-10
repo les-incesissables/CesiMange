@@ -39,13 +39,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, onConfi
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 px-4 sm:px-0" onClick={handleBackdropClick}>
-            {title && (
-                <div className="mb-4">
-                    <h2 className="text-xl font-bold">{title}</h2>
-                </div>
-            )}
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 px-4 sm:px-0 " onClick={handleBackdropClick}>
             <div className="relative bg-[#E4DBC7] rounded-2xl outline-1 outline-black w-full max-w-md max-h-screen overflow-y-auto p-6 shadow-xl">
+                {title && (
+                    <div className="mb-4">
+                        <h2 className="text-xl font-bold">{title}</h2>
+                    </div>
+                )}
                 <section>{children}</section>
 
                 {/* Footer avec bouton de confirmation */}

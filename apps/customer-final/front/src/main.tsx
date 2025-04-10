@@ -15,6 +15,9 @@ import { CartProvider } from './context/CartContext';
 import AuthProvider from './context/AuthContext';
 import ProtectedRoute from './components/Utils/ProtectedRoute';
 
+import { ToastContainer } from 'react-toastify';
+import { isMobile } from './utils/functions';
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -75,6 +78,7 @@ if (!rootElement.innerHTML) {
                             </Route>
                         </Routes>
                     </CartProvider>
+                    <ToastContainer position={isMobile() ? 'top-center' : 'bottom-left'} />
                 </AuthProvider>
             </QueryClientProvider>
         </BrowserRouter>,

@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import NavBar from '../components/NavBar';
 import Modal from '../components/Utils/Modal';
