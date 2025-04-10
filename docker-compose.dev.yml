@@ -5,7 +5,7 @@ services:
             dockerfile: platforms/microservices/auth-service/Dockerfile.dev
         container_name: auth-service
         depends_on:
-            - mssql-auth-service
+            - mssql-auth
         ports:
             - '4001:4001'
         environment:
