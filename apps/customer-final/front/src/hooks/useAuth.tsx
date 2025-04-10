@@ -56,15 +56,14 @@ const useAuth = (): UseAuthReturn => {
     };
 
     // Vérification initiale de la session : si le token ou la session est expiré, déconnecte
-    useEffect(() => {
+    /*  useEffect(() => {
         const currentTime = moment();
         const timeSessionStr = localStorage.getItem('timeSession');
         const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
-        if (!localStorage.getItem('user') || currentTime.isAfter(timeSession)) {
+        if (localStorage.getItem('user') && (currentTime.isAfter(timeSession, 'minute') || !localStorage.getItem('timeSession'))) {
             logout();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); */
 
     // Fonction de connexion via email/mot de passe
     const login = async (inputs: LoginInput): Promise<boolean | void> => {
@@ -183,6 +182,7 @@ const useAuth = (): UseAuthReturn => {
 
     // Déconnexion
     const logout = (): void => {
+        console.log('logout dans useAuth');
         localMiddlewareInstance
             .callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.logout();

@@ -155,7 +155,18 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) =
                             </div>
                         </>
                     ) : (
-                        <div className="flex order-2 lg:order-4 items-center gap-20">
+                        <div className="flex order-2 lg:order-4 items-center gap-2">
+                            <div className="flex items-end gap-2">
+                                <button className="w-10 h-10 cursor-pointer" onClick={onCartClick}>
+                                    <ShoppingCartIcon className="w-full h-full" />
+                                </button>
+                                <div className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
+                                    <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">
+                                        {totalItems}
+                                    </div>
+                                </div>
+                                {showCartPopup && <CartPopup onClose={() => setShowCartPopup(false)} />}
+                            </div>
                             <ClickableText text="Devenir partenaire" />
                             <LoginButton text="Se connecter" onClick={onLoginClick} />
                         </div>

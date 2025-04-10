@@ -23,22 +23,19 @@ import { InputsConnexion } from '../../types/form';
 import { BusyOverlay } from '../Busy';
 
 // ----- TYPES DU COMPOSANT -----
-interface FormConnexionProps
-{
+interface FormConnexionProps {
     modalConfirmLabel: (label: string) => void;
     isLogged: (value: boolean) => void;
     onLogged: () => void;
 }
 
-export interface FormConnexionHandle
-{
+export interface FormConnexionHandle {
     login: () => void;
     openSignup: () => void;
 }
 
 // ----- COMPOSANT -----
-const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, ref) =>
-{
+const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, ref) => {
     // Contexte d'authentification (pour récupérer authState, etc.)
     const { authState } = useContext(AuthContext);
 
@@ -69,65 +66,52 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     });
 
     // DEBUG : Affiche les erreurs de validation dans la console (pour le dev)
-    useEffect(() =>
-    {
+    useEffect(() => {
         console.log('Form errors:', errors);
     }, [errors]);
 
     // Mise à jour du label du bouton modal en fonction du mode du formulaire
-    useEffect(() =>
-    {
-        if (isSignup)
-        {
+    useEffect(() => {
+        if (isSignup) {
             props.modalConfirmLabel("S'inscrire");
-        } else if (isForgot)
-        {
+        } else if (isForgot) {
             props.modalConfirmLabel('Réinitialiser');
-        } else
-        {
+        } else {
             props.modalConfirmLabel('Se connecter');
         }
     }, [isSignup, isForgot, props]);
 
     // Notifier le parent dès que l'état "isSubmitted" et "authState.isLogged" sont vrais
-    useEffect(() =>
-    {
+    useEffect(() => {
         console.log('isSubmitted', isSubmitted);
         console.log('authState.isLogged', authState.isLogged);
-        if (isSubmitted && authState.isLogged)
-        {
+        if (isSubmitted && authState.isLogged) {
             props.isLogged(true);
         }
     }, [isSubmitted]);
 
     // Callback pour déclencher l'action "onLogged" dans le parent
-    const onSubmitCallback = useCallback(() =>
-    {
-        if (isSubmitted && authState.isLogged)
-        {
+    const onSubmitCallback = useCallback(() => {
+        if (isSubmitted && authState.isLogged) {
             props.onLogged();
         }
     }, [isSubmitted, authState.isLogged, props]);
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         console.log(authState.isLogged);
     }, [authState]);
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         onSubmitCallback();
     }, [onSubmitCallback]);
 
     // Gestion de la soumission pour l'inscription via react-hook-form
-    const onSubmitSignUp: SubmitHandler<SignUpFormValues> = (data) =>
-    {
+    const onSubmitSignUp: SubmitHandler<SignUpFormValues> = (data) => {
         signUp(data);
     };
 
     // Gestion de la modification des champs dans le formulaire de connexion (mode login/forgot)
-    const handleChangeFormConnexion = (e: ChangeEvent<HTMLInputElement>): void =>
-    {
+    const handleChangeFormConnexion = (e: ChangeEvent<HTMLInputElement>): void => {
         setInputsConnexion((prev) => ({
             ...prev,
             [e.target.name]: e.target.value,
@@ -135,8 +119,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     };
 
     // Basculement de la visibilité du mot de passe
-    const handleShowPassword = (e: MouseEvent<HTMLButtonElement>): void =>
-    {
+    const handleShowPassword = (e: MouseEvent<HTMLButtonElement>): void => {
         e.preventDefault();
         e.stopPropagation();
         setShowPassword((prev) => !prev);
@@ -144,22 +127,17 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
 
     // Expose les méthodes "login" et "openSignup" au parent via ref
     useImperativeHandle(ref, () => ({
-        login: () =>
-        {
-            if (!isForgot && !isSignup)
-            {
+        login: () => {
+            if (!isForgot && !isSignup) {
                 console.log('useImperative login');
                 login(inputsConnexion);
-            } else if (isForgot)
-            {
+            } else if (isForgot) {
                 forgotPassword(inputsConnexion);
-            } else if (isSignup && !isSignupSubmitted)
-            {
+            } else if (isSignup && !isSignupSubmitted) {
                 handleSubmit(onSubmitSignUp)();
             }
         },
-        openSignup: () =>
-        {
+        openSignup: () => {
             setIsSignup(true);
         },
     }));
@@ -168,7 +146,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
 
     // Rendu du composant
     return (
-        <BusyOverlay isLoading={isSubmitted} text="Chargement en cours...">
+        <BusyOverlay isLoading={isPending} text="Chargement en cours...">
             <>
                 {/* ***** Mode Connexion ***** */}
                 {!isForgot && !isSignup && !authState.isLogged && (
@@ -247,8 +225,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                         <p className="mt-4 text-blueMain text-sm text-center flex gap-4">
                             <button onClick={() => setIsForgot(false)}>Me connecter</button>
                             <button
-                                onClick={() =>
-                                {
+                                onClick={() => {
                                     setIsSignup(true);
                                     setIsForgot(false);
                                 }}
@@ -264,7 +241,9 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                     <>
                         <h1 className="-mx-6 -mt-6 text-3xl text-black text-center font-bold px-2 md:px-8 py-4 border-b border-black">Inscription</h1>
                         {isSignupSubmitted && authState.isLogged && <Alert type="success" message="Vous avez créé un compte !" />}
-                        {hasError && isSignupSubmitted && !authState.isLogged && <Alert type="danger" message="Un compte existe déjà avec cette adresse email" />}
+                        {hasError && isSignupSubmitted && !authState.isLogged && (
+                            <Alert type="danger" message="Un compte existe déjà avec cette adresse email" />
+                        )}
                         <form className="mt-2 m-0" autoComplete="off">
                             <div className="relative z-0 w-full mb-2 group">
                                 <label htmlFor="floating_email" className="input_labelFloating">

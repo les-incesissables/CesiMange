@@ -17,8 +17,4 @@ export class AuthRepository extends BaseRepository<any, any> {
     public async logout(): Promise<any> {
         return this.apiProxy.post(`${this.endpoint}/logout`, '');
     }
-
-    public async deleteAuthAccount(id: number): Promise<any> {
-        return this.apiProxy.delete(`${this.endpoint}/${id}`);
-    }
 }
