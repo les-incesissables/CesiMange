@@ -47,7 +47,7 @@ export function loadGatewayConfig(): IGatewayConfig
             },
             {
                 routeName: 'user-profiles',
-                BaseUrl: (process.env.restaurant_SERVICE_URL || 'http://localhost:4002') + '/user-profiles',
+                BaseUrl: (process.env.PROFILES_SERVICE_URL || 'http://localhost:4002') + '/user-profiles',
                 enabled: true,
                 publicRoutes: [
                     {
