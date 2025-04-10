@@ -19,6 +19,7 @@ export class LocalMiddleware {
      * @returns A normalized response.
      */
     public processIncomingMessage(message: any): NormalizedResponse {
+        console.log('processIncomingMessage', message);
         if (!message) {
             return {
                 status: 'failure',
@@ -70,6 +71,7 @@ export class LocalMiddleware {
     public async callLocalApi(apiFunction: () => Promise<any>): Promise<NormalizedResponse> {
         try {
             const response = await apiFunction();
+            console.log('API response:', response);
             return this.processIncomingMessage(response);
         } catch (error: any) {
             console.error('Local API call error:', error);

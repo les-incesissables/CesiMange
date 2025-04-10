@@ -28,6 +28,8 @@ const DashBoardAccount: React.FC = () => {
                 return await localMiddlewareInstance.AuthRepo.deleteItem(userId.toString());
             });
 
+            console.log(response);
+
             if (response.status === 'success') {
                 await logout();
             } else {

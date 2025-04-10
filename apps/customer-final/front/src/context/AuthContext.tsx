@@ -73,22 +73,24 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     });
 
     // Utilisation de React Query pour récupérer l’utilisateur via le local middleware
-    const meQuery: UseQueryResult<User, Error> = useQuery<User, Error>({
+    const meQuery: UseQueryResult<any, Error> = useQuery<any, Error>({
         queryKey: ['me'],
         queryFn: async () => {
             // Dans cet exemple, on récupère l’objet "user" depuis le localStorage, puis on appelle une méthode du UserRepo.
             const userStr = localStorage.getItem('user');
             if (userStr) {
+                //const userId: string = parsedUser.id.toString();
                 const parsedUser = JSON.parse(userStr);
-                // On suppose que l'id est stocké dans parsedUser.id
-                const userId = parsedUser.id;
-                /*   const result = await localMiddlewareInstance.callLocalApi(async () => {
-                    const lUserProfile = { user_id: userId };
-                    const res = await localMiddlewareInstance.UserRepo.getItems(lUserProfile);
-                    return res;
-                }); */
-                // On retourne le premier élément du tableau
-                return userId;
+
+                return parsedUser; //
+
+                /*  const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
+                    return await localMiddlewareInstance.UserRepo.getItems({ user_id: userId });
+                });
+
+                console.log(lResponse); */
+
+                //return lReponse; normalement
             }
             return {} as User;
         },
