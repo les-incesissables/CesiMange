@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import express from 'express';
 import * as path from 'path';
 import cors from 'cors';
-import helmet from 'helmet'; 
+import helmet from 'helmet';
 import morgan from 'morgan';
 
 import { OrderController } from './controllers/orders/OrderController';
@@ -14,20 +14,15 @@ import { OrderMetier } from './metier/orders/OrderMetier';
 
 const isDocker = process.env.DOCKER_ENV === 'true';
 
-if (process.env.NODE_ENV === 'development' && isDocker === true)
-{
+if (process.env.NODE_ENV === 'development' && isDocker === true) {
     dotenv.config({ path: '.env.development' });
-} else if (process.env.NODE_ENV === 'development' && isDocker === false)
-{
+} else if (process.env.NODE_ENV === 'development' && isDocker === false) {
     dotenv.config({ path: '.env.localhost' });
-} else if (process.env.NODE_ENV === 'staging')
-{
+} else if (process.env.NODE_ENV === 'staging') {
     dotenv.config({ path: '.env.staging' });
-} else if (process.env.NODE_ENV === 'production')
-{
+} else if (process.env.NODE_ENV === 'production') {
     dotenv.config({ path: '.env.production' });
 }
-
 
 //#endregion
 
@@ -46,6 +41,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
 
+app.use(
+    cors({
+        origin: ['http://localhost:3001'], // ou liste d'origines autorisées, ex: ['http://localhost:3000']
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-xsrf-token', 'x-application-name'],
+        credentials: true,
+    })
+);
+
 /**
  * Logging HTTP standard avec morgan
  * Format 'dev' ou 'combined' selon vos besoins
@@ -57,12 +61,11 @@ const orderController = new OrderController(new OrderMetier());
 app.use('/orders', orderController.getRouter());
 
 // Gestion des erreurs
-app.use((req, res) =>
-{
+app.use((req, res) => {
     res.status(404).json({
         code: 404,
-        status: "Error",
-        message: "Route not found.",
+        status: 'Error',
+        message: 'Route not found.',
         data: null,
     });
 });
@@ -71,8 +74,6 @@ app.use((req, res) =>
 const port = 4004;
 
 // We can see that the app is listening on which port.
-app.listen(port, () =>
-{
+app.listen(port, () => {
     console.log(`App is listening on port ${port}`);
 });
-

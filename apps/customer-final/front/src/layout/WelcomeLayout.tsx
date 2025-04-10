@@ -1,20 +1,14 @@
-import React, { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import NavBar from '../components/NavBar';
 import Modal from '../components/Utils/Modal';
 import FormLogin, { FormConnexionHandle } from '../components/forms/FormLogin';
-import { AuthContext } from '../context/AuthContext';
 
 interface WelcomeLayoutProps {
     children: React.ReactNode;
 }
 
 const WelcomeLayout: React.FC<WelcomeLayoutProps> = ({ children }) => {
-    /*     const [isLoginOpen, setIsModalOpen] = useState(false);
-    const [isSignupOpen, setOpen] = useState(false); */
-    //CONTEXTS
-    const { authState } = useContext(AuthContext);
-
     const [isConnexionOpen, setIsConnexionOpen] = useState(false);
     const [modalConfirmLabel, setModalConfirmLabel] = useState('Valider');
     const [isLogged, setIsLogged] = useState(false);
@@ -25,14 +19,10 @@ const WelcomeLayout: React.FC<WelcomeLayoutProps> = ({ children }) => {
         setIsLogged(status);
     }
 
-    useEffect(() => {
-        console.log('isLogged', isLogged);
-    }, [isLogged]);
-
     const onConfirm = !isLogged
         ? {
               label: modalConfirmLabel,
-              class: 'font-bold', // Vous pouvez ajouter d'autres classes ici
+              class: 'font-bold',
               onClick: () => {
                   loginRef.current?.login();
               },

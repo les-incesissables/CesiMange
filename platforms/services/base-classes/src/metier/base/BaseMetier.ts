@@ -19,7 +19,7 @@ export abstract class BaseMetier<DTO, CritereDTO> implements IBaseRepository<DTO
 
         const lRepo = new Repository<DTO, CritereDTO>(pCollectionName, lDatabaseType, pModel);
         this.Repository = lRepo;
-        //this.initialize();
+        this.initialize();
     }
 
     //#endregion

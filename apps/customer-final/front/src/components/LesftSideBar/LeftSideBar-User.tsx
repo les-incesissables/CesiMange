@@ -30,7 +30,7 @@ const LeftSideBarUser: React.FC = () => {
     const { logout } = useAuth();
 
     return (
-        <aside className="w-80 h-screen sticky top-0 px-8 py-8 border-r border-black flex flex-col gap-8 overflow-y-auto bg-[#E4DBC7]">
+        <aside className="hidden w-80 h-screen sticky top-0 px-8 py-8 border-r border-black sm:flex flex-col gap-8 overflow-y-auto bg-[#E4DBC7]">
             {/* Titre du compte */}
             <header className="text-4xl font-bold text-black font-['Inter'] text-center">Nom Compte</header>
 

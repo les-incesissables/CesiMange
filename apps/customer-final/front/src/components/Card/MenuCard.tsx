@@ -12,7 +12,6 @@ const MenuCard: React.FC<MenuCardProps> = ({ menu, onAdd }) => {
     const { addMenuToCart } = useCart();
 
     const handleAdd = () => {
-        console.log('a');
         addMenuToCart(menu);
     };
 

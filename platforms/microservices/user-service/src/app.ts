@@ -15,7 +15,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-
 import * as dotenv from 'dotenv';
 import { UserProfileController } from './controllers/user_profiles/UserProfileController';
 import { UserProfileMetier } from './metier/user_profiles/UserProfileMetier';
@@ -48,10 +47,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
 app.use(
     cors({
-        origin: '*', // ou liste d'origines autorisées, ex: ['http://localhost:3000']
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-    }),
+        origin: ['http://localhost:3001'], // ou liste d'origines autorisées, ex: ['http://localhost:3000']
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-xsrf-token', 'x-application-name'],
+        credentials: true,
+    })
 );
 
 /**
@@ -63,7 +63,6 @@ app.use(morgan('dev'));
 console.log('Connecting to', process.env.CONNECTION_STRING);
 console.log('DB name is', process.env.MONGO_DB_NAME);
 console.log('Docker use : ', isDocker);
-
 
 const userProfileController = new UserProfileController(new UserProfileMetier());
 

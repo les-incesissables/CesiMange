@@ -12,8 +12,9 @@ export class ApiProxy {
     constructor() {
         // Création de l'instance Axios avec la configuration dynamique
         this.client = axios.create({
-            baseURL: API_CONFIG.baseURL,
+            baseURL: 'http://localhost:8080',
             timeout: API_CONFIG.timeout,
+            withCredentials: true,
         });
 
         // Appliquer les intercepteurs externes

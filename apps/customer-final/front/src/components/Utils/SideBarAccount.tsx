@@ -3,12 +3,15 @@ import React from 'react';
 import ClickableText from '../Buttons/ClickableText';
 import Button from '../Buttons/Button';
 import { useNavigate } from 'react-router';
+import useAuth from '../../hooks/useAuth';
 
 interface AccountSidebarProps {
     onClose: () => void;
 }
 
 const AccountSidebar: React.FC<AccountSidebarProps> = ({ onClose }) => {
+    const { logout } = useAuth();
+
     const navigate = useNavigate();
 
     // Handlers de navigation
@@ -26,7 +29,8 @@ const AccountSidebar: React.FC<AccountSidebarProps> = ({ onClose }) => {
     };
     const handleDeconnexionClick = () => {
         // Action de déconnexion, ou navigation
-        console.log('Déconnexion');
+        onClose();
+        logout();
     };
     const handleAddRestaurantClick = () => {
         navigate('/add-restaurant');

@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router';
 
 // CONTEXTS
 import { AuthContext, AuthContextType } from '../context/AuthContext';
-import { SocketContext, ISocketContext } from '../context/SocketContext';
+//import { SocketContext, ISocketContext } from '../context/SocketContext';
 
 import { localMiddlewareInstance } from 'customer-final-middleware';
 import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
@@ -15,13 +15,13 @@ import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
 // Interface retournée par le hook
 export interface UseAuthReturn {
     isSubmitted: boolean;
+    isPending: boolean;
     isForgotSubmitted: boolean;
     isSignupSubmitted: boolean;
     hasError: boolean;
     errorMsg: string;
     logout: () => void;
     login: (inputs: LoginInput) => Promise<boolean | void>;
-    loginByOauth: (tokenId: string, type: string) => Promise<void>;
     forgotPassword: (inputs: ForgotPasswordInput) => Promise<boolean | void>;
     signUp: (inputs: SignUpInput) => Promise<boolean | void>;
     reload: () => void;
@@ -30,6 +30,7 @@ export interface UseAuthReturn {
 const useAuth = (): UseAuthReturn => {
     // États locaux
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [isPending, setIsPending] = useState<boolean>(false);
     const [isForgotSubmitted, setIsForgotSubmitted] = useState<boolean>(false);
     const [isSignupSubmitted, setIsSignupSubmitted] = useState<boolean>(false);
     const [hasError, setHasError] = useState<boolean>(false);
@@ -37,7 +38,7 @@ const useAuth = (): UseAuthReturn => {
 
     // CONTEXTS
     const { authState, setAuthState, refresh } = useContext<AuthContextType>(AuthContext);
-    const socket = useContext<ISocketContext>(SocketContext);
+    //const socket = useContext<ISocketContext>(SocketContext);
 
     // HOOKS ROUTING
     const navigate = useNavigate();
@@ -54,24 +55,21 @@ const useAuth = (): UseAuthReturn => {
         return true;
     };
 
-    // Vérification initiale de la session : si le token ou la session est expiré, déconnecte
     useEffect(() => {
         const currentTime = moment();
-        const timeSessionStr = localStorage.getItem('timeSession');
-        const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
-        if (!localStorage.getItem('user') || currentTime.isAfter(timeSession)) {
+        const timeSession = moment(localStorage.getItem('timeSession'));
+
+        if (localStorage.getItem('user') && (currentTime.isAfter(timeSession, 'minute') || !localStorage.getItem('timeSession'))) {
             logout();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        //eslint-disable-next-line
     }, []);
 
     // Fonction de connexion via email/mot de passe
     const login = async (inputs: LoginInput): Promise<boolean | void> => {
-        console.log('login dans useAuth');
         try {
             const mailformat = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
             if (!inputs.email.match(mailformat)) {
-                console.log('Erreur de format email');
                 setHasError(true);
                 setIsSubmitted(true);
                 return false;
@@ -83,28 +81,20 @@ const useAuth = (): UseAuthReturn => {
                 email: inputs.email,
                 password_hash: inputs.password,
             };
-
+            setIsPending(true);
             const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.login(lCritere);
             });
+            setIsPending(false);
 
-            console.log('Réponse de connexion:', lResponse);
             if (lResponse.status === 'success') {
                 setConnexion(lResponse);
+            } else {
+                setHasError(true);
             }
         } catch (err) {
             setIsSubmitted(true);
             setHasError(true);
-        }
-    };
-
-    // Connexion via OAuth
-    const loginByOauth = async (tokenId: string, type: string): Promise<void> => {
-        const response = await API.post('auth/loginByOauth', { tokenId, type });
-        if (response.status === 200) {
-            setIsSubmitted(true);
-            setHasError(false);
-            setConnexion(response);
         }
     };
 
@@ -119,12 +109,14 @@ const useAuth = (): UseAuthReturn => {
                 // Définir la validité de la session pour 1 jour
                 localStorage.setItem('timeSession', moment().add(1, 'days').toString());
             }
-            console.log('Réponse de connexion:', response.data);
             setIsSubmitted(true);
             setHasError(false);
             // Mise à jour immédiate de l'état d'authentification
             setAuthState(() => ({ me: response.data, isLogged: true }));
             // Vérifie que le token est présent et appelle refresh
+
+            toast('Vous êtes connecté(e)', { type: 'success' });
+
             if (checkXsrfToken()) {
                 refresh();
             }
@@ -157,19 +149,26 @@ const useAuth = (): UseAuthReturn => {
     // Création d'un compte
     const signUp = async (inputs: SignUpInput): Promise<boolean | void> => {
         try {
+            setIsPending(true);
             setIsSignupSubmitted(true);
             //if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
             console.log('signup');
-            const response = await localMiddlewareInstance.callLocalApi(async () => {
-                // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
-                return await localMiddlewareInstance.AuthRepo.register({
-                    email: inputs.email,
-                    password_hash: inputs.password,
-                    passwordConfirm: inputs.passwordConfirm,
+            const response = await localMiddlewareInstance
+                .callLocalApi(async () => {
+                    // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
+                    return await localMiddlewareInstance.AuthRepo.register({
+                        email: inputs.email,
+                        password_hash: inputs.password,
+                        passwordConfirm: inputs.passwordConfirm,
+                    });
+                })
+                .finally(() => {
+                    setIsPending(false);
                 });
-            });
+
             if (response.status === 'success') {
                 await login(inputs);
+
                 return true;
             } else {
                 toast('Une erreur est survenue', { type: 'error' });
@@ -185,6 +184,7 @@ const useAuth = (): UseAuthReturn => {
 
     // Déconnexion
     const logout = (): void => {
+        console.log('logout dans useAuth');
         localMiddlewareInstance
             .callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.logout();
@@ -200,9 +200,9 @@ const useAuth = (): UseAuthReturn => {
                 setAuthState({ ...authState, me: null, isLogged: false });
                 // Notifiez le serveur via le socket
                 if (authState.me?.id) {
-                    socket.send('userLogout', { id: authState.me.id });
+                    //socket.send('userLogout', { id: authState.me.id });
                 }
-                socket.off('userConnect');
+                //socket.off('userConnect');
                 toast('Vous êtes déconnecté(e)', { type: 'success' });
                 refresh();
                 reload();
@@ -219,13 +219,13 @@ const useAuth = (): UseAuthReturn => {
 
     return {
         isSubmitted,
+        isPending,
         isForgotSubmitted,
         isSignupSubmitted,
         hasError,
         errorMsg,
         logout,
         login,
-        loginByOauth,
         forgotPassword,
         signUp,
         reload,

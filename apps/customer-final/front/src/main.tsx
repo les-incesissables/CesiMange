@@ -12,6 +12,11 @@ import DashboardOrder from './pages/DashBoard/DashBoardOrder';
 import DashBoardFavorites from './pages/DashBoard/DashboardFavorites';
 import DashBoardSponsorship from './pages/DashBoard/DashboardSponsorShip';
 import { CartProvider } from './context/CartContext';
+import AuthProvider from './context/AuthContext';
+import ProtectedRoute from './components/Utils/ProtectedRoute';
+
+import { ToastContainer } from 'react-toastify';
+import { isMobile } from './utils/functions';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -29,19 +34,53 @@ if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
         <BrowserRouter>
-            <CartProvider>
-                <QueryClientProvider client={queryClient}>
-                    <Routes>
-                        <Route path="/" element={<Welcome />} />
-                        <Route path="/home" element={<Home />}></Route>
-                        <Route path="/restaurants/:id" element={<Restaurant />}></Route>
-                        <Route path="/dashboard/account" element={<DashBoardAccount />}></Route>
-                        <Route path="/dashboard/order" element={<DashboardOrder />}></Route>
-                        <Route path="/dashboard/favorites" element={<DashBoardFavorites />}></Route>
-                        <Route path="/dashboard/sponsorship" element={<DashBoardSponsorship />}></Route>
-                    </Routes>
-                </QueryClientProvider>
-            </CartProvider>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <CartProvider>
+                        <Routes>
+                            <Route path="/" element={<Welcome />} />
+                            <Route path="/home" element={<Home />}></Route>
+                            <Route path="/restaurants/:id" element={<Restaurant />}></Route>
+
+                            <Route path="dashboard">
+                                <Route
+                                    path="account"
+                                    element={
+                                        <ProtectedRoute>
+                                            <DashBoardAccount />
+                                        </ProtectedRoute>
+                                    }
+                                ></Route>
+                                <Route
+                                    path="order"
+                                    element={
+                                        <ProtectedRoute>
+                                            <DashboardOrder />
+                                        </ProtectedRoute>
+                                    }
+                                ></Route>
+                                <Route
+                                    path="favorites"
+                                    element={
+                                        <ProtectedRoute>
+                                            <DashBoardFavorites />
+                                        </ProtectedRoute>
+                                    }
+                                ></Route>
+                                <Route
+                                    path="sponsorship"
+                                    element={
+                                        <ProtectedRoute>
+                                            <DashBoardSponsorship />
+                                        </ProtectedRoute>
+                                    }
+                                ></Route>
+                            </Route>
+                        </Routes>
+                    </CartProvider>
+                    <ToastContainer position={isMobile() ? 'top-center' : 'bottom-left'} />
+                </AuthProvider>
+            </QueryClientProvider>
         </BrowserRouter>,
     );
 }

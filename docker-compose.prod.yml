@@ -62,7 +62,7 @@ services:
         networks:
             - api_network
 
-    mssql-auth-service:
+    mssql-auth:
         image: mcr.microsoft.com/mssql/server:2019-latest
         container_name: db-mssql-auth-prod
         ports:
