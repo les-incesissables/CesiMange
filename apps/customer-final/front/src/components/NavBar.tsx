@@ -73,7 +73,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) =
                                     <BellIcon className="w-full h-full" />
                                 </button>
                                 <div className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
-                                    <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">3</div>
+                                    <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center"></div>
                                 </div>
                             </div>
 
@@ -128,9 +128,7 @@ const NavBar: React.FC<HeaderProps> = ({ variant, onLoginClick, onBellClick }) =
                                         <BellIcon className="w-full h-full" />
                                     </button>
                                     <div className="min-w-[1rem] px-1 bg-Schemes-Error rounded-full flex justify-center items-center overflow-hidden">
-                                        <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center">
-                                            3
-                                        </div>
+                                        <div className="text-Schemes-On-Error text-xs font-medium font-['Roboto'] leading-none tracking-wide text-center"></div>
                                     </div>
                                 </div>
                                 {/* Panier */}

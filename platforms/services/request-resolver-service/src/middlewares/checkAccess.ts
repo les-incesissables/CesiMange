@@ -35,9 +35,6 @@ export function checkAccess(pService: IServiceDefinition) {
         // 3. R�cup�ration et v�rification du token
         const lAuthHeader = req.headers.authorization;
 
-        console.log('req.headers :', req.headers);
-        console.log('Authorization header:', lAuthHeader);
-
         let lToken: string;
 
         if (lAuthHeader && lAuthHeader.startsWith('Bearer ')) {

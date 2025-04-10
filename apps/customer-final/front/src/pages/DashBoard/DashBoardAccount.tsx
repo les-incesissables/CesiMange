@@ -19,18 +19,16 @@ const DashBoardAccount: React.FC = () => {
 
     const handleDeleteAccount = async (): Promise<void> => {
         setOpenConfirmDeleteAccount(false);
-        console.log('authState in dashboard account :', authState);
+
         // Vérification explicite : me?.id doit exister
         if (authState.isLogged && authState.me && authState.me.id) {
-            console.log('ok');
             const userId = authState.me.id;
             const response = await localMiddlewareInstance.callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.deleteItem(userId.toString());
             });
 
-            console.log(response);
-
             if (response.status === 'success') {
+                toast('Votre compte a été supprimé', { type: 'success' });
                 await logout();
             } else {
                 toast('Une erreur est survenue', { type: 'error' });

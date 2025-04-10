@@ -55,23 +55,21 @@ const useAuth = (): UseAuthReturn => {
         return true;
     };
 
-    // Vérification initiale de la session : si le token ou la session est expiré, déconnecte
-    /*  useEffect(() => {
+    useEffect(() => {
         const currentTime = moment();
-        const timeSessionStr = localStorage.getItem('timeSession');
-        const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
+        const timeSession = moment(localStorage.getItem('timeSession'));
+
         if (localStorage.getItem('user') && (currentTime.isAfter(timeSession, 'minute') || !localStorage.getItem('timeSession'))) {
             logout();
         }
-    }, []); */
+        //eslint-disable-next-line
+    }, []);
 
     // Fonction de connexion via email/mot de passe
     const login = async (inputs: LoginInput): Promise<boolean | void> => {
-        console.log('login dans useAuth');
         try {
             const mailformat = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
             if (!inputs.email.match(mailformat)) {
-                console.log('Erreur de format email');
                 setHasError(true);
                 setIsSubmitted(true);
                 return false;
@@ -88,9 +86,11 @@ const useAuth = (): UseAuthReturn => {
                 return await localMiddlewareInstance.AuthRepo.login(lCritere);
             });
             setIsPending(false);
-            console.log('Réponse de connexion:', lResponse);
+
             if (lResponse.status === 'success') {
                 setConnexion(lResponse);
+            } else {
+                setHasError(true);
             }
         } catch (err) {
             setIsSubmitted(true);
@@ -109,12 +109,14 @@ const useAuth = (): UseAuthReturn => {
                 // Définir la validité de la session pour 1 jour
                 localStorage.setItem('timeSession', moment().add(1, 'days').toString());
             }
-            console.log('Réponse de connexion:', response.data);
             setIsSubmitted(true);
             setHasError(false);
             // Mise à jour immédiate de l'état d'authentification
             setAuthState(() => ({ me: response.data, isLogged: true }));
             // Vérifie que le token est présent et appelle refresh
+
+            toast('Vous êtes connecté(e)', { type: 'success' });
+
             if (checkXsrfToken()) {
                 refresh();
             }
