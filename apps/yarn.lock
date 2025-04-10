@@ -1623,7 +1623,7 @@ csstype@^3.0.2:
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
-"customer-final-app@file:C:\\CesiMange\\apps\\customer-final\\front":
+"customer-final-app@file:D:\\Projet\\Ecole\\Projet_CESI\\2025-2026\\WebAvance\\CesiMange\\apps\\customer-final\\front":
   version "0.0.0"
   resolved "file:customer-final/front"
   dependencies:
@@ -1633,7 +1633,6 @@ csstype@^3.0.2:
     "@tanstack/react-query" "^5.69.0"
     "@types/jest" "^29.5.14"
     axios "^1.8.4"
-    check-password-strength "^3.0.0"
     customer-final-middleware "*"
     moment "^2.30.1"
     react "^19.0.0"
@@ -1645,13 +1644,13 @@ csstype@^3.0.2:
     tailwindcss "^4.1.3"
     yup "^1.6.1"
 
-customer-final-middleware@*, "customer-final-middleware@file:C:\\CesiMange\\apps\\customer-final\\local-middleware":
+customer-final-middleware@*, "customer-final-middleware@file:D:\\Projet\\Ecole\\Projet_CESI\\2025-2026\\WebAvance\\CesiMange\\apps\\customer-final\\local-middleware":
   version "1.0.0"
   resolved "file:customer-final/local-middleware"
   dependencies:
     customer-final-proxy "*"
 
-customer-final-proxy@*, "customer-final-proxy@file:C:\\CesiMange\\apps\\customer-final\\proxy":
+customer-final-proxy@*, "customer-final-proxy@file:D:\\Projet\\Ecole\\Projet_CESI\\2025-2026\\WebAvance\\CesiMange\\apps\\customer-final\\proxy":
   version "1.0.0"
   resolved "file:customer-final/proxy"
   dependencies:
@@ -1902,10 +1901,15 @@ escape-string-regexp@^2.0.0:
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz"
   integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
 
-escape-string-regexp@^4.0.0, escape-string-regexp@5.0.0:
+escape-string-regexp@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
+
+escape-string-regexp@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-5.0.0.tgz"
+  integrity sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==
 
 eslint-plugin-react-hooks@^5.1.0:
   version "5.2.0"

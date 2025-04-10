@@ -15,6 +15,7 @@ import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
 // Interface retournée par le hook
 export interface UseAuthReturn {
     isSubmitted: boolean;
+    isPending: boolean;
     isForgotSubmitted: boolean;
     isSignupSubmitted: boolean;
     hasError: boolean;
@@ -30,6 +31,7 @@ export interface UseAuthReturn {
 const useAuth = (): UseAuthReturn => {
     // États locaux
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [isPending, setIsPending] = useState<boolean>(false);
     const [isForgotSubmitted, setIsForgotSubmitted] = useState<boolean>(false);
     const [isSignupSubmitted, setIsSignupSubmitted] = useState<boolean>(false);
     const [hasError, setHasError] = useState<boolean>(false);
@@ -83,11 +85,11 @@ const useAuth = (): UseAuthReturn => {
                 email: inputs.email,
                 password_hash: inputs.password,
             };
-
+            setIsPending(true);
             const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.login(lCritere);
             });
-
+            setIsPending(false);
             console.log('Réponse de connexion:', lResponse);
             if (lResponse.status === 'success') {
                 setConnexion(lResponse);
@@ -99,13 +101,16 @@ const useAuth = (): UseAuthReturn => {
     };
 
     // Connexion via OAuth
-    const loginByOauth = async (tokenId: string, type: string): Promise<void> => {
+    const loginByOauth = async (tokenId: string, type: string): Promise<void> =>
+    {
+        setIsPending(true);
         const response = await API.post('auth/loginByOauth', { tokenId, type });
         if (response.status === 200) {
             setIsSubmitted(true);
             setHasError(false);
             setConnexion(response);
         }
+        setIsPending(false);
     };
 
     // Stocke la connexion suite à une réponse réussie, met à jour immédiatement authState
@@ -156,7 +161,9 @@ const useAuth = (): UseAuthReturn => {
 
     // Création d'un compte
     const signUp = async (inputs: SignUpInput): Promise<boolean | void> => {
-        try {
+        try
+        {
+            setIsPending(true);
             setIsSignupSubmitted(true);
             //if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
             console.log('signup');
@@ -167,9 +174,14 @@ const useAuth = (): UseAuthReturn => {
                     password_hash: inputs.password,
                     passwordConfirm: inputs.passwordConfirm,
                 });
+            }).finally(() =>
+            {
+                setIsPending(false);
             });
+         
             if (response.status === 'success') {
                 await login(inputs);
+     
                 return true;
             } else {
                 toast('Une erreur est survenue', { type: 'error' });
