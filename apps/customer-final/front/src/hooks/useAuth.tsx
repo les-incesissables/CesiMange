@@ -231,6 +231,7 @@ const useAuth = (): UseAuthReturn => {
 
     return {
         isSubmitted,
+        isPending,
         isForgotSubmitted,
         isSignupSubmitted,
         hasError,
