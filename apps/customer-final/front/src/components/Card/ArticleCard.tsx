@@ -12,7 +12,6 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, onAdd }) => {
     const { addArticleToCart } = useCart();
 
     const handleAdd = () => {
-        console.log('a');
         addArticleToCart(article);
     };
     return (
