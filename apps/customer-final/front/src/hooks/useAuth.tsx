@@ -15,13 +15,13 @@ import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
 // Interface retournée par le hook
 export interface UseAuthReturn {
     isSubmitted: boolean;
+    isPending: boolean;
     isForgotSubmitted: boolean;
     isSignupSubmitted: boolean;
     hasError: boolean;
     errorMsg: string;
     logout: () => void;
     login: (inputs: LoginInput) => Promise<boolean | void>;
-    loginByOauth: (tokenId: string, type: string) => Promise<void>;
     forgotPassword: (inputs: ForgotPasswordInput) => Promise<boolean | void>;
     signUp: (inputs: SignUpInput) => Promise<boolean | void>;
     reload: () => void;
@@ -30,6 +30,7 @@ export interface UseAuthReturn {
 const useAuth = (): UseAuthReturn => {
     // États locaux
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [isPending, setIsPending] = useState<boolean>(false);
     const [isForgotSubmitted, setIsForgotSubmitted] = useState<boolean>(false);
     const [isSignupSubmitted, setIsSignupSubmitted] = useState<boolean>(false);
     const [hasError, setHasError] = useState<boolean>(false);
@@ -83,11 +84,11 @@ const useAuth = (): UseAuthReturn => {
                 email: inputs.email,
                 password_hash: inputs.password,
             };
-
+            setIsPending(true);
             const lResponse = await localMiddlewareInstance.callLocalApi(async () => {
                 return await localMiddlewareInstance.AuthRepo.login(lCritere);
             });
-
+            setIsPending(false);
             console.log('Réponse de connexion:', lResponse);
             if (lResponse.status === 'success') {
                 setConnexion(lResponse);
@@ -95,16 +96,6 @@ const useAuth = (): UseAuthReturn => {
         } catch (err) {
             setIsSubmitted(true);
             setHasError(true);
-        }
-    };
-
-    // Connexion via OAuth
-    const loginByOauth = async (tokenId: string, type: string): Promise<void> => {
-        const response = await API.post('auth/loginByOauth', { tokenId, type });
-        if (response.status === 200) {
-            setIsSubmitted(true);
-            setHasError(false);
-            setConnexion(response);
         }
     };
 
@@ -157,19 +148,26 @@ const useAuth = (): UseAuthReturn => {
     // Création d'un compte
     const signUp = async (inputs: SignUpInput): Promise<boolean | void> => {
         try {
+            setIsPending(true);
             setIsSignupSubmitted(true);
             //if (!pAuthUsers.email || !pAuthUsers.password_hash || !pAuthUsers.username)
             console.log('signup');
-            const response = await localMiddlewareInstance.callLocalApi(async () => {
-                // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
-                return await localMiddlewareInstance.AuthRepo.register({
-                    email: inputs.email,
-                    password_hash: inputs.password,
-                    passwordConfirm: inputs.passwordConfirm,
+            const response = await localMiddlewareInstance
+                .callLocalApi(async () => {
+                    // Ici, on pourrait appeler une méthode register sur AuthRepo via le middleware.
+                    return await localMiddlewareInstance.AuthRepo.register({
+                        email: inputs.email,
+                        password_hash: inputs.password,
+                        passwordConfirm: inputs.passwordConfirm,
+                    });
+                })
+                .finally(() => {
+                    setIsPending(false);
                 });
-            });
+
             if (response.status === 'success') {
                 await login(inputs);
+
                 return true;
             } else {
                 toast('Une erreur est survenue', { type: 'error' });
@@ -226,7 +224,6 @@ const useAuth = (): UseAuthReturn => {
         errorMsg,
         logout,
         login,
-        loginByOauth,
         forgotPassword,
         signUp,
         reload,
