@@ -182,7 +182,7 @@ export class BaseController<DTO, CritereDTO> {
 
             if (success) await this.afterDeleteItem(lCritere);
 
-            success ? res.status(204).send() : res.status(404).json({ error: 'Élément non trouvé' });
+            success ? res.status(200).send(success) : res.status(404).json({ error: 'Élément non trouvé' });
         } catch (error) {
             this.handleError(error, 'deleteItem');
             res.status(500).json({
