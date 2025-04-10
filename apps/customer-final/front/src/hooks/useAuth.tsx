@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router';
 
 // CONTEXTS
 import { AuthContext, AuthContextType } from '../context/AuthContext';
-import { SocketContext, ISocketContext } from '../context/SocketContext';
+//import { SocketContext, ISocketContext } from '../context/SocketContext';
 
 import { localMiddlewareInstance } from 'customer-final-middleware';
 import { ForgotPasswordInput, LoginInput, SignUpInput } from '../types/form';
@@ -37,7 +37,7 @@ const useAuth = (): UseAuthReturn => {
 
     // CONTEXTS
     const { authState, setAuthState, refresh } = useContext<AuthContextType>(AuthContext);
-    const socket = useContext<ISocketContext>(SocketContext);
+    //const socket = useContext<ISocketContext>(SocketContext);
 
     // HOOKS ROUTING
     const navigate = useNavigate();
@@ -200,9 +200,9 @@ const useAuth = (): UseAuthReturn => {
                 setAuthState({ ...authState, me: null, isLogged: false });
                 // Notifiez le serveur via le socket
                 if (authState.me?.id) {
-                    socket.send('userLogout', { id: authState.me.id });
+                    //socket.send('userLogout', { id: authState.me.id });
                 }
-                socket.off('userConnect');
+                //socket.off('userConnect');
                 toast('Vous êtes déconnecté(e)', { type: 'success' });
                 refresh();
                 reload();

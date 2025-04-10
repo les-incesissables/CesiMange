@@ -1,8 +1,7 @@
 // src/components/forms/FormLogin.tsx
-import { useState, useImperativeHandle, forwardRef, useContext, useEffect, useCallback, useRef, ChangeEvent, MouseEvent } from 'react';
+import { useState, useImperativeHandle, forwardRef, useContext, useEffect, useCallback, ChangeEvent, MouseEvent } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { passwordStrength } from 'check-password-strength';
 
 // HOOKS
 import UseAuth from '../../hooks/useAuth';
@@ -20,7 +19,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Alert from '../Alert';
 
 // Interfaces supplémentaires importées depuis vos types centralisés
-import { InputsConnexion, PasswordStrengthInfo as PSInfo } from '../../types/form';
+import { InputsConnexion } from '../../types/form';
 
 // ----- TYPES DU COMPOSANT -----
 interface FormConnexionProps {
@@ -52,20 +51,15 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isForgot, setIsForgot] = useState<boolean>(false);
     const [isSignup, setIsSignup] = useState<boolean>(false);
-    const [strongPwd, setStrongPwd] = useState<PSInfo | null>(null);
-    //const [typeInscription, setTypeInscription] = useState<string | null>(null);
 
-    // Référence pour le bouton Google (si besoin)
-    const ggRef = useRef<HTMLDivElement>(null);
+    //const [typeInscription, setTypeInscription] = useState<string | null>(null);
 
     // Utilisation de react-hook-form pour le formulaire d'inscription,
     // en se basant sur l'interface SignUpFormValues et validé par Yup.
     const {
         register,
         handleSubmit,
-        watch,
         formState: { errors },
-        getValues,
     } = useForm<SignUpFormValues>({
         resolver: yupResolver(validationSchema),
     });
@@ -112,9 +106,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
 
     // Gestion de la soumission pour l'inscription via react-hook-form
     const onSubmitSignUp: SubmitHandler<SignUpFormValues> = (data) => {
-        if (strongPwd?.allowed === true) {
-            signUp(data);
-        }
+        signUp(data);
     };
 
     // Gestion de la modification des champs dans le formulaire de connexion (mode login/forgot)
@@ -150,27 +142,6 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
     }));
 
     // Suivi de la force du mot de passe
-    useEffect(() => {
-        const sPwd = getValues('password');
-        const strength = passwordStrength(sPwd);
-        switch (strength.value) {
-            case 'Too weak':
-                setStrongPwd({ class: 'bg-red w-1/4', contains: strength.contains, length: strength.length, allowed: true });
-                break;
-            case 'Weak':
-                setStrongPwd({ class: 'bg-warning-500 w-2/4', contains: strength.contains, length: strength.length, allowed: true });
-                break;
-            case 'Medium':
-                setStrongPwd({ class: 'bg-warning-500 w-3/4', contains: strength.contains, length: strength.length, allowed: true });
-                break;
-            case 'Strong':
-                setStrongPwd({ class: 'bg-success-500 w-full', contains: strength.contains, length: strength.length, allowed: true });
-                break;
-            default:
-                setStrongPwd(null);
-        }
-        if (strength.length <= 0) setStrongPwd(null);
-    }, [watch('password'), getValues]);
 
     // Rendu du composant
     return (
@@ -184,7 +155,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                     )}
                     <form className="mt-2 m-0" autoComplete="off">
                         <div className="relative z-0 w-full mb-2 group flex flex-col gap-1">
-                            <label className="">Adresse email* :</label>
+                            <label className="">Adresse email :</label>
                             <input
                                 type="text"
                                 name="email"
@@ -196,7 +167,7 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                             />
                         </div>
                         <div className="relative z-0 w-full mb-2 group flex flex-col gap-1">
-                            <label className="block text-black">Mot de passe* :</label>
+                            <label className="block text-black">Mot de passe :</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -223,9 +194,6 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                             S'inscrire
                         </button>
                     </p>
-                    <div className="m-auto mt-8 text-center flex justify-center">
-                        <div ref={ggRef}></div>
-                    </div>
                 </>
             )}
 
@@ -305,9 +273,9 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                                 >
                                     {showPassword ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" />}
                                 </button>
-                                <div className={`${strongPwd?.class} h-[2px] block absolute bottom-0`}></div>
-                                {errors.password && <span className="w-full mt-0 text-xs text-danger">{errors.password.message}</span>}
                             </div>
+
+                            {errors && errors['password'] && <span className={`w-full mt-0 text-xs text-danger`}>{errors['password'].message}</span>}
                         </div>
 
                         <div className="relative z-0 w-full mb-2 group flex flex-col gap-1">
@@ -336,13 +304,9 @@ const FormLogin = forwardRef<FormConnexionHandle, FormConnexionProps>((props, re
                             <div className="flex gap-2">
                                 <input type="checkbox" id="cguConsent" className="w-10 sm:w-6 mr-4" {...register('cguConsent')} />
                                 <label className="text-sm" htmlFor="cgu_consent">
-                                    J'ai lu et je consens à la{' '}
-                                    <Link className="text-blueMain" to="/cgu" title="Consulter notre politique de confidentialité">
-                                        politique de confidentialité
-                                    </Link>{' '}
-                                    et aux{' '}
-                                    <Link className="text-blueMain" to="/cgu" title="Consulter nos conditions d'utilisation">
-                                        conditions d'utilisation
+                                    J'ai lu et je consens aux{' '}
+                                    <Link className="font-bold" to="/cgu" title="Consulter nos conditions d'utilisation">
+                                        conditions d'utilisation de CesiMange
                                     </Link>
                                     .
                                 </label>

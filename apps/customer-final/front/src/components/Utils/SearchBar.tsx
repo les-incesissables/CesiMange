@@ -29,12 +29,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeHolder, textButton, onClick 
         <div
             className="
         w-full
-        sm:max-w-md
+        lg:max-w-md
         h-12
         p-2.5
         bg-white
         rounded-[20px]
-        outline
         outline-1
         outline-offset-[-1px]
         outline-black/50

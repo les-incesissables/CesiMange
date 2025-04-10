@@ -1,19 +1,20 @@
 // src/context/AuthContext.tsx
-import { createContext, useState, useContext, useCallback, useEffect, ReactNode, Dispatch, SetStateAction, FC } from 'react';
+import { createContext, useState, useCallback, useEffect, ReactNode, Dispatch, SetStateAction, FC } from 'react';
 import moment from 'moment';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router';
-import { SocketContext, ISocketContext } from './SocketContext';
 import { toast } from 'react-toastify';
+
+// Importation de l'instance du local middleware
+import { localMiddlewareInstance } from 'customer-final-middleware';
 
 // ----- INTERFACES ----- //
 
 /**
- * Représente un utilisateur. Ajoutez d'autres propriétés si nécessaire.
+ * Représente un utilisateur.
  */
 export interface User {
     id: number;
-    // Ex: name, email, etc.
 }
 
 /**
@@ -55,37 +56,47 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-    // Désactivation des avertissements de Moment.js
+    // Désactive les avertissements de Moment.js
     moment.suppressDeprecationWarnings = true;
-
-    // Récupération du contexte Socket (pour notification serveur)
-    const socket = useContext<ISocketContext>(SocketContext);
 
     // Hooks de routing
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Vérification rapide de la présence d'un utilisateur dans le localStorage
+    // Vérifie rapidement la présence d'un utilisateur dans le localStorage
     const isUserLogged = (): boolean => !!localStorage.getItem('user');
 
-    // État d'authentification local
+    // État local d'authentification
     const [authState, setAuthState] = useState<AuthState>({
         me: null,
         isLogged: isUserLogged(),
     });
 
-    // Utilisation de React Query pour récupérer l'utilisateur (query "me")
+    // Utilisation de React Query pour récupérer l’utilisateur via le local middleware
     const meQuery: UseQueryResult<User, Error> = useQuery<User, Error>({
         queryKey: ['me'],
         queryFn: async () => {
-            // TODO: Remplacez cette ligne par votre appel API réel
+            // Dans cet exemple, on récupère l’objet "user" depuis le localStorage, puis on appelle une méthode du UserRepo.
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const parsedUser = JSON.parse(userStr);
+                // On suppose que l'id est stocké dans parsedUser.id
+                const userId = parsedUser.id;
+                /*   const result = await localMiddlewareInstance.callLocalApi(async () => {
+                    const lUserProfile = { user_id: userId };
+                    const res = await localMiddlewareInstance.UserRepo.getItems(lUserProfile);
+                    return res;
+                }); */
+                // On retourne le premier élément du tableau
+                return userId;
+            }
             return {} as User;
         },
         enabled: typeof window !== 'undefined' ? !window.location.pathname.includes('dashboard/profil') && isUserLogged() : false,
         staleTime: 1000,
     });
 
-    // Si la query rencontre une erreur, on nettoie la session
+    // En cas d'erreur de la query, on nettoie la session
     useEffect(() => {
         if (meQuery.isError) {
             localStorage.removeItem('user');
@@ -95,12 +106,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         }
     }, [meQuery.isError]);
 
-    // Fonction pour mettre à jour l'état d'authentification en fonction de la query
+    // Fonction de mise à jour de l'état à partir de meQuery
     const setMe = useCallback(() => {
-        if (meQuery.isSuccess && meQuery.data) {
+        if (meQuery.isSuccess && meQuery.data && Object.keys(meQuery.data).length) {
             const currentTime = moment();
             const timeSessionStr = localStorage.getItem('timeSession');
             const timeSession = timeSessionStr ? moment(timeSessionStr) : moment().subtract(1, 'minute');
+
             if (isUserLogged() && currentTime.isBefore(timeSession)) {
                 console.log('Utilisateur connecté');
                 setAuthState(() => ({ me: meQuery.data, isLogged: true }));
@@ -118,19 +130,19 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         }
     }, [meQuery.isSuccess, meQuery.data, meQuery.isError]);
 
-    // refresh : déclenche un refetch et retourne immédiatement l'état actuel.
+    // La fonction refresh déclenche un refetch via React Query et retourne l'état actuel (avant mise à jour)
     const refresh = useCallback((): AuthState => {
         console.log('refresh auth context');
         meQuery.refetch();
         return authState;
     }, [meQuery, authState]);
 
-    // Met à jour authState lors des changements de meQuery
+    // Met à jour authState dès que meQuery se résout
     useEffect(() => {
         setMe();
     }, [setMe]);
 
-    // Vérification initiale de la session : si le token est absent ou expiré, déclencher logout
+    // Vérification initiale de la session : si le token est absent ou expiré, déclencher le logout
     useEffect(() => {
         const currentTime = moment();
         const timeSessionStr = localStorage.getItem('timeSession');
@@ -141,7 +153,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Écoute des changements dans le localStorage pour détecter la suppression du token CSRF
+    // Écoute des modifications dans le localStorage pour détecter la suppression du token CSRF
     useEffect(() => {
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'xsrfToken' && !e.newValue) {
@@ -153,37 +165,37 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    // Fonction de déconnexion
+    // Fonction de déconnexion qui appelle logout de localMiddleware
     const logout = useCallback((): void => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('timeSession');
-        localStorage.removeItem('xsrfToken');
-
-        // Mise à jour fonctionnelle de l'état d'authentification
-        setAuthState((prev) => ({ ...prev, me: null, isLogged: false }));
-
-        // Notifier le serveur via socket s'il y avait un utilisateur connecté
-        setAuthState((prev) => {
-            if (prev.me?.id) {
-                socket.send('userLogout', { id: prev.me.id });
-            }
-            return { ...prev, me: null, isLogged: false };
-        });
-        socket.send('userLogout', { id: authState?.me?.id });
-        socket.off('userConnect');
-        toast('Vous êtes déconnecté(e)', { type: 'success' });
-
-        // Déclenche refresh (qui lance le refetch) et recharge la page
-        refresh();
-        reload();
-    }, [socket, refresh]);
+        localMiddlewareInstance
+            .callLocalApi(async () => {
+                return await localMiddlewareInstance.AuthRepo.logout();
+            })
+            .then((lResponse) => {
+                if (lResponse.status === 'success') {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('timeSession');
+                    localStorage.removeItem('xsrfToken');
+                }
+                setAuthState({ ...authState, me: null, isLogged: false });
+                // Ici, vous pouvez notifier le serveur via socket si besoin
+                // socket.send('userLogout', { id: authState?.me?.id });
+                // socket.off('userConnect');
+                toast('Vous êtes déconnecté(e)', { type: 'success' });
+                refresh();
+                reload();
+            })
+            .catch((error) => {
+                console.error('Erreur lors du logout via middleware :', error);
+            });
+    }, [authState, refresh]);
 
     // Fonction pour recharger la page
     const reload = useCallback((): void => {
         navigate(location.pathname + location.search);
     }, [navigate, location]);
 
-    // Debug : Observer l'état isLogged lors de chaque changement
+    // Debug: observer l'état isLogged
     useEffect(() => {
         console.log('Etat de connexion (isLogged):', authState.isLogged);
     }, [authState.isLogged]);

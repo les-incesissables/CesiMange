@@ -10,7 +10,6 @@ const Welcome: React.FC = () => {
 
     const handleGoToHome = useCallback(() => {
         navigate('/home');
-
     }, [navigate]);
 
     return (
