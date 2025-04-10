@@ -43,6 +43,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
 
+/* app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Private-Network', true);
+    res.append('Access-Control-Allow-Credentials', true);
+    next();
+}); */
+
+app.use(
+    cors({
+        origin: ['http://localhost:3001'], // ou liste d'origines autorisées, ex: ['http://localhost:3000']
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-xsrf-token', 'x-application-name'],
+        credentials: true,
+    })
+);
+
 /**
  * Logging HTTP standard avec morgan
  * Format 'dev' ou 'combined' selon vos besoins

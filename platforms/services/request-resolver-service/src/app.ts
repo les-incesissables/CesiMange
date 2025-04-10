@@ -36,6 +36,15 @@ app.use(cookieParser());
 // Middlewares de sécurité et parsing
 app.use(helmet());
 
+app.use(
+    cors({
+        origin: ['http://localhost:3001'], // ou liste d'origines autorisées, ex: ['http://localhost:3000']
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-xsrf-token', 'x-application-name'],
+        credentials: true,
+    })
+);
+
 app.use(morgan('dev'));
 
 // Middleware personnalisé pour afficher la provenance

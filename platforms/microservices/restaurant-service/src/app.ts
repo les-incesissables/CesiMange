@@ -40,10 +40,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
 app.use(
     cors({
-        origin: '*', // ou liste d'origines autorisées, ex: ['http://localhost:3000']
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-    }),
+        origin: ['http://localhost:3001'], // ou liste d'origines autorisées, ex: ['http://localhost:3000']
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-xsrf-token', 'x-application-name'],
+        credentials: true,
+    })
 );
 
 /**

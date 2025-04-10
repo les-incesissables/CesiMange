@@ -25,7 +25,7 @@ const DashBoardAccount: React.FC = () => {
             console.log('ok');
             const userId = authState.me.id;
             const response = await localMiddlewareInstance.callLocalApi(async () => {
-                return await localMiddlewareInstance.AuthRepo.delete(userId);
+                return await localMiddlewareInstance.AuthRepo.deleteItem(userId.toString());
             });
 
             if (response.status === 'success') {

@@ -9,14 +9,15 @@ export function applyRequestInterceptor(client: AxiosInstance): void {
             // Injection du nom de l'application
             config.headers['x-application-name'] = APPLICATION_NAME;
 
+            // Afficher les cookies en console (pour debug)
+            console.log('Cookies disponibles:', document.cookie);
+
             // Récupère le token XSRF depuis le localStorage
             const xsrfTokenRaw = localStorage.getItem('xsrfToken');
-
             if (xsrfTokenRaw) {
                 // Supprime les éventuels guillemets supplémentaires
                 const xsrfToken = xsrfTokenRaw.replace(/^"+|"+$/g, '');
                 config.headers['x-xsrf-token'] = xsrfToken;
-                config.headers['Authorization'] = `Bearer ${xsrfToken}`;
             }
             return config;
         },
